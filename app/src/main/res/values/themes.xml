@@ -1,0 +1,57 @@
+<resources xmlns:tools="http://schemas.android.com/tools">
+
+    <style name="Theme.TvLimit" parent="Theme.AppCompat.NoActionBar">
+        <item name="colorPrimary">@color/sun</item>
+        <item name="colorPrimaryDark">@color/bg_deep</item>
+        <item name="colorAccent">@color/sky</item>
+        <item name="android:windowBackground">@drawable/bg_screen</item>
+        <item name="android:colorBackground">@color/bg_deep</item>
+        <item name="android:textColorPrimary">@color/text_main</item>
+        <item name="android:textColorSecondary">@color/text_sub</item>
+        <item name="android:windowFullscreen">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowActionBar">false</item>
+        <item name="android:windowNoTitle">true</item>
+    </style>
+
+    <!-- 弹窗专用：窗口透明，自己画圆角面板 -->
+    <style name="Theme.TvLimit.Dialog" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:backgroundDimAmount">0.72</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="colorAccent">@color/sun</item>
+    </style>
+
+    <!-- ===== 通用大按钮 ===== -->
+    <style name="Widget.BigButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/selector_btn_primary</item>
+        <item name="android:textColor">#241A02</item>
+        <item name="android:textSize">@dimen/text_body</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">68dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">40dp</item>
+        <item name="android:paddingEnd">40dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+    <style name="Widget.GhostButton" parent="Widget.AppCompat.Button">
+        <item name="android:background">@drawable/selector_btn_ghost</item>
+        <item name="android:textColor">@color/text_sub</item>
+        <item name="android:textSize">@dimen/text_note</item>
+        <item name="android:textStyle">bold</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:minHeight">64dp</item>
+        <item name="android:minWidth">0dp</item>
+        <item name="android:paddingStart">36dp</item>
+        <item name="android:paddingEnd">36dp</item>
+        <item name="android:stateListAnimator">@null</item>
+        <item name="android:focusable">true</item>
+        <item name="android:focusableInTouchMode">true</item>
+    </style>
+
+</resources>

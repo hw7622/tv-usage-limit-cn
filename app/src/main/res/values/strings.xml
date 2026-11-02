@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">电视时间管家</string>
+    <string name="admin_description">用于在观看时间用完后关闭电视屏幕。</string>
+    <string name="warning_message">时间到啦！休息一下吧。</string>
+    <string name="pin_hint">请输入密码</string>
+    <string name="msg_monitoring_active">电视时间监控已开启</string>
+</resources>

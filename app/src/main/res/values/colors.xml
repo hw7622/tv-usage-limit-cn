@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- ===== 基础背景（深色夜间风，电视上不刺眼） ===== -->
+    <color name="bg_deep">#0D1220</color>
+    <color name="bg_deep_2">#0A0E18</color>
+    <color name="surface">#161D2E</color>
+    <color name="surface_hi">#1B2440</color>
+    <color name="surface_soft">#121828</color>
+
+    <!-- ===== 描边 ===== -->
+    <color name="stroke">#242E47</color>
+    <color name="stroke_hi">#33405F</color>
+
+    <!-- ===== 主题色（糖果色点缀） ===== -->
+    <color name="sun">#FFC94A</color>
+    <color name="sun_deep">#33280F</color>
+    <color name="sky">#5AC8FA</color>
+    <color name="sky_deep">#0E2A3A</color>
+    <color name="mint">#4ADE80</color>
+    <color name="mint_deep">#0E2A1C</color>
+    <color name="coral">#FF7A7A</color>
+    <color name="coral_deep">#3A1518</color>
+    <color name="lavender">#A78BFA</color>
+
+    <!-- ===== 文字 ===== -->
+    <color name="text_main">#E8EEF9</color>
+    <color name="text_sub">#9FAAC2</color>
+    <color name="text_dim">#6E7A94</color>
+    <color name="text_faint">#4A5468</color>
+
+    <!-- ===== 遮罩 ===== -->
+    <color name="scrim">#F20A0E18</color>
+    <color name="scrim_soft">#CC0A0E18</color>
+
+    <!-- ===== 兼容旧引用 ===== -->
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="purple_200">#FFBB86FC</color>
+    <color name="purple_500">#FF6200EE</color>
+    <color name="purple_700">#FF3700B3</color>
+    <color name="teal_200">#FF03DAC5</color>
+    <color name="teal_700">#FF018786</color>
+    <color name="overlay_background">#F20A0E18</color>
+</resources>

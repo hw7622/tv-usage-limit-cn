@@ -1,0 +1,39 @@
+TV 使用时间管家（中文改造版）
+Copyright 2026 tv-usage-limit-cn contributors
+
+本产品包含由 Leo Liang <leoliang@gmail.com> 开发的软件：
+  TV Usage Limit — https://github.com/aleung/tv-usage-limit
+  Copyright 2026 Leo Liang，以 Apache License 2.0 授权。
+
+========================================================================
+修改说明（Apache License 2.0, Section 4(b)）
+========================================================================
+
+本仓库是基于上述原项目的衍生作品，主要修改如下：
+
+1. 界面与文案全部中文化；新增遥控器可操作的九宫格密码控件，
+   替换原版依赖系统输入法的输入框。
+2. 重写前台应用判定逻辑：由「取最近一条 resume 事件」改为
+   resumed 栈 + 增量事件游标，并将系统 UI / 电视厂商皮肤层作为
+   透明包跳过，修复「连续观看后到点不拦截」的问题。
+3. 拦截提示由后台启动 Activity 改为全屏悬浮窗（TYPE_APPLICATION_OVERLAY），
+   并在显示后主动退回桌面，修复部分电视（视频走独立硬件层）上
+   提示被播放画面遮盖的问题。
+4. 新增「仅限制指定应用」模式（多个应用共享同一份额度），
+   并定义整机口径与应用程序口径之间切换时的用量继承规则。
+5. 新增应用启动自愈通道（透明 Activity + 看门狗），
+   应对电视厂商 FreezeManager 冻结后台进程导致服务不启动的问题。
+6. 休息页面改为「还要休息 X 分 XX 秒」实时倒计时。
+7. 修正会话进度持久化、休息到期清零、并发建库等若干缺陷，
+   详见 README 的「相对上游的改动清单」。
+
+除上述修改外，项目结构与原始代码归原作者所有。
+所有修改同样以 Apache License 2.0 发布。
+
+========================================================================
+第三方组件
+========================================================================
+
+AndroidX（core-ktx、appcompat、lifecycle、room 等）— Apache License 2.0
+Material Components for Android — Apache License 2.0
+Kotlin / Kotlin Coroutines — Apache License 2.0

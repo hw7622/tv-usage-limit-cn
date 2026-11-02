@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/bg_screen"
+    android:paddingStart="@dimen/screen_pad_h"
+    android:paddingEnd="@dimen/screen_pad_h"
+    android:paddingTop="@dimen/screen_pad_v"
+    android:paddingBottom="@dimen/screen_pad_v">
+
+    <!-- ===== 顶部栏 ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="64dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <ImageView
+            android:layout_width="36dp"
+            android:layout_height="36dp"
+            android:src="@drawable/ic_clock"
+            android:tint="@color/sun"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="14dp"
+            android:text="电视时间管家"
+            android:textColor="@color/text_main"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false" />
+
+        <Space
+            android:layout_width="0dp"
+            android:layout_height="1dp"
+            android:layout_weight="1" />
+
+        <TextView
+            android:id="@+id/tvClock"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="--:--"
+            android:textColor="@color/text_dim"
+            android:textSize="22sp"
+            android:includeFontPadding="false" />
+    </LinearLayout>
+
+    <!-- ===== 主区 ===== -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginTop="28dp"
+        android:orientation="horizontal">
+
+        <!-- 左：今天还能看多久 -->
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:background="@drawable/selector_card_gold"
+            android:padding="48dp">
+
+            <TextView
+                android:id="@+id/tvProfileBadge"
+                android:layout_width="wrap_content"
+                android:layout_height="40dp"
+                android:background="@drawable/bg_pill"
+                android:backgroundTint="@color/sun_deep"
+                android:gravity="center"
+                android:paddingStart="24dp"
+                android:paddingEnd="24dp"
+                android:text="儿童"
+                android:textColor="@color/sun"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:includeFontPadding="false" />
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvRemainLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="今天还能看"
+                android:textColor="@color/text_dim"
+                android:textSize="22sp"
+                android:includeFontPadding="false" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="6dp"
+                android:orientation="horizontal"
+                android:gravity="bottom">
+
+                <TextView
+                    android:id="@+id/tvRemainHero"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="25"
+                    android:textColor="@color/sun"
+                    android:textSize="100dp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false"
+                    android:letterSpacing="-0.03" />
+
+                <TextView
+                    android:id="@+id/tvRemainUnit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="14dp"
+                    android:layout_marginBottom="18dp"
+                    android:text="分钟"
+                    android:textColor="@color/sun"
+                    android:textSize="30sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+
+            <ProgressBar
+                android:id="@+id/pbUsage"
+                style="?android:attr/progressBarStyleHorizontal"
+                android:layout_width="match_parent"
+                android:layout_height="12dp"
+                android:layout_marginTop="24dp"
+                android:max="100"
+                android:progress="62"
+                android:progressDrawable="@drawable/progress_bar_horizontal_custom" />
+
+            <Space
+                android:layout_width="1dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:id="@+id/tvDetail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="本场还能看 18 分钟，之后要休息一下"
+                android:textColor="@color/text_dim"
+                android:textSize="20sp"
+                android:includeFontPadding="false" />
+        </LinearLayout>
+
+        <!-- 右：两个入口 -->
+        <LinearLayout
+            android:layout_width="340dp"
+            android:layout_height="match_parent"
+            android:layout_marginStart="24dp"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/cardSwitch"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:background="@drawable/selector_card"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:paddingStart="36dp"
+                android:paddingEnd="36dp">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:src="@drawable/ic_users"
+                    android:tint="@color/sky"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="谁在看电视"
+                    android:textColor="@color/text_main"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="儿童 · 家长"
+                    android:textColor="@color/text_dim"
+                    android:textSize="18sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/cardSettings"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:layout_marginTop="24dp"
+                android:background="@drawable/selector_card"
+                android:clickable="true"
+                android:focusable="true"
+                android:orientation="vertical"
+                android:gravity="center_vertical"
+                android:paddingStart="36dp"
+                android:paddingEnd="36dp">
+
+                <ImageView
+                    android:layout_width="44dp"
+                    android:layout_height="44dp"
+                    android:src="@drawable/ic_gear"
+                    android:tint="@color/lavender"
+                    android:contentDescription="@null" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="18dp"
+                    android:text="家长设置"
+                    android:textColor="@color/text_main"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:includeFontPadding="false" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    android:text="时长 · 密码 · 应用"
+                    android:textColor="@color/text_dim"
+                    android:textSize="18sp"
+                    android:includeFontPadding="false" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- ===== 权限提示（缺权限时才出现） ===== -->
+    <LinearLayout
+        android:id="@+id/permissionBar"
+        android:layout_width="match_parent"
+        android:layout_height="72dp"
+        android:layout_marginTop="24dp"
+        android:background="@drawable/selector_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="28dp"
+        android:paddingEnd="28dp"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="!"
+            android:textColor="@color/sun"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/tvPermissionText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="18dp"
+            android:text="还有权限没开启，点这里去设置"
+            android:textColor="@color/text_main"
+            android:textSize="22sp"
+            android:includeFontPadding="false" />
+
+        <ImageView
+            android:layout_width="28dp"
+            android:layout_height="28dp"
+            android:src="@drawable/ic_chevron_right"
+            android:tint="@color/text_dim"
+            android:contentDescription="@null" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="10dp">
+
+    <LinearLayout
+        android:id="@+id/cardApp"
+        android:layout_width="match_parent"
+        android:layout_height="88dp"
+        android:background="@drawable/selector_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="22dp"
+        android:paddingEnd="22dp">
+
+        <ImageView
+            android:id="@+id/ivAppIcon"
+            android:layout_width="52dp"
+            android:layout_height="52dp"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/tvAppName"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="20dp"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text="应用名称"
+            android:textColor="@color/text_main"
+            android:textSize="21sp"
+            android:includeFontPadding="false" />
+
+        <ImageView
+            android:id="@+id/ivCheck"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_marginStart="12dp"
+            android:src="@drawable/ic_circle"
+            android:tint="@color/text_faint"
+            android:contentDescription="@null" />
+    </LinearLayout>
+
+</LinearLayout>

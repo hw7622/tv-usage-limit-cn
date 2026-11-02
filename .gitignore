@@ -1,0 +1,48 @@
+# --- Gradle ---
+.gradle/
+build/
+/*/build/
+
+# --- Android SDK & Local Config ---
+local.properties
+.externalNativeBuild/
+.cxx/
+captures/
+
+# --- IDE (Android Studio / IntelliJ / AntiGravity) ---
+.idea/
+*.iml
+*.iws
+*.ipr
+.navigation/
+cmake-build-*/
+
+# --- Device & Build Artifacts ---
+*.apk
+*.aar
+*.ap_
+*.aab
+*.dex
+*.class
+output.json
+
+# --- Secrets & Signing (CRITICAL) ---
+*.jks
+*.keystore
+*.p12
+google-services.json
+# (If using Firebase, typically you keep this out of public repos)
+
+# --- OS Specific ---
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# --- SDKMAN! ---
+# If you want team members to use the same Java/Gradle versions via SDKMAN
+# keep .sdkmanrc, but ignore any local overrides.
+.sdkman/
+
+*.txt
+/research/

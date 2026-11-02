@@ -1,0 +1,7 @@
+# Enable automatic switching for this project
+
+# To install: sdk env install
+# To switch: sdk env use
+
+java=17.0.10-tem
+gradle=8.6

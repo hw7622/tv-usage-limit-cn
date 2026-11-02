@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_focused="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#FFD975" />
+            <stroke android:width="4dp" android:color="#FFFFFF" />
+            <corners android:radius="@dimen/radius_pill" />
+        </shape>
+    </item>
+    <item android:state_pressed="true">
+        <shape android:shape="rectangle">
+            <solid android:color="#E0AE2E" />
+            <corners android:radius="@dimen/radius_pill" />
+        </shape>
+    </item>
+    <item>
+        <shape android:shape="rectangle">
+            <solid android:color="@color/sun" />
+            <corners android:radius="@dimen/radius_pill" />
+        </shape>
+    </item>
+</selector>

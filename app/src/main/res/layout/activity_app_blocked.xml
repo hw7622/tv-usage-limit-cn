@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_screen"
+    android:gravity="center"
+    android:orientation="vertical"
+    android:padding="64dp">
+
+    <ImageView
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:src="@drawable/ic_lock"
+        android:tint="@color/sun"
+        android:contentDescription="@null" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="36dp"
+        android:text="这个应用现在不能看"
+        android:textColor="@color/text_main"
+        android:textSize="42sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false" />
+
+    <TextView
+        android:id="@+id/tvBlockedDetails"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:gravity="center"
+        android:text="休息一下，等会儿再来吧"
+        android:textColor="@color/text_sub"
+        android:textSize="23sp"
+        android:includeFontPadding="false" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="68dp"
+        android:layout_marginTop="52dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnGoBack"
+            style="@style/Widget.GhostButton"
+            android:layout_width="wrap_content"
+            android:layout_height="68dp"
+            android:minWidth="220dp"
+            android:text="回到首页" />
+
+        <Button
+            android:id="@+id/btnSwitchProfile"
+            style="@style/Widget.BigButton"
+            android:layout_width="wrap_content"
+            android:layout_height="68dp"
+            android:layout_marginStart="24dp"
+            android:minWidth="220dp"
+            android:text="我是家长" />
+    </LinearLayout>
+
+</LinearLayout>

@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  整机模式的全屏休息遮罩。
+  排版优先级：① 还剩多久（最大的字）② 现在是什么状态 ③ 家长入口。
+  电视是 2~3 米外看的，核心数字必须一眼读到，所以剩余分钟单独用 120sp 显示。
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/bg_rest_scrim"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingTop="40dp"
+    android:paddingBottom="40dp">
+
+    <!-- 只在「10 秒后关屏」那段倒计时里出现；进入休息态后整块 GONE，把空间让给大数字 -->
+    <com.example.tvlimit.ui.CountdownRingView
+        android:id="@+id/ringCountdown"
+        android:layout_width="260dp"
+        android:layout_height="260dp" />
+
+    <TextView
+        android:id="@+id/tvTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="28dp"
+        android:text="休息时间到啦"
+        android:textColor="@color/text_main"
+        android:textSize="48sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false" />
+
+    <TextView
+        android:id="@+id/tvMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="14dp"
+        android:gravity="center"
+        android:text="让眼睛放个假，看看远处吧"
+        android:textColor="@color/text_sub"
+        android:textSize="27sp"
+        android:includeFontPadding="false" />
+
+    <!-- 状态小字：屏幕马上自动关掉 / 休息好了就能接着看 / 今天已经看满 N 分钟 -->
+    <TextView
+        android:id="@+id/tvTimer"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp"
+        android:gravity="center"
+        android:text="屏幕马上自动关掉"
+        android:textColor="@color/text_dim"
+        android:textSize="22sp"
+        android:includeFontPadding="false" />
+
+    <!-- 剩余时间：整个页面最重要的一块，数字单独给到 120sp -->
+    <LinearLayout
+        android:id="@+id/restBlock"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        android:visibility="gone">
+
+        <TextView
+            android:id="@+id/tvRestLabel"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:letterSpacing="0.12"
+            android:text="还 要 休 息"
+            android:textColor="@color/text_sub"
+            android:textSize="26sp"
+            android:includeFontPadding="false" />
+
+        <!--
+          分 + 秒 一起显示，秒数每秒跳一次，孩子自己看着就知道还有多久。
+          两个数字给同样的字号、分给固定最小宽度，跳动时整块不会左右晃。
+        -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            android:gravity="bottom"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvRestMin"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:gravity="end"
+                android:includeFontPadding="false"
+                android:minWidth="150dp"
+                android:text="20"
+                android:textColor="@color/sun"
+                android:textSize="104sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginBottom="14dp"
+                android:includeFontPadding="false"
+                android:text="分"
+                android:textColor="@color/text_sub"
+                android:textSize="32sp" />
+
+            <TextView
+                android:id="@+id/tvRestSec"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:gravity="end"
+                android:includeFontPadding="false"
+                android:minWidth="130dp"
+                android:text="00"
+                android:textColor="@color/sun"
+                android:textSize="104sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="10dp"
+                android:layout_marginBottom="14dp"
+                android:includeFontPadding="false"
+                android:text="秒"
+                android:textColor="@color/text_sub"
+                android:textSize="32sp" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <Button
+        android:id="@+id/btnSwitchProfile"
+        style="@style/Widget.GhostButton"
+        android:layout_width="wrap_content"
+        android:layout_height="76dp"
+        android:layout_marginTop="40dp"
+        android:minWidth="320dp"
+        android:paddingStart="56dp"
+        android:paddingEnd="56dp"
+        android:text="我是家长"
+        android:textColor="@color/sun"
+        android:textSize="26sp" />
+
+</LinearLayout>

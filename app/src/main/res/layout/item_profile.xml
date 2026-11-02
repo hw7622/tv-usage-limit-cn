@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:padding="12dp"
+    android:gravity="center_horizontal">
+
+    <LinearLayout
+        android:id="@+id/cardProfile"
+        android:layout_width="380dp"
+        android:layout_height="wrap_content"
+        android:background="@drawable/selector_card"
+        android:clickable="true"
+        android:focusable="true"
+        android:focusableInTouchMode="true"
+        android:orientation="vertical"
+        android:gravity="center_horizontal"
+        android:paddingTop="40dp"
+        android:paddingBottom="36dp"
+        android:paddingStart="28dp"
+        android:paddingEnd="28dp">
+
+        <ImageView
+            android:id="@+id/ivAvatar"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:src="@drawable/ic_avatar_kid"
+            android:contentDescription="@null" />
+
+        <TextView
+            android:id="@+id/tvProfileName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="24dp"
+            android:text="儿童"
+            android:textColor="@color/text_main"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/tvProfileType"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="14dp"
+            android:gravity="center"
+            android:text="今天还能看 25 分钟"
+            android:textColor="@color/sun"
+            android:textSize="20sp"
+            android:includeFontPadding="false" />
+
+        <TextView
+            android:id="@+id/tvProfileSub"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:gravity="center"
+            android:text="本场还剩 18 分钟"
+            android:textColor="@color/text_dim"
+            android:textSize="17sp"
+            android:includeFontPadding="false" />
+    </LinearLayout>
+
+</LinearLayout>
