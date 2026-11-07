@@ -39,21 +39,39 @@
 |---|---|---|---|
 | [wuwangzhang1216/ChinaTextbookStudyFree](https://github.com/wuwangzhang1216/ChinaTextbookStudyFree) | 小学 1–6 年级语文/数学/英语/科学，44 册教材、2166 课节、**6545 道单元练习**，AI 生成后人工审 | **MIT** | ✅ **首选**，可直接用、可商用。数据不在 Git 里，在 Release 包（2GB+，含 6 万个音频），需要写脚本只抽题库部分 |
 | [D-Lee419/CSQ](https://github.com/D-Lee419/CSQ) | 小学科学 12000 道，带知识点与解题思路（CoT） | **Apache-2.0** | ✅ 可直接用，许可与本项目一致，适合补科学 |
-| [xiaoyang111222/cn-math-taxonomy](https://github.com/xiaoyang111222/cn-math-taxonomy) | 3297 知识点 / **13335 道题**，覆盖小学语文 2728、英语 3164、初中物化生史地政，对齐课标，带解析 | **CC BY-NC 4.0**（非商业） | ⚠️ **有条件可用**：个人/教学可以，必须署名，不能商用。混进来会让「整个仓库不能商用」，见下面的隔离方案 |
+| [xiaoyang111222/cn-math-taxonomy](https://github.com/xiaoyang111222/cn-math-taxonomy) | 3297 知识点 / **13335 道题**，覆盖小学语文 2728、英语 3164、初中物化生史地政，对齐课标，带解析 | **CC BY-NC 4.0**（非商业） | ✅ **本项目可以用**（个人自用、免费开源，符合 NC）。条件是署名、标注修改、保留许可声明，且**这批数据不能给下游商用授权**，见下面的隔离方案 |
 | [AI-EDU-LAB/E-EVAL](https://github.com/AI-EDU-LAB/E-EVAL) | K12 23 科目 4351 道多选题 | **无 LICENSE** | ❌ 默认版权保留，不能用 |
 | [math-eval/TAL-SCQ5K](https://github.com/math-eval/TAL-SCQ5K) | 中英文数学竞赛题各 5000 道 | **无 LICENSE** | ❌ 不能用 |
 | Nexdata 系列（1300 万题等） | 大规模 K12 题库 | 商业许可 | ❌ 要买，不划算 |
 
-**结论**：先做 ChinaTextbookStudyFree（MIT）+ CSQ（Apache-2.0），这两个许可干净；
-cn-math-taxonomy 题最全但 NC，只在确认「本项目不商用」的前提下作为可选扩展包，并且必须按下面的方式隔离。
+**结论**：三个都能用，差别只在义务多少。ChinaTextbookStudyFree（MIT）和 CSQ（Apache-2.0）义务最少，先做；
+cn-math-taxonomy（CC BY-NC）题最全，按下面的方式隔离后同样可以打包——因为本项目的使用方式（自家用、免费、无广告、不分发收费版本）本身就落在 NC 允许的范围内。
 
-### 许可隔离方案（重要，别把仓库搞成不能商用）
+### 关于 CC BY-NC：不是「不能用」，是「不能替别人做主」
+
+NC 条款约束的是**使用行为**，不是给作品「打标记」。具体到本项目：
+
+- **符合**：自家孩子用、免费放 GitHub、无广告、无付费版、无非营利也不涉及营收。NC 定义里的
+  "not primarily intended for or directed towards commercial advantage" 就是指这种情形。
+- **没有 ShareAlike**：BY-NC 4.0 不像 GPL 那样传染，不要求衍生作品也用 NC。所以它**不会**
+  让 Apache-2.0 的代码变成「不能商用」——这一点之前的文档写错了，已改正。
+- **真正的限制**：你不能把自己并不持有的权利转授出去。也就是说，可以分发这批数据，
+  但不能对外声明「本仓库全部 Apache-2.0，随便商用」——那等于替原始权利人发了商用许可。
+- **自锁风险**：哪天想加广告、出付费版、或给厂商预装，NC 数据必须整批摘掉。放成独立的
+  可选扩展包，摘的时候只删一个文件，不动代码。
+
+题量只是次要因素。**更大的不确定性在权利来源**：cn-math-taxonomy 是个人仓库，
+如果题目本身来自教材配套练习或商业题库，上传者未必有权授权，MIT/Apache/NC 都解决不了
+「他到底有没有权给」这件事。这也是更看重 ChinaTextbookStudyFree 的原因——它明确写着
+AI 生成 + 人工审，权利链条最短。自用场景下这个风险可以接受，但别把它当成零风险。
+
+### 许可隔离方案（让每份数据带着自己的许可走）
 
 1. 代码保持 Apache-2.0；题库数据**不并入**代码许可。
 2. `assets/quiz/` 下按来源分文件：`bank.builtin.json`、`bank.ctsf.json`（MIT）、`bank.csq.json`（Apache-2.0）、可选 `bank.cnm.json`（CC BY-NC）。
 3. 每个文件头部字段：`"source"`（项目名 + URL）、`"license"`、`"retrievedAt"`、`"transformNote"`（怎么清洗的）。
 4. 新增 `assets/quiz/LICENSES.md` 逐条列出处；README 单开「题库数据来源」章节。
-5. 若打包 NC 数据，Release 说明里明确「此 APK 含非商业授权数据，禁止商用」，并单出一个「仅 MIT/Apache」的纯净包。
+5. 若打包 NC 数据，Release 说明里注明「本 APK 的题库数据部分为 CC BY-NC 4.0，仅限非商业用途；代码仍为 Apache-2.0」，并单出一个「仅 MIT/Apache 数据」的纯净包供他人商用。
 6. 只用题干和答案，**不搬运教材原文、插图、音频**（教材内容另有版权）。
 
 ### 转换脚本要求
