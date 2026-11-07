@@ -1,0 +1,15 @@
+﻿id,subject,grade,knowledge,stem,optionA,optionB,optionC,optionD,answer,explain,difficulty
+,chinese,2,字形,"「碧」字是什么结构？",上下结构,左右结构,半包围结构,独体字,A,"碧由「王」「白」「石」上下叠成，是上下结构。",1
+,chinese,2,词义,"下面哪个词和「快乐」意思相反？",高兴,难过,开心,愉快,B,"快乐的相反意思是不开心，所以选「难过」。",1
+,chinese,2,量词,"「一只小鸟」里的「只」用来数什么？",动物,书本,花朵,汽车,A,"「只」常用来数小动物，如一只鸟、一只猫。",1
+,chinese,2,部首,"「春」字的部首是什么？",日,三,人,口,A,"春的部首是「日」。",1
+,chinese,2,拼音,"「霜」读什么音？",shuāng,suāng,shāng,shuǎng,A,"霜读 shuāng，第一声。",1
+,chinese,2,量词,"妈妈买了一____铅笔。横线上填哪个字？",支,只,条,张,A,"铅笔细长，用「支」来数：一支铅笔。",1
+,chinese,2,部首,"「苗」字的偏旁是什么？",艹,田,木,禾,A,"苗上面是草字头「艹」。",1
+,chinese,2,词义,"「热闹」的反义词是什么？",吵闹,安静,快乐,高兴,B,"热闹说的是人多有声音，反过来说就是「安静」。",1
+,english,2,颜色,"哪个单词表示「红色」？",red,blue,green,yellow,A,"red 是红色。",1
+,english,2,名词复数,"「三只猫」用英语怎么说？",three cats,three cat,cats three,three a cat,A,"数量大于一时名词要加 s，所以是 three cats。",1
+,english,2,词汇,"下面哪个单词是水果？",apple,desk,pen,door,A,"apple 是苹果，属于水果。",1
+,english,2,颜色,"天空通常是蓝色的。用英语怎么说？",It is blue.,It is red.,It is black.,It is yellow.,A,"蓝色是 blue，所以选 It is blue.",1
+,english,2,词汇,"哪个单词表示「老师」？",teacher,student,doctor,farmer,A,"teacher 是老师。",1
+,english,2,语法,"I ___ a boy. 横线上填哪个词？",am,is,are,be,A,"主语是 I 时用 am：I am a boy.",1

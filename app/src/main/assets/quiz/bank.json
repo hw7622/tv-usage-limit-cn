@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "license": "CC BY-SA 4.0",
   "note": "自编题，禁止从教材/教辅复制",
   "questions": [
@@ -10,12 +10,12 @@
       "knowledge": "拼音",
       "stem": "「蜻蜓」的「蜓」读第几声？",
       "options": [
-        "第一声",
         "第二声",
+        "第一声",
         "第三声",
         "第四声"
       ],
-      "answer": 1,
+      "answer": 0,
       "explain": "蜓读 tíng，第二声，也是后鼻音。",
       "difficulty": 1
     },
@@ -27,11 +27,11 @@
       "stem": "「鹅」读第几声？",
       "options": [
         "第一声",
-        "第二声",
         "第三声",
-        "第四声"
+        "第四声",
+        "第二声"
       ],
-      "answer": 1,
+      "answer": 3,
       "explain": "鹅读 é，第二声。",
       "difficulty": 1
     },
@@ -42,12 +42,12 @@
       "knowledge": "拼音",
       "stem": "下面哪个字读翘舌音？",
       "options": [
-        "书 shū",
         "四 sì",
         "丝 sī",
+        "书 shū",
         "字 zì"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "sh 是翘舌音；s、z 都是平舌音。",
       "difficulty": 1
     },
@@ -58,12 +58,12 @@
       "knowledge": "拼音",
       "stem": "「我们」的「们」应该读？",
       "options": [
+        "轻声",
         "第一声",
         "第二声",
-        "第三声",
-        "轻声"
+        "第三声"
       ],
-      "answer": 3,
+      "answer": 0,
       "explain": "「们」作人称代词后缀时读轻声。",
       "difficulty": 1
     },
@@ -90,12 +90,12 @@
       "knowledge": "汉字",
       "stem": "「绿」的部首是？",
       "options": [
-        "纟",
         "录",
         "水",
-        "青"
+        "青",
+        "纟"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "「绿」左边是绞丝旁。",
       "difficulty": 1
     },
@@ -106,12 +106,12 @@
       "knowledge": "汉字",
       "stem": "「休」字由哪两部分组成？",
       "options": [
-        "亻+木",
         "亻+本",
         "木+目",
+        "亻+木",
         "人+禾"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "人靠在树旁休息。",
       "difficulty": 1
     },
@@ -139,11 +139,11 @@
       "stem": "「花」一共有几画？",
       "options": [
         "6 画",
-        "7 画",
         "8 画",
+        "7 画",
         "9 画"
       ],
-      "answer": 1,
+      "answer": 2,
       "explain": "艹 3 画 + 化 4 画。",
       "difficulty": 1
     },
@@ -154,12 +154,12 @@
       "knowledge": "词语",
       "stem": "与「高兴」意思最接近的是？",
       "options": [
-        "快乐",
         "难过",
+        "快乐",
         "生气",
         "害怕"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "高兴和快乐都是心情好。",
       "difficulty": 1
     },
@@ -170,12 +170,12 @@
       "knowledge": "词语",
       "stem": "「寒冷」的反义词是？",
       "options": [
-        "温暖",
         "冰凉",
         "凉快",
+        "温暖",
         "刮风"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "寒冷对温暖。",
       "difficulty": 1
     },
@@ -186,12 +186,12 @@
       "knowledge": "词语",
       "stem": "「仔细」的近义词是？",
       "options": [
-        "认真",
         "马虎",
         "快速",
+        "认真",
         "随便"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "仔细就是认真、不马虎。",
       "difficulty": 1
     },
@@ -202,12 +202,12 @@
       "knowledge": "词语",
       "stem": "下面哪个词表示颜色？",
       "options": [
-        "碧绿",
         "奔跑",
         "快乐",
+        "碧绿",
         "高大"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "碧绿是颜色。",
       "difficulty": 1
     },
@@ -218,12 +218,12 @@
       "knowledge": "古诗",
       "stem": "「白日依山尽」的下一句是？",
       "options": [
-        "黄河入海流",
         "欲穷千里目",
+        "黄河入海流",
         "更上一层楼",
         "春风吹又生"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "出自《登鹳雀楼》。",
       "difficulty": 1
     },
@@ -234,12 +234,12 @@
       "knowledge": "古诗",
       "stem": "「春眠不觉晓」的下一句是？",
       "options": [
-        "处处闻啼鸟",
         "夜来风雨声",
         "花落知多少",
+        "处处闻啼鸟",
         "床前明月光"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "出自《春晓》。",
       "difficulty": 1
     },
@@ -250,12 +250,12 @@
       "knowledge": "古诗",
       "stem": "「离离原上草」的下一句是？",
       "options": [
-        "一岁一枯荣",
         "野火烧不尽",
         "春风吹又生",
-        "远芳侵古道"
+        "远芳侵古道",
+        "一岁一枯荣"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "出自《赋得古原草送别》。",
       "difficulty": 1
     },
@@ -266,12 +266,12 @@
       "knowledge": "古诗",
       "stem": "「锄禾日当午」的下一句是？",
       "options": [
-        "汗滴禾下土",
         "谁知盘中餐",
         "粒粒皆辛苦",
-        "春种一粒粟"
+        "春种一粒粟",
+        "汗滴禾下土"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "出自《悯农》。",
       "difficulty": 1
     },
@@ -282,12 +282,12 @@
       "knowledge": "古诗",
       "stem": "「床前明月光」的下一句是？",
       "options": [
-        "疑是地上霜",
         "举头望明月",
         "低头思故乡",
-        "夜来风雨声"
+        "夜来风雨声",
+        "疑是地上霜"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "出自《静夜思》。",
       "difficulty": 1
     },
@@ -298,12 +298,12 @@
       "knowledge": "古诗",
       "stem": "「两个黄鹂鸣翠柳」的下一句是？",
       "options": [
-        "一行白鹭上青天",
         "窗含西岭千秋雪",
         "门泊东吴万里船",
+        "一行白鹭上青天",
         "千山鸟飞绝"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "出自《绝句》。",
       "difficulty": 1
     },
@@ -330,12 +330,12 @@
       "knowledge": "古诗",
       "stem": "「不知细叶谁裁出」的下一句是？",
       "options": [
-        "二月春风似剪刀",
         "万条垂下绿丝绦",
         "碧玉妆成一树高",
-        "春风又绿江南岸"
+        "春风又绿江南岸",
+        "二月春风似剪刀"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "出自《咏柳》。",
       "difficulty": 1
     },
@@ -362,12 +362,12 @@
       "knowledge": "文学常识",
       "stem": "李白是哪个朝代的诗人？",
       "options": [
-        "唐",
         "宋",
+        "唐",
         "元",
         "明"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "李白被称为诗仙。",
       "difficulty": 1
     },
@@ -378,12 +378,12 @@
       "knowledge": "成语",
       "stem": "「一言既出」的下一句是？",
       "options": [
-        "驷马难追",
         "寸有所长",
         "必有我师",
-        "下笔如有神"
+        "下笔如有神",
+        "驷马难追"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "形容说话算数。",
       "difficulty": 1
     },
@@ -410,12 +410,12 @@
       "knowledge": "成语",
       "stem": "「三人行」的下一句是？",
       "options": [
-        "必有我师焉",
         "寸有所长",
+        "必有我师焉",
         "不亦说乎",
         "可以为师矣"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "出自《论语》。",
       "difficulty": 1
     },
@@ -442,12 +442,12 @@
       "knowledge": "成语",
       "stem": "「亡羊补牢」的意思是？",
       "options": [
-        "出了问题及时补救",
         "丢了东西不再找",
+        "出了问题及时补救",
         "做事要有计划",
         "不要相信别人"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "补牢还不算晚。",
       "difficulty": 1
     },
@@ -458,12 +458,12 @@
       "knowledge": "成语",
       "stem": "「守株待兔」讽刺的是？",
       "options": [
-        "不努力只想靠运气",
         "做事太着急",
         "说话不算数",
-        "骄傲自满"
+        "骄傲自满",
+        "不努力只想靠运气"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "偶然的成功不能当本事。",
       "difficulty": 1
     },
@@ -474,12 +474,12 @@
       "knowledge": "句子",
       "stem": "「弯弯的月亮像小船」用了什么修辞？",
       "options": [
-        "比喻",
         "拟人",
+        "比喻",
         "夸张",
         "排比"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "把月亮比作小船。",
       "difficulty": 1
     },
@@ -506,12 +506,12 @@
       "knowledge": "成语",
       "stem": "「画蛇添足」比喻？",
       "options": [
-        "多此一举",
         "画得很快",
+        "多此一举",
         "锦上添花",
         "做事细致"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "多做了反而坏事。",
       "difficulty": 2
     },
@@ -522,12 +522,12 @@
       "knowledge": "成语",
       "stem": "「刻舟求剑」讽刺？",
       "options": [
-        "不懂事物在变化",
         "做事很认真",
         "宝剑很锋利",
+        "不懂事物在变化",
         "坐船很危险"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "船动了，剑不会跟着动。",
       "difficulty": 2
     },
@@ -538,12 +538,12 @@
       "knowledge": "词语",
       "stem": "与「举世闻名」意思相近的是？",
       "options": [
-        "闻名中外",
         "默默无闻",
+        "闻名中外",
         "井底之蛙",
         "一举两得"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "都是说名气很大。",
       "difficulty": 2
     },
@@ -570,12 +570,12 @@
       "knowledge": "古诗",
       "stem": "「读书破万卷」的下一句是？",
       "options": [
-        "下笔如有神",
         "书中自有黄金屋",
         "学而时习之",
+        "下笔如有神",
         "腹有诗书气自华"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "多读才能写得好。",
       "difficulty": 2
     },
@@ -602,12 +602,12 @@
       "knowledge": "古诗",
       "stem": "「会当凌绝顶」的下一句是？",
       "options": [
-        "一览众山小",
         "更上一层楼",
+        "一览众山小",
         "山高我为峰",
         "直挂云帆济沧海"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "出自《望岳》。",
       "difficulty": 3
     },
@@ -618,12 +618,12 @@
       "knowledge": "古诗",
       "stem": "「但愿人长久」的下一句是？",
       "options": [
-        "千里共婵娟",
         "天涯若比邻",
+        "千里共婵娟",
         "明月几时有",
         "把酒问青天"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "出自《水调歌头》。",
       "difficulty": 3
     },
@@ -650,12 +650,12 @@
       "knowledge": "单词",
       "stem": "apple 是什么意思？",
       "options": [
-        "苹果",
         "香蕉",
         "橘子",
+        "苹果",
         "葡萄"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "",
       "difficulty": 1
     },
@@ -682,12 +682,12 @@
       "knowledge": "单词",
       "stem": "orange 是什么意思？",
       "options": [
-        "橘子",
         "苹果",
         "香蕉",
-        "草莓"
+        "草莓",
+        "橘子"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "",
       "difficulty": 1
     },
@@ -698,12 +698,12 @@
       "knowledge": "单词",
       "stem": "book 是什么意思？",
       "options": [
-        "书",
         "笔",
+        "书",
         "桌子",
         "书包"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "",
       "difficulty": 1
     },
@@ -714,12 +714,12 @@
       "knowledge": "单词",
       "stem": "cat 是什么意思？",
       "options": [
-        "猫",
         "狗",
+        "猫",
         "鸟",
         "鱼"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "",
       "difficulty": 1
     },
@@ -730,12 +730,12 @@
       "knowledge": "单词",
       "stem": "dog 是什么意思？",
       "options": [
-        "狗",
         "猫",
+        "狗",
         "猪",
         "羊"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "",
       "difficulty": 1
     },
@@ -762,12 +762,12 @@
       "knowledge": "单词",
       "stem": "blue 是什么颜色？",
       "options": [
-        "蓝色",
         "红色",
         "黑色",
+        "蓝色",
         "白色"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "",
       "difficulty": 1
     },
@@ -778,12 +778,12 @@
       "knowledge": "单词",
       "stem": "three 是数字几？",
       "options": [
-        "3",
         "2",
+        "3",
         "4",
         "5"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "",
       "difficulty": 1
     },
@@ -794,12 +794,12 @@
       "knowledge": "单词",
       "stem": "seven 是数字几？",
       "options": [
-        "7",
         "6",
         "8",
+        "7",
         "9"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "",
       "difficulty": 1
     },
@@ -810,12 +810,12 @@
       "knowledge": "日常用语",
       "stem": "Good morning 是什么意思？",
       "options": [
-        "早上好",
         "晚安",
+        "早上好",
         "谢谢",
         "再见"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "",
       "difficulty": 1
     },
@@ -826,12 +826,12 @@
       "knowledge": "日常用语",
       "stem": "别人说 Thank you，你应该回答？",
       "options": [
-        "You're welcome.",
         "Good morning.",
         "I'm sorry.",
-        "How old are you?"
+        "How old are you?",
+        "You're welcome."
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "意思是「不客气」。",
       "difficulty": 1
     },
@@ -842,12 +842,12 @@
       "knowledge": "单词",
       "stem": "Monday 是星期几？",
       "options": [
-        "星期一",
         "星期二",
         "星期日",
+        "星期一",
         "星期六"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "",
       "difficulty": 2
     },
@@ -858,12 +858,12 @@
       "knowledge": "句型",
       "stem": "I ___ a student.（选 am/is/are）",
       "options": [
-        "am",
         "is",
         "are",
+        "am",
         "be"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "主语是 I，用 am。",
       "difficulty": 2
     },
@@ -890,12 +890,12 @@
       "knowledge": "句型",
       "stem": "How many ___ do you have?",
       "options": [
-        "apples",
         "apple",
         "an apple",
-        "the apple"
+        "the apple",
+        "apples"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "How many 后面用复数。",
       "difficulty": 2
     },
@@ -906,12 +906,12 @@
       "knowledge": "句型",
       "stem": "—What's your name? —___",
       "options": [
-        "My name is Tom.",
         "I'm eight.",
         "It's a cat.",
-        "I'm fine."
+        "I'm fine.",
+        "My name is Tom."
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "",
       "difficulty": 2
     },
@@ -938,12 +938,12 @@
       "knowledge": "句型",
       "stem": "This is ___ book.",
       "options": [
-        "my",
         "me",
+        "my",
         "I",
         "mine"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "my 后面接名词。",
       "difficulty": 2
     },
@@ -954,12 +954,12 @@
       "knowledge": "句型",
       "stem": "I like ___ very much.",
       "options": [
-        "apples",
         "apple",
+        "apples",
         "an apple",
         "the apple"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "表达喜欢某类事物用复数。",
       "difficulty": 2
     },
@@ -986,12 +986,12 @@
       "knowledge": "语法",
       "stem": "There ___ some milk in the glass.",
       "options": [
-        "is",
         "are",
+        "is",
         "be",
         "am"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "milk 不可数，用 is。",
       "difficulty": 2
     },
@@ -1002,12 +1002,12 @@
       "knowledge": "语法",
       "stem": "I ___ my homework yesterday.",
       "options": [
-        "did",
         "do",
         "does",
+        "did",
         "doing"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "yesterday 用过去式。",
       "difficulty": 2
     },
@@ -1018,12 +1018,12 @@
       "knowledge": "语法",
       "stem": "go 的过去式是？",
       "options": [
-        "went",
         "goed",
+        "went",
         "gone",
         "going"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "不规则动词。",
       "difficulty": 3
     },
@@ -1050,12 +1050,12 @@
       "knowledge": "语法",
       "stem": "bigger 是 big 的什么形式？",
       "options": [
-        "比较级",
         "最高级",
         "过去式",
+        "比较级",
         "复数"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "big → bigger → biggest。",
       "difficulty": 3
     },
@@ -1082,12 +1082,12 @@
       "knowledge": "语法",
       "stem": "If it ___ tomorrow, we'll stay home.",
       "options": [
-        "rains",
         "rain",
         "rained",
+        "rains",
         "raining"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "主将从现。",
       "difficulty": 3
     },
@@ -1098,12 +1098,12 @@
       "knowledge": "语法",
       "stem": "Have you ___ your homework?",
       "options": [
-        "finished",
         "finish",
         "finishing",
-        "finishes"
+        "finishes",
+        "finished"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "现在完成时用过去分词。",
       "difficulty": 3
     },
@@ -1114,12 +1114,12 @@
       "knowledge": "交际",
       "stem": "—What did you do last Sunday? —___",
       "options": [
-        "I played football.",
         "I play football.",
+        "I played football.",
         "I will play football.",
         "I am playing football."
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "问过去，答过去。",
       "difficulty": 3
     },
@@ -1162,12 +1162,12 @@
       "knowledge": "变化",
       "stem": "冰融化成水属于什么变化？",
       "options": [
-        "物理变化",
         "化学变化",
+        "物理变化",
         "光合作用",
         "燃烧"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "没有产生新物质。",
       "difficulty": 2
     },
@@ -1178,12 +1178,12 @@
       "knowledge": "天体",
       "stem": "太阳系的中心是？",
       "options": [
-        "太阳",
         "地球",
         "月球",
+        "太阳",
         "火星"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "行星都绕着太阳转。",
       "difficulty": 2
     },
@@ -1194,12 +1194,12 @@
       "knowledge": "地球",
       "stem": "一天中影子最短的时候大约是？",
       "options": [
-        "正午",
         "清晨",
         "傍晚",
-        "半夜"
+        "半夜",
+        "正午"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "太阳最高的时候影子最短。",
       "difficulty": 2
     },
@@ -1242,12 +1242,12 @@
       "knowledge": "电",
       "stem": "下列属于导体的是？",
       "options": [
-        "铁钉",
         "塑料尺",
+        "铁钉",
         "橡皮",
         "木筷"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "金属是导体。",
       "difficulty": 2
     },
@@ -1258,12 +1258,12 @@
       "knowledge": "人体",
       "stem": "人体主要的呼吸器官是？",
       "options": [
-        "肺",
         "胃",
         "心脏",
+        "肺",
         "肝"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "肺负责气体交换。",
       "difficulty": 2
     },
@@ -1274,12 +1274,12 @@
       "knowledge": "声音",
       "stem": "声音靠什么传播？",
       "options": [
-        "介质（空气等）",
         "真空",
         "光",
-        "磁场"
+        "磁场",
+        "介质（空气等）"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "真空不能传声。",
       "difficulty": 2
     },
@@ -1290,12 +1290,12 @@
       "knowledge": "运动",
       "stem": "速度的计算公式是？",
       "options": [
-        "v = s / t",
         "v = s × t",
         "v = t / s",
+        "v = s / t",
         "v = s + t"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "速度 = 路程 ÷ 时间。",
       "difficulty": 3
     },
@@ -1322,12 +1322,12 @@
       "knowledge": "力",
       "stem": "力的国际单位是？",
       "options": [
-        "牛顿",
         "千克",
         "焦耳",
-        "帕斯卡"
+        "帕斯卡",
+        "牛顿"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "符号 N。",
       "difficulty": 3
     },
@@ -1338,12 +1338,12 @@
       "knowledge": "光",
       "stem": "下列属于光的直线传播现象的是？",
       "options": [
-        "影子",
         "彩虹",
         "水中筷子变弯",
-        "平面镜成像"
+        "平面镜成像",
+        "影子"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "光沿直线传播被挡住形成影子。",
       "difficulty": 3
     },
@@ -1370,12 +1370,12 @@
       "knowledge": "密度",
       "stem": "密度的计算公式是？",
       "options": [
-        "ρ = m / V",
         "ρ = m × V",
+        "ρ = m / V",
         "ρ = V / m",
         "ρ = m + V"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "密度 = 质量 ÷ 体积。",
       "difficulty": 3
     },
@@ -1386,12 +1386,12 @@
       "knowledge": "声",
       "stem": "声音在空气中的传播速度约为？",
       "options": [
-        "340 m/s",
         "3×10⁸ m/s",
         "1500 m/s",
+        "340 m/s",
         "34 m/s"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "15℃ 空气中约 340 米/秒。",
       "difficulty": 3
     },
@@ -1402,12 +1402,12 @@
       "knowledge": "光",
       "stem": "平面镜成像的特点是？",
       "options": [
-        "等大的虚像",
         "放大的实像",
+        "等大的虚像",
         "缩小的实像",
         "倒立的实像"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "像与物等大、对称。",
       "difficulty": 3
     },
@@ -1418,12 +1418,12 @@
       "knowledge": "物质构成",
       "stem": "水的化学式是？",
       "options": [
-        "H₂O",
         "CO₂",
         "O₂",
-        "H₂O₂"
+        "H₂O₂",
+        "H₂O"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "两个氢一个氧。",
       "difficulty": 3
     },
@@ -1450,12 +1450,12 @@
       "knowledge": "性质",
       "stem": "能使澄清石灰水变浑浊的气体是？",
       "options": [
-        "二氧化碳",
         "氧气",
+        "二氧化碳",
         "氮气",
         "氢气"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "生成碳酸钙沉淀。",
       "difficulty": 3
     },
@@ -1466,12 +1466,12 @@
       "knowledge": "符号",
       "stem": "铁元素的化学符号是？",
       "options": [
-        "Fe",
         "F",
         "Ir",
+        "Fe",
         "Fr"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "Fe 表示铁。",
       "difficulty": 3
     },
@@ -1482,12 +1482,12 @@
       "knowledge": "环境",
       "stem": "酸雨的主要成分之一是？",
       "options": [
-        "二氧化硫",
         "二氧化碳",
         "氧气",
+        "二氧化硫",
         "氮气"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "燃煤排放的 SO₂。",
       "difficulty": 3
     },
@@ -1514,12 +1514,12 @@
       "knowledge": "酸碱",
       "stem": "pH 小于 7 的溶液显？",
       "options": [
-        "酸性",
         "碱性",
         "中性",
-        "无法判断"
+        "无法判断",
+        "酸性"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "pH 越小酸性越强。",
       "difficulty": 3
     },
@@ -1530,12 +1530,12 @@
       "knowledge": "变化",
       "stem": "化学变化的本质特征是？",
       "options": [
-        "有新物质生成",
         "状态改变",
+        "有新物质生成",
         "形状改变",
         "温度升高"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "看有没有新物质。",
       "difficulty": 3
     },
@@ -1562,12 +1562,12 @@
       "knowledge": "植物",
       "stem": "光合作用主要发生在？",
       "options": [
-        "叶绿体",
         "线粒体",
         "细胞核",
+        "叶绿体",
         "液泡"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "叶绿体含叶绿素。",
       "difficulty": 3
     },
@@ -1578,12 +1578,12 @@
       "knowledge": "人体",
       "stem": "人体最大的器官是？",
       "options": [
-        "皮肤",
         "肝脏",
+        "皮肤",
         "肺",
         "大脑"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "皮肤覆盖全身。",
       "difficulty": 3
     },
@@ -1594,12 +1594,12 @@
       "knowledge": "人体",
       "stem": "血液中运输氧气主要靠？",
       "options": [
-        "红细胞",
         "白细胞",
         "血小板",
-        "血浆"
+        "血浆",
+        "红细胞"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "红细胞含血红蛋白。",
       "difficulty": 3
     },
@@ -1610,12 +1610,12 @@
       "knowledge": "遗传",
       "stem": "生物的遗传物质主要是？",
       "options": [
-        "DNA",
         "蛋白质",
+        "DNA",
         "糖类",
         "脂肪"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "DNA 上携带基因。",
       "difficulty": 3
     },
@@ -1642,12 +1642,12 @@
       "knowledge": "朝代",
       "stem": "中国历史上第一个统一的封建王朝是？",
       "options": [
-        "秦朝",
         "汉朝",
         "唐朝",
-        "夏朝"
+        "夏朝",
+        "秦朝"
       ],
-      "answer": 0,
+      "answer": 3,
       "explain": "公元前 221 年秦统一六国。",
       "difficulty": 3
     },
@@ -1674,12 +1674,12 @@
       "knowledge": "都城",
       "stem": "唐朝的都城是？",
       "options": [
-        "长安",
         "洛阳",
         "开封",
+        "长安",
         "北京"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "今西安。",
       "difficulty": 3
     },
@@ -1690,12 +1690,12 @@
       "knowledge": "对外交往",
       "stem": "郑和下西洋发生在哪个朝代？",
       "options": [
-        "明朝",
         "元朝",
+        "明朝",
         "清朝",
         "宋朝"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "明成祖时期。",
       "difficulty": 3
     },
@@ -1706,12 +1706,12 @@
       "knowledge": "近代",
       "stem": "鸦片战争爆发于哪一年？",
       "options": [
-        "1840 年",
         "1839 年",
+        "1840 年",
         "1856 年",
         "1911 年"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "中国近代史的开端。",
       "difficulty": 3
     },
@@ -1754,12 +1754,12 @@
       "knowledge": "中国地理",
       "stem": "中国最长的河流是？",
       "options": [
-        "长江",
         "黄河",
+        "长江",
         "珠江",
         "黑龙江"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "约 6300 千米。",
       "difficulty": 3
     },
@@ -1770,12 +1770,12 @@
       "knowledge": "世界地理",
       "stem": "世界最高峰是？",
       "options": [
-        "珠穆朗玛峰",
         "乔戈里峰",
         "乞力马扎罗山",
+        "珠穆朗玛峰",
         "富士山"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "海拔 8848.86 米。",
       "difficulty": 3
     },
@@ -1802,12 +1802,12 @@
       "knowledge": "气候",
       "stem": "我国季风气候显著的主要原因是？",
       "options": [
-        "海陆热力差异",
         "纬度位置",
         "地形起伏",
+        "海陆热力差异",
         "洋流影响"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "海陆比热不同。",
       "difficulty": 3
     },
@@ -1818,12 +1818,12 @@
       "knowledge": "地图",
       "stem": "地图上通常用「上北下南、左西右东」判断方向，这适用于？",
       "options": [
-        "一般地图",
         "所有地图",
+        "一般地图",
         "只有中国地图",
         "只有世界地图"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "有指向标时以指向标为准。",
       "difficulty": 3
     },
@@ -1850,12 +1850,12 @@
       "knowledge": "法律",
       "stem": "未成年人保护法保护的对象是？",
       "options": [
-        "未满 18 周岁的公民",
         "未满 16 周岁的公民",
+        "未满 18 周岁的公民",
         "所有学生",
         "未满 14 周岁的公民"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "未成年人指未满 18 周岁。",
       "difficulty": 3
     },
@@ -1866,12 +1866,12 @@
       "knowledge": "权利",
       "stem": "下列属于公民基本权利的是？",
       "options": [
-        "受教育权",
         "纳税",
         "服兵役",
+        "受教育权",
         "遵守法律"
       ],
-      "answer": 0,
+      "answer": 2,
       "explain": "受教育既是权利也是义务。",
       "difficulty": 3
     },
@@ -1898,12 +1898,12 @@
       "knowledge": "网络",
       "stem": "网络交往中应该特别注意？",
       "options": [
-        "保护个人隐私",
         "公开家庭住址",
+        "保护个人隐私",
         "随意加陌生人为好友",
         "转发未核实的信息"
       ],
-      "answer": 0,
+      "answer": 1,
       "explain": "不泄露个人信息。",
       "difficulty": 3
     },
@@ -1922,6 +1922,231 @@
       "answer": 0,
       "explain": "火灾时不能乘电梯。",
       "difficulty": 3
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "字形",
+      "stem": "「碧」字是什么结构？",
+      "options": [
+        "左右结构",
+        "半包围结构",
+        "独体字",
+        "上下结构"
+      ],
+      "answer": 3,
+      "explain": "碧由「王」「白」「石」上下叠成，是上下结构。",
+      "difficulty": 1,
+      "id": "chinese-g2-0030"
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "词义",
+      "stem": "下面哪个词和「快乐」意思相反？",
+      "options": [
+        "高兴",
+        "难过",
+        "开心",
+        "愉快"
+      ],
+      "answer": 1,
+      "explain": "快乐的相反意思是不开心，所以选「难过」。",
+      "difficulty": 1,
+      "id": "chinese-g2-0031"
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "量词",
+      "stem": "「一只小鸟」里的「只」用来数什么？",
+      "options": [
+        "书本",
+        "动物",
+        "花朵",
+        "汽车"
+      ],
+      "answer": 1,
+      "explain": "「只」常用来数小动物，如一只鸟、一只猫。",
+      "difficulty": 1,
+      "id": "chinese-g2-0032"
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "部首",
+      "stem": "「春」字的部首是什么？",
+      "options": [
+        "三",
+        "人",
+        "日",
+        "口"
+      ],
+      "answer": 2,
+      "explain": "春的部首是「日」。",
+      "difficulty": 1,
+      "id": "chinese-g2-0033"
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "拼音",
+      "stem": "「霜」读什么音？",
+      "options": [
+        "shuāng",
+        "suāng",
+        "shāng",
+        "shuǎng"
+      ],
+      "answer": 0,
+      "explain": "霜读 shuāng，第一声。",
+      "difficulty": 1,
+      "id": "chinese-g2-0034"
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "量词",
+      "stem": "妈妈买了一____铅笔。横线上填哪个字？",
+      "options": [
+        "只",
+        "支",
+        "条",
+        "张"
+      ],
+      "answer": 1,
+      "explain": "铅笔细长，用「支」来数：一支铅笔。",
+      "difficulty": 1,
+      "id": "chinese-g2-0035"
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "部首",
+      "stem": "「苗」字的偏旁是什么？",
+      "options": [
+        "田",
+        "艹",
+        "木",
+        "禾"
+      ],
+      "answer": 1,
+      "explain": "苗上面是草字头「艹」。",
+      "difficulty": 1,
+      "id": "chinese-g2-0036"
+    },
+    {
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "词义",
+      "stem": "「热闹」的反义词是什么？",
+      "options": [
+        "安静",
+        "吵闹",
+        "快乐",
+        "高兴"
+      ],
+      "answer": 0,
+      "explain": "热闹说的是人多有声音，反过来说就是「安静」。",
+      "difficulty": 1,
+      "id": "chinese-g2-0037"
+    },
+    {
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "颜色",
+      "stem": "哪个单词表示「红色」？",
+      "options": [
+        "blue",
+        "green",
+        "yellow",
+        "red"
+      ],
+      "answer": 3,
+      "explain": "red 是红色。",
+      "difficulty": 1,
+      "id": "english-g2-0000"
+    },
+    {
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "名词复数",
+      "stem": "「三只猫」用英语怎么说？",
+      "options": [
+        "three cats",
+        "three cat",
+        "cats three",
+        "three a cat"
+      ],
+      "answer": 0,
+      "explain": "数量大于一时名词要加 s，所以是 three cats。",
+      "difficulty": 1,
+      "id": "english-g2-0001"
+    },
+    {
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "词汇",
+      "stem": "下面哪个单词是水果？",
+      "options": [
+        "desk",
+        "pen",
+        "door",
+        "apple"
+      ],
+      "answer": 3,
+      "explain": "apple 是苹果，属于水果。",
+      "difficulty": 1,
+      "id": "english-g2-0002"
+    },
+    {
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "颜色",
+      "stem": "天空通常是蓝色的。用英语怎么说？",
+      "options": [
+        "It is blue.",
+        "It is red.",
+        "It is black.",
+        "It is yellow."
+      ],
+      "answer": 0,
+      "explain": "蓝色是 blue，所以选 It is blue.",
+      "difficulty": 1,
+      "id": "english-g2-0003"
+    },
+    {
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "词汇",
+      "stem": "哪个单词表示「老师」？",
+      "options": [
+        "student",
+        "doctor",
+        "teacher",
+        "farmer"
+      ],
+      "answer": 2,
+      "explain": "teacher 是老师。",
+      "difficulty": 1,
+      "id": "english-g2-0004"
+    },
+    {
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "语法",
+      "stem": "I ___ a boy. 横线上填哪个词？",
+      "options": [
+        "am",
+        "is",
+        "are",
+        "be"
+      ],
+      "answer": 0,
+      "explain": "主语是 I 时用 am：I am a boy.",
+      "difficulty": 1,
+      "id": "english-g2-0005"
     }
-  ]
+  ],
+  "mergedAt": "2026-11-07"
 }

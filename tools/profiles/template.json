@@ -1,0 +1,28 @@
+{
+  "_comment": "字段映射模板。复制一份改名，把右边的值改成你那份文件的真实列名。",
+  "_comment2": "fields.options 是选项列名数组，按 A/B/C/D 顺序；不写则默认找 optionA..optionD。",
+  "_comment3": "subjects / grades 不是必须的：常见的「语文/二年级/初二」写法内置已能识别，只有特殊写法才需要补。",
+  "name": "替换成来源名，例如 ChinaTextbookStudyFree",
+  "license": "MIT",
+  "retrievedAt": "2026-11-07",
+  "fields": {
+    "stem": "question",
+    "options": ["A", "B", "C", "D"],
+    "answer": "answer",
+    "subject": "subject",
+    "grade": "grade",
+    "knowledge": "knowledge",
+    "explain": "analysis",
+    "difficulty": "difficulty"
+  },
+  "subjects": {
+    "语文": "chinese",
+    "数学": "math",
+    "英语": "english",
+    "科学": "science"
+  },
+  "grades": {
+    "二年级": 2,
+    "初一": 7
+  }
+}

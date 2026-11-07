@@ -164,10 +164,31 @@ export ANDROID_HOME=/path/to/android-sdk
 
 ### 题库
 
-内置 120 道自编题，覆盖小学语文/英语/科学与初中的物化生史地政（数学走生成器）。
-**题量偏少，是当前最大的短板**：默认配置下一天约需 54 道，二年级语文只有 30 道，两天就转完一圈。
+内置 **134 道自编题**，覆盖小学语文/英语/科学与初中的物化生史地政（数学走生成器）。
+**题量仍然偏少**：默认配置下一天约需 54 道，二年级语文 38 道，一周多就转完一圈。
 
-题库扩充方案、开源题库选型与许可证判断、家长端「题库管理」的设计，见 [docs/ROADMAP.md](docs/ROADMAP.md)。
+题库走「自编为主」的路子：题目由项目自己编写，数据随源码一起以 CC BY-SA 4.0 发布，
+不打包任何第三方题库——那些源只作为**参考和扩展方向**列在路线图里，需要的人自己下载、自己转。
+
+想自己加题、或者把别的题库导进来：
+
+```bash
+# 导出成表格，在 Excel / WPS 里编题
+python tools/import_bank.py export app/src/main/assets/quiz/bank.json -o 题库.csv
+# 改完转回去，打散答案位置，再合并（自动校验、去重、编号）
+python tools/import_bank.py convert 题库.csv -o tmp/new.json --source 自编
+python tools/import_bank.py rebalance tmp/new.json
+python tools/import_bank.py merge app/src/main/assets/quiz/bank.json tmp/new.json \
+    -o app/src/main/assets/quiz/bank.json
+# 体检：题量矩阵、缺口、非法题
+python tools/import_bank.py check app/src/main/assets/quiz/bank.json
+```
+
+格式规范、字段约束、第三方题库的映射写法与四个常见坑，见 [docs/QUIZ_FORMAT.md](docs/QUIZ_FORMAT.md)。
+
+> **正确答案别总放第一格。** 第一版题库 96% 的答案是 A，孩子一路按左键就能过；
+> 已用 `rebalance` 打散成 31/28/23/18，`check` 会盯着这个分布。
+扩充节奏与家长端「题库管理」的设计，见 [docs/ROADMAP.md](docs/ROADMAP.md)。
 
 ---
 
@@ -176,7 +197,8 @@ export ANDROID_HOME=/path/to/android-sdk
 | 文档 | 内容 |
 |---|---|
 | [docs/HANDOVER.md](docs/HANDOVER.md) | **换电脑继续开发看这份**：环境搭建、构建、装真机、备份回滚、代码地图、8 个已知坑 |
-| [docs/ROADMAP.md](docs/ROADMAP.md) | 待办：题库扩充与开源选型、题库维护功能设计、真机待验证项 |
+| [docs/QUIZ_FORMAT.md](docs/QUIZ_FORMAT.md) | 题库格式、编题工作流、`tools/import_bank.py` 用法、第三方题库怎么转 |
+| [docs/ROADMAP.md](docs/ROADMAP.md) | 待办：题库扩充计划与参考源、题库维护功能设计、真机待验证项 |
 
 ---
 
