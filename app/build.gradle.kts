@@ -12,8 +12,8 @@ android {
         applicationId = "com.example.tvlimit"
         minSdk = 26 // Android 8.0 (Oreo) - Common for Android TV
         targetSdk = 34
-        versionCode = 36
-        versionName = "2.5.26-cn"
+        versionCode = 44
+        versionName = "2.7.6-cn"
     }
 
     buildTypes {

@@ -47,7 +47,7 @@ class AppBlockedActivity : ComponentActivity() {
             )
             finish()
         }
-        btnSwitch.post { btnSwitch.requestFocus() }
+        btnSwitch.post { TvFocus.focus(btnSwitch) }
 
         // 用 OnBackPressedDispatcher 而不是重写 onBackPressed()：
         // 后者在开启「预测性返回」的系统上不会被调用，返回键会直接把页面 finish 掉，

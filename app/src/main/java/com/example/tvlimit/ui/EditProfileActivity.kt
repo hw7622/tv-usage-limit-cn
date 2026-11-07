@@ -158,9 +158,9 @@ class EditProfileActivity : AppCompatActivity() {
                     // 不限时的档案勾「限制哪些应用」也不会生效，直接藏掉，免得家长白设
                     findViewById<View>(R.id.cardApps).visibility = View.GONE
                     tvProfileHint.text = "家长模式不受时长限制，也不用限制应用，随时都能看"
-                    findViewById<View>(R.id.btnSave).requestFocus()
+                    TvFocus.focus(findViewById<View>(R.id.btnSave))
                 } else {
-                    findViewById<View>(R.id.btnDailyMinus).requestFocus()
+                    TvFocus.focus(findViewById<View>(R.id.btnDailyMinus))
                 }
             }
         }

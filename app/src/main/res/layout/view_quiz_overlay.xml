@@ -1,0 +1,362 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  答题页：全屏悬浮窗（不是 Activity）。
+  TCL 上 Activity 会被硬件视频层盖住，只有悬浮窗能可靠地压在最上层；
+  见 docs/电视时间管理-v2-设计方案.md §4.6。
+
+  排版约束：遥控器只有方向键，所以选项固定 2×2 四格 —— 方向键一次就能到任意一格，
+  竖排列表平均要按 2~3 次。
+-->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/quizRoot"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_deep"
+    android:clickable="true"
+    android:focusable="true"
+    android:focusableInTouchMode="true">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingStart="56dp"
+        android:paddingEnd="56dp"
+        android:paddingTop="36dp"
+        android:paddingBottom="28dp">
+
+        <!-- 顶部：年级科目 + 还剩几题 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/tvQuizSubject"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:background="@drawable/bg_pill"
+                android:includeFontPadding="false"
+                android:paddingStart="18dp"
+                android:paddingEnd="18dp"
+                android:paddingTop="7dp"
+                android:paddingBottom="7dp"
+                android:text="数学 · 二年级"
+                android:textColor="@color/sun"
+                android:textSize="19sp" />
+
+            <TextView
+                android:id="@+id/tvQuizRemain"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="16dp"
+                android:includeFontPadding="false"
+                android:text="还剩 1 题 · 答错会加题"
+                android:textColor="@color/text_dim"
+                android:textSize="19sp" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="电视时间管家 · 答题"
+                android:textColor="@color/text_faint"
+                android:textSize="17sp" />
+        </LinearLayout>
+
+        <!-- 题干 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="22dp"
+            android:background="@drawable/bg_overlay_rounded"
+            android:minHeight="132dp"
+            android:paddingStart="36dp"
+            android:paddingEnd="36dp"
+            android:paddingTop="26dp"
+            android:paddingBottom="26dp">
+
+            <TextView
+                android:id="@+id/tvQuizStem"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                android:lineSpacingExtra="8dp"
+                android:maxLines="3"
+                android:ellipsize="end"
+                android:text="47 + 38 = ?"
+                android:textColor="@color/text_main"
+                android:textSize="40sp" />
+        </LinearLayout>
+
+        <!-- 四个选项：2×2 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="20dp"
+            android:layout_weight="1"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/opt0"
+                    android:nextFocusDown="@id/opt2"
+                    android:nextFocusRight="@id/opt1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_quiz_option"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="28dp"
+                    android:paddingEnd="24dp">
+
+                    <TextView
+                        android:id="@+id/tvBadge0"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:text="A"
+                        android:textColor="@color/sun"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvOpt0"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="18dp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:text="75"
+                        android:textColor="@color/text_main"
+                        android:textSize="28sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/opt1"
+                    android:nextFocusDown="@id/opt3"
+                    android:nextFocusLeft="@id/opt0"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginBottom="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_quiz_option"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="28dp"
+                    android:paddingEnd="24dp">
+
+                    <TextView
+                        android:id="@+id/tvBadge1"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:text="B"
+                        android:textColor="@color/sun"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvOpt1"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="18dp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:text="84"
+                        android:textColor="@color/text_main"
+                        android:textSize="28sp" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:orientation="horizontal">
+
+                <LinearLayout
+                    android:id="@+id/opt2"
+                    android:nextFocusDown="@id/btnQuizParent"
+                    android:nextFocusRight="@id/opt3"
+                    android:nextFocusUp="@id/opt0"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_quiz_option"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="28dp"
+                    android:paddingEnd="24dp">
+
+                    <TextView
+                        android:id="@+id/tvBadge2"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:text="C"
+                        android:textColor="@color/sun"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvOpt2"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="18dp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:text="85"
+                        android:textColor="@color/text_main"
+                        android:textSize="28sp" />
+                </LinearLayout>
+
+                <LinearLayout
+                    android:id="@+id/opt3"
+                    android:nextFocusDown="@id/btnQuizQuit"
+                    android:nextFocusLeft="@id/opt2"
+                    android:nextFocusUp="@id/opt1"
+                    android:layout_width="0dp"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="10dp"
+                    android:layout_marginTop="10dp"
+                    android:layout_weight="1"
+                    android:background="@drawable/bg_quiz_option"
+                    android:clickable="true"
+                    android:focusable="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal"
+                    android:paddingStart="28dp"
+                    android:paddingEnd="24dp">
+
+                    <TextView
+                        android:id="@+id/tvBadge3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:includeFontPadding="false"
+                        android:text="D"
+                        android:textColor="@color/sun"
+                        android:textSize="24sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:id="@+id/tvOpt3"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="18dp"
+                        android:layout_weight="1"
+                        android:fontFamily="sans-serif-medium"
+                        android:includeFontPadding="false"
+                        android:maxLines="2"
+                        android:ellipsize="end"
+                        android:text="95"
+                        android:textColor="@color/text_main"
+                        android:textSize="28sp" />
+                </LinearLayout>
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 反馈：答错提示 / 解析 -->
+        <TextView
+            android:id="@+id/tvQuizFeedback"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="6dp"
+            android:includeFontPadding="false"
+            android:maxLines="1"
+            android:ellipsize="end"
+            android:text=""
+            android:textColor="@color/coral"
+            android:textSize="21sp" />
+
+        <!-- 底部：家长入口固定在左边，不默认获焦 -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:gravity="center_vertical"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/btnQuizParent"
+                android:nextFocusUp="@id/opt2"
+                android:nextFocusRight="@id/btnQuizQuit"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:background="@drawable/selector_btn_ghost"
+                android:focusable="true"
+                android:paddingStart="26dp"
+                android:paddingEnd="26dp"
+                android:text="我是家长"
+                android:textAllCaps="false"
+                android:textColor="@color/text_sub"
+                android:textSize="19sp" />
+
+            <!-- 返回键在悬浮窗上不一定收得到（系统会把它交给下层），
+                 所以必须有一个看得见、方向键够得着的出口。 -->
+            <Button
+                android:id="@+id/btnQuizQuit"
+                android:nextFocusUp="@id/opt3"
+                android:nextFocusLeft="@id/btnQuizParent"
+                style="@style/Widget.AppCompat.Button.Borderless"
+                android:layout_width="wrap_content"
+                android:layout_height="56dp"
+                android:layout_marginStart="14dp"
+                android:background="@drawable/selector_btn_ghost"
+                android:focusable="true"
+                android:paddingStart="26dp"
+                android:paddingEnd="26dp"
+                android:text="不看了"
+                android:textAllCaps="false"
+                android:textColor="@color/text_sub"
+                android:textSize="19sp" />
+
+            <Space
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_weight="1" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:includeFontPadding="false"
+                android:text="方向键选择 · OK 确认 · 答完继续看"
+                android:textColor="@color/text_faint"
+                android:textSize="18sp" />
+        </LinearLayout>
+    </LinearLayout>
+</FrameLayout>

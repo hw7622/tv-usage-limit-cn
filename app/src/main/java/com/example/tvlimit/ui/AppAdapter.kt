@@ -68,7 +68,7 @@ class AppAdapter(
         if (!focusGiven) {
             focusGiven = true
             val target = holder.itemView
-            target.post { target.requestFocus() }
+            target.post { TvFocus.focus(target) }
         }
     }
 

@@ -1,5 +1,7 @@
 package com.example.tvlimit.service
 
+import com.example.tvlimit.ui.TvFocus
+
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -42,9 +44,11 @@ import com.example.tvlimit.data.LimitControl
 import com.example.tvlimit.data.Profile
 import com.example.tvlimit.data.UsageLog
 import com.example.tvlimit.receiver.AdminReceiver
+import com.example.tvlimit.quiz.QuizSettings
 import com.example.tvlimit.ui.CountdownRingView
 import com.example.tvlimit.ui.ParentGateActivity
 import com.example.tvlimit.ui.ProfileSelectionActivity
+import com.example.tvlimit.util.EventLog
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.CoroutineScope
@@ -102,6 +106,9 @@ class TimeTrackingService : Service() {
         /** 家长验证结束后，让服务重新判断该不该接着计时。 */
         const val ACTION_RECHECK = "com.example.tvlimit.ACTION_RECHECK"
 
+        /** 设置页点「现在答一组试试」：立刻弹一组，不用真等一个间隔。 */
+        const val ACTION_QUIZ_TEST = "com.example.tvlimit.ACTION_QUIZ_TEST"
+
         private const val PREF_LAST_SESSION_END_PREFIX = "last_session_end_time_"
         private const val PREF_SESSION_USAGE_PREFIX = "session_usage_"
         private const val PREF_SESSION_SAVED_AT_PREFIX = "session_saved_at_"
@@ -118,6 +125,18 @@ class TimeTrackingService : Service() {
         /** 运行状态（排查用，外部可读） */
         private const val PREF_LAST_TICK_AT = "last_tick_at"
         private const val PREF_LAST_TICK_STATE = "last_tick_state"
+
+        /**
+         * 最后一次「真的在看」的时刻。每累计一分钟就刷一次（30 秒节流）。
+         * 断电、被强杀、TCL 冻结之后，靠它判断"这一场休息够了没有" ——
+         * 原来只有关屏广播才写休息起点，拔插头就什么都不写。
+         */
+        private const val PREF_LAST_WATCH_AT_PREFIX = "last_watch_at_"
+        /**
+         * 进入「没在看」状态的时刻（熄屏 / 前台不是受限应用 / 暂停）。
+         * 0 表示正在看。休息够 restDuration 就把本场额度清零，这是需求 2。
+         */
+        private const val PREF_IDLE_SINCE_PREFIX = "idle_since_"
     }
 
     /**
@@ -135,6 +154,8 @@ class TimeTrackingService : Service() {
             }
     )
     private var trackingJob: Job? = null
+    /** 每 30 秒核一次「计时循环还活着吗」，见 startSelfHealLoop()。 */
+    private var selfHealJob: Job? = null
     private var restrictedAppCheckJob: Job? = null
     private lateinit var database: AppDatabase
     @Volatile
@@ -216,6 +237,15 @@ class TimeTrackingService : Service() {
     private var appBlockedOverlayView: View? = null
     private var appBlockedHeartbeatJob: Job? = null
 
+    /**
+     * 答题门禁的界面。悬浮窗 + 一组题，见 QuizGate。
+     * 晚初始化（onCreate 里 windowManager 就绪后）。
+     */
+    private var quizGate: QuizGate? = null
+
+    /** 家长在设置页点「试一道」的预览模式：不拦播放、不留 pending、答完回设置页。 */
+    private var quizPreview = false
+
     private val processLifecycleObserver = LifecycleEventObserver { _, event ->
         if (event == Lifecycle.Event.ON_START) {
             isAppInForeground = true
@@ -259,6 +289,10 @@ class TimeTrackingService : Service() {
                 LimitControl.ACTION_PAUSE_CHANGED -> {
                     if (LimitControl.isPaused(this@TimeTrackingService)) {
                         Log.d("TvLimit", "Pause on. Removing overlays.")
+                        EventLog.event("pause", "on" to true, "min" to LimitControl.remainMinutes(this@TimeTrackingService))
+                        // 家长已经用密码解锁了：答题门禁也一起让开，
+                        // 否则「临时关闭」了却还挂着一道题，家长会以为开关没生效
+                        clearQuizGate("paused")
                         removeOverlay()
                         if (isScreenOn && !isAppInForeground && currentProfile != null) {
                             refreshBadge()
@@ -267,6 +301,7 @@ class TimeTrackingService : Service() {
                         }
                     } else {
                         Log.d("TvLimit", "Pause off. Re-checking limits.")
+                        EventLog.event("pause", "on" to false)
                         if (isScreenOn && !isAppInForeground && currentProfile != null) {
                             startTracking()
                             // 走 checkLimits()，不要直接 showWarningOverlay()：
@@ -281,6 +316,11 @@ class TimeTrackingService : Service() {
                     if (isScreenOn && !isAppInForeground && currentProfile != null) refreshBadge()
                 }
                 ACTION_RECHECK -> handleRecheck()
+                ACTION_QUIZ_TEST -> {
+                    // 家长在设置页主动要求试一道：允许在自己界面上弹，方便马上看效果
+                    EventLog.event("quiz_test", "enabled" to QuizSettings.enabled(this@TimeTrackingService))
+                    showQuiz(lastTopPackage, force = true)
+                }
             }
         }
     }
@@ -299,6 +339,12 @@ class TimeTrackingService : Service() {
         }
 
         Log.d("TvLimit", "Service onCreate")
+        // 老版本升级：把旧的默认间隔 20 分搬成 10 分、给题量补默认值。
+        // 放在最前面 —— 一旦后面某处提前 return 或崩了，配置也得是对的。
+        QuizSettings.migrateDefaults(this)
+        EventLog.init(this)
+        EventLog.logBoot(this)
+        EventLog.event("svc_start", "fg" to true)
         database = AppDatabase.getDatabase(this)
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
 
@@ -336,6 +382,7 @@ class TimeTrackingService : Service() {
             addAction(LimitControl.ACTION_PAUSE_CHANGED)
             addAction(LimitControl.ACTION_BADGE_CHANGED)
             addAction(ACTION_RECHECK)
+            addAction(ACTION_QUIZ_TEST)
         }
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
             registerReceiver(pauseReceiver, pauseFilter, Context.RECEIVER_NOT_EXPORTED)
@@ -346,8 +393,115 @@ class TimeTrackingService : Service() {
         // 挂上看门狗：服务被杀后 15 分钟内会被自动拉起来
         ServiceWatchdog.schedule(this)
 
+        initQuizGate()
+
+        // 断电重弹：上次题没答完就关机 / 被强杀，开机后不能就这么算了。
+        // 文章里孩子第一次绕过就是「直接断电重启」，这里必须补上。
+        serviceScope.launch {
+            delay(4_000)
+            if (QuizSettings.enabled(this@TimeTrackingService) &&
+                QuizSettings.isPending(this@TimeTrackingService) &&
+                quizGate?.isShowing != true
+            ) {
+                EventLog.event("quiz_reboot", "pkg" to QuizSettings.pendingPkg(this@TimeTrackingService))
+                showQuiz(QuizSettings.pendingPkg(this@TimeTrackingService), force = true)
+            }
+        }
+
         // Initial setup
         initializeProfile()
+        startSelfHealLoop()
+    }
+
+    /**
+     * 计时循环的「复活」守卫。
+     *
+     * 踩过的坑：家长在我们的设置页时 `App in foreground` 会把 ticking 停掉，
+     * 然后**直接用遥控器从设置页跳到另一个应用**（不经过桌面）。这种切换里
+     * Activity 只走到 onPause，ProcessLifecycleOwner 的 ON_STOP 不派发，
+     * 于是「App went to background」永远等不到，计时就这么静悄悄地停着 ——
+     * 孩子接着看一小时也无人拦截，而且日志上一个错误都没有（11-07 12:14 实测停了 3 分半）。
+     *
+     * 所以不信任何单一事件，每 30 秒核对一次「该在跑吗」。
+     */
+    private fun startSelfHealLoop() {
+        if (selfHealJob?.isActive == true) return
+        selfHealJob = serviceScope.launch {
+            var staleForeground = 0
+            while (isActive) {
+                delay(30_000L)
+                try {
+                    // ① 前台标记卡死：ProcessLifecycleOwner 只在 ON_STOP 派发，
+                    //    而「从我们的页面直接跳到另一个应用」只走到 onPause，
+                    //    于是 isAppInForeground 永远是 true，计时再也不恢复。
+                    //    连续两次（60 秒）从 UsageStats 看到前台都是别人，才认定标记过期。
+                    val actual = withContext(Dispatchers.IO) { peekForegroundPackage() }
+                    Log.d(
+                        "TvLimit",
+                        "selfheal probe: fgFlag=$isAppInForeground actual=$actual " +
+                            "tracking=${trackingJob?.isActive == true} screen=$isScreenOn"
+                    )
+                    if (isAppInForeground) {
+                        if (actual != null && actual != packageName) {
+                            staleForeground++
+                            if (staleForeground >= 2) {
+                                Log.w("TvLimit", "Foreground flag stale (top=$actual). Releasing it.")
+                                EventLog.event("selfheal", "why" to "fg_stale", "top" to actual)
+                                staleForeground = 0
+                                isAppInForeground = false
+                                updateForegroundState()
+                            }
+                        } else {
+                            staleForeground = 0
+                        }
+                    } else {
+                        staleForeground = 0
+                    }
+
+                    // ② 计时循环本身意外死掉（协程异常退出 / 被取消）
+                    val shouldTrack = isScreenOn && !isAppInForeground && currentProfile != null
+                    if (shouldTrack && trackingJob?.isActive != true) {
+                        Log.w("TvLimit", "Tracking loop is dead while idle. Restarting.")
+                        EventLog.event("selfheal", "why" to "tracking_dead", "s" to currentSessionUsage)
+                        startTracking()
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    Log.e("TvLimit", "selfHeal error: ${e.message}")
+                }
+            }
+        }
+    }
+
+    /**
+     * 只看「最近一分半谁被 resume 了」，不碰 resumedStack / eventCursor。
+     *
+     * 那是主判定逻辑的游标，两边同时读会互相吃掉事件；这里只是给自愈做旁证。
+     * 窗口取 90 秒而不是 15 秒：人坐在一个页面不动时是**没有事件**的，
+     * 窗口太短就会一直查空，自愈永远等不到判断依据。
+     */
+    private fun peekForegroundPackage(): String? {
+        val usm = getSystemService(Context.USAGE_STATS_SERVICE) as? UsageStatsManager ?: return null
+        val now = System.currentTimeMillis()
+        val events = try {
+            usm.queryEvents(now - 90_000L, now)
+        } catch (e: Exception) {
+            return null
+        }
+        var latest: String? = null
+        val ev = UsageEvents.Event()
+        while (events.hasNextEvent()) {
+            events.getNextEvent(ev)
+            val pkg = ev.packageName ?: continue
+            if (pkg in TRANSPARENT_PACKAGES) continue
+            if (ev.eventType == UsageEvents.Event.MOVE_TO_FOREGROUND ||
+                ev.eventType == UsageEvents.Event.ACTIVITY_RESUMED
+            ) {
+                latest = pkg
+            }
+        }
+        return latest
     }
 
     private var initRetry = 0
@@ -455,6 +609,10 @@ class TimeTrackingService : Service() {
             if (newProfile != null) {
                 currentProfile = newProfile
                 loadUsageStats()
+
+                // 换档案 = 重新开始：上一位没答完的题不该落到下一位头上。
+                // 家长模式更是必须清掉，否则切回来时立刻弹一道题。
+                clearQuizGate("profile_switch")
 
                 saveProfileToPrefs(newProfile.name)
                 Log.d("TvLimit", "Switched to Profile: ${newProfile.name}")
@@ -678,16 +836,130 @@ class TimeTrackingService : Service() {
         try {
             PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()
                 .putLong(PREF_LAST_TICK_AT, now)
-                .putString(
-                    PREF_LAST_TICK_STATE,
-                    "s=${currentSessionUsage} d=${accumulatedDailyUsage}" +
-                        " r=${isLimitReached()} p=${LimitControl.isPaused(this)}" +
-                        " top=$lastTopPackage scope=${inTrackedScope()}" +
-                        " blocks=${appBlockedOverlayView != null} rest=${isOverlayShowing}"
-                )
+                .putString(PREF_LAST_TICK_STATE, runtimeStateString())
                 .apply()
         } catch (_: Exception) {
         }
+    }
+
+    /**
+     * 一行状态快照。prefs 和事件日志共用，字段必须一致，排查时才能对着看。
+     * idle = 已经「没在看」多久（秒），0 表示正在看。
+     */
+    private fun runtimeStateString(): String {
+        val p = currentProfile
+        val idleText = if (p != null) {
+            val since = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+                .getLong(PREF_IDLE_SINCE_PREFIX + p.id, 0L)
+            // 0 表示「正在看」，别和「刚进入 idle 的 0 秒」混在一起
+            if (since > 0) "${(System.currentTimeMillis() - since) / 1000}s" else "-"
+        } else "-"
+        return "s=${currentSessionUsage} d=${accumulatedDailyUsage}" +
+            " r=${isLimitReached()} p=${LimitControl.isPaused(this)}" +
+            " top=$lastTopPackage scope=${inTrackedScope()}" +
+            " blocks=${appBlockedOverlayView != null} rest=${isOverlayShowing}" +
+            " idle=$idleText"
+    }
+
+    /**
+     * 这一刻算不算「在看」。
+     * 1 = 在看，0 = 没在看，null = 探不准（别动 idle 状态，免得误判成休息把额度白送）。
+     */
+    private fun watchingState(): Int? {
+        if (!isScreenOn) return 0
+        if (isAppInForeground) return 0
+        if (LimitControl.isPaused(this)) return 0
+        if (!appScopedMode()) return 1
+        val top = lastTopPackage ?: return null
+        val list = currentProfile?.restrictedApps ?: return 1
+        return if (list.split(",").map { it.trim() }.contains(top)) 1 else 0
+    }
+
+    /**
+     * 需求 2 的核心：休息从「最后一次真的在看」开始算，休息够时长就把本场清零。
+     *
+     * 原来的实现只认 `SCREEN_OFF` 广播，所以这三条真实路径全都不算休息：
+     * ① 直接拔插头 / 关电源 —— 收不到广播；
+     * ② 退出播放器回桌面 —— 屏幕一直亮着；
+     * ③ 在桌面待着 —— 计时协程没停，但 `inTrackedScope()` 为假，什么都不记。
+     * 表现就是「看了 10 分钟关电视，回来只剩 10 分钟」。
+     */
+    private fun maintainIdleAndRest() {
+        val p = currentProfile ?: return
+        if (!p.isRestricted) return
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val idleKey = PREF_IDLE_SINCE_PREFIX + p.id
+        val now = System.currentTimeMillis()
+
+        when (watchingState()) {
+            1 -> {
+                val since = prefs.getLong(idleKey, 0L)
+                if (since > 0L) {
+                    val idleMs = now - since
+                    // 关机期间也算休息。开机就自动播放（开机直进直播）时，
+                    // 这一轮就已经是「在看」了，必须在这里补判定，否则永远等不到下一轮 idle。
+                    val restMs = p.restDurationMinutes * 60_000L
+                    prefs.edit().putLong(idleKey, 0L).apply()
+                    if (restMs > 0 && currentSessionUsage > 0 && idleMs >= restMs) {
+                        resetSessionForRest("idle_resume", idleMs)
+                    } else {
+                        EventLog.event("idle_end", "ms" to idleMs, "s" to currentSessionUsage)
+                    }
+                }
+                return
+            }
+            null -> return
+        }
+
+        var idleSince = prefs.getLong(idleKey, 0L)
+        if (idleSince <= 0L) {
+            idleSince = now
+            prefs.edit().putLong(idleKey, idleSince).apply()
+            EventLog.event("idle_start", "s" to currentSessionUsage, "top" to lastTopPackage)
+        }
+        val restMs = p.restDurationMinutes * 60_000L
+        if (restMs <= 0L || currentSessionUsage <= 0) return
+        if (now - idleSince < restMs) return
+
+        // 休息够了：本场归零，重新给满额度。日额度不动 —— 那是每天唯一的硬顶。
+        prefs.edit().putLong(idleKey, 0L).apply()
+        resetSessionForRest("idle", now - idleSince)
+    }
+
+    /**
+     * 立刻把「从这一刻起没在看」记下来。
+     * 用在收不到下一轮 tick 的时机：关屏、本应用（家长页）到前台。
+     * 拔插头连这个都来不及，所以每轮 tick 也在维护同一份数据。
+     */
+    private fun markIdleNow(why: String) {
+        val p = currentProfile ?: return
+        if (!p.isRestricted) return
+        val prefs = PreferenceManager.getDefaultSharedPreferences(applicationContext)
+        val key = PREF_IDLE_SINCE_PREFIX + p.id
+        if (prefs.getLong(key, 0L) > 0L) return
+        prefs.edit().putLong(key, System.currentTimeMillis()).apply()
+        EventLog.event("idle_start", "why" to why, "s" to currentSessionUsage, "top" to lastTopPackage)
+    }
+
+    /** 休息够了：本场归零。日额度不动，那是每天唯一的硬顶。 */
+    private fun resetSessionForRest(why: String, idleMs: Long) {        val p = currentProfile ?: return
+        EventLog.event(
+            "rest_reset", "why" to why, "was" to currentSessionUsage,
+            "idleMs" to idleMs, "d" to accumulatedDailyUsage
+        )
+        currentSessionUsage = 0
+        sessionEndRecorded = false
+        restingLockAttempted = false
+        pendingMs = 0L
+        lastTickAt = 0L
+        PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()
+            .putInt(PREF_SESSION_USAGE_PREFIX + p.id, 0)
+            .putLong(PREF_LAST_SESSION_END_PREFIX + p.id, 0L)
+            .putLong(PREF_SESSION_SAVED_AT_PREFIX + p.id, 0L)
+            .putLong(PREF_SESSION_ACTIVE_AT_PREFIX + p.id, 0L)
+            .putLong(PREF_IDLE_SINCE_PREFIX + p.id, 0L)
+            .apply()
+        sendUsageUpdateBroadcast()
     }
 
     private fun handleScreenOff() {
@@ -697,6 +969,10 @@ class TimeTrackingService : Service() {
         isScreenOn = false
         stopTracking()
         removeTimeLeftOverlay()
+        // 关屏 = 开始休息。必须立刻落盘：服务可能马上被冻结/杀掉，之后就再没机会补写。
+        markIdleNow("screen_off")
+        EventLog.noteScreen(this, false)
+        EventLog.event("screen", "on" to false, "tracking" to wasTracking)
 
         // Only update session end time if we were actually tracking (watching).
         // AND if we didn't start in a blocked state.
@@ -732,6 +1008,7 @@ class TimeTrackingService : Service() {
 
     private fun handleScreenOn() {
         isScreenOn = true
+        EventLog.noteScreen(this, true)
         if (currentProfile == null) return
         // 关屏失败、遮罩还留在屏幕上时，开屏后直接回到「休息中」的样式，
         // 否则会看到圆环又从 10 跳到 0 再卡住
@@ -745,7 +1022,7 @@ class TimeTrackingService : Service() {
                 if (!isOverlayShowing || isAppInForeground) return@launch
                 Log.d("TvLimit", "Screen on: reclaiming overlay focus")
                 forceOverlayWindowFocus()
-                overlayView?.findViewById<Button>(R.id.btnSwitchProfile)?.requestFocus()
+                TvFocus.focus(overlayView?.findViewById<Button>(R.id.btnSwitchProfile))
             }
         }
         startTracking()
@@ -909,10 +1186,20 @@ class TimeTrackingService : Service() {
                     // 休息时长已经到了就先清零，这一场重新开始
                     // （原来只有关屏才记结束时间，屏幕一直亮着就永远不恢复）
                     resetSessionIfRestFinished()
+                    // 整机模式下没有应用级监控协程，lastTopPackage 没人维护。
+                    // 答题门禁要靠它判断「是不是在桌面」、答完题也要靠它回跳，
+                    // 所以这里自己更新一次（20 秒一次，开销可以忽略）。
+                    refreshTopPackageIfNeeded()
                     updateUsage()
+                    // 需求 2：把「没在看」本身当成休息。每轮维护 idleSince，
+                    // 休息够时长就把本场清零 —— 不再依赖关屏广播
+                    // （拔插头、退出播放器回桌面都收不到那个广播）。
+                    maintainIdleAndRest()
                     // 运行状态落到 prefs 里，外部 run-as 就能读到「循环还活着吗、卡在哪一步」。
                     // 这台电视会过滤 D 级日志，光靠 logcat 排查会误判成「程序没跑」。
                     writeRuntimeState()
+                    // 事件日志：顺带做空窗检测（两轮间隔 > 40 秒就是漏拦证据）
+                    EventLog.tick(this@TimeTrackingService, runtimeStateString(), isScreenOn)
 
                     // 每 5 分钟把本场进度落到磁盘，服务被杀也不至于归零
                     if (currentSessionUsage > 0 && currentSessionUsage % 5 == 0) {
@@ -933,6 +1220,16 @@ class TimeTrackingService : Service() {
                                 "TvLimit",
                                 "Limit reached -> rest starts. daily=$accumulatedDailyUsage/${currentProfile?.dailyLimitMinutes}, " +
                                     "session=$currentSessionUsage/${currentProfile?.sessionLimitMinutes}"
+                            )
+                            EventLog.event(
+                                "limit",
+                                "d" to accumulatedDailyUsage,
+                                "dmax" to (currentProfile?.dailyLimitMinutes ?: -1),
+                                "s" to currentSessionUsage,
+                                "smax" to (currentProfile?.sessionLimitMinutes ?: -1),
+                                "top" to lastTopPackage,
+                                "scope" to inTrackedScope(),
+                                "mode" to if (appScopedMode()) "apps" else "all"
                             )
                             // 到点这一刻让正在播的停下来。
                             // 勾了具体应用的模式不显示全屏遮罩，光靠拦截页盖不住声音，这里也要停。
@@ -962,25 +1259,36 @@ class TimeTrackingService : Service() {
                         if (isOverlayShowing) removeOverlay()
                         // 额度恢复了（休息结束 / 家长加时），拦截页也该撤掉
                         removeAppBlockedOverlay()
-                        // 休息结束 / 额度还有：把音频焦点还回去，播放器会自己接着播。
-                        // 「只限制部分应用」模式没有遮罩，就靠这一句恢复。
-                        releaseAudioFocus()
-                        // 有些播放器不认「焦点归还」这件事（我们按过的媒体暂停键它倒是记得），
-                        // 所以显式再按一次播放。只在确实是我们停的、而且现在真的没在响时才按，
-                        // 免得把家长正在看的东西又打开一次。
-                        if (pausedPlaybackByUs && !isMusicActive()) {
-                            dispatchMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
+                        // 答题期间例外：播放是我们刚暂停的，这会儿恢复就等于
+                        // 「屏幕在做题、片子还在后台响」，孩子按几下遥控器就摸回去了。
+                        if (quizGate?.isShowing != true) {
+                            // 休息结束 / 额度还有：把音频焦点还回去，播放器会自己接着播。
+                            // 「只限制部分应用」模式没有遮罩，就靠这一句恢复。
+                            releaseAudioFocus()
+                            // 有些播放器不认「焦点归还」这件事（我们按过的媒体暂停键它倒是记得），
+                            // 所以显式再按一次播放。只在确实是我们停的、而且现在真的没在响时才按，
+                            // 免得把家长正在看的东西又打开一次。
+                            if (pausedPlaybackByUs && !isMusicActive()) {
+                                dispatchMediaKey(KeyEvent.KEYCODE_MEDIA_PLAY)
+                            }
+                            pausedPlaybackByUs = false
                         }
-                        pausedPlaybackByUs = false
                         refreshBadge()
+                        // 答题门禁：到这里说明没到休息、也没被暂停，才轮得到弹题
+                        maybeQuizGate()
                     }
                 } catch (e: CancellationException) {
                     throw e
                 } catch (e: Exception) {
                     // 单轮出错不能让整个计时循环死掉，记一笔继续跑
                     Log.e("TvLimit", "tracking loop error, keep going: ${e.message}", e)
+                    EventLog.event("error", "where" to "tick", "msg" to e.message)
                 }
-                delay(CHECK_INTERVAL_MS)
+                // 有待答的题时把节奏加快到 3 秒：孩子一打开应用就要被弹回去。
+                // 20 秒的空档足够他把片头看完，「答完才能看」就成了摆设。
+                val pendingQuiz = QuizSettings.enabled(this@TimeTrackingService) &&
+                    QuizSettings.isPending(this@TimeTrackingService)
+                delay(if (pendingQuiz) 3_000L else CHECK_INTERVAL_MS)
             }
         }
         startRestrictedAppMonitoring()
@@ -1037,6 +1345,10 @@ class TimeTrackingService : Service() {
         if (System.currentTimeMillis() - lastEnd < restMin * 60_000L) return
 
         Log.w("TvLimit", "Rest finished. Reset session usage ($currentSessionUsage -> 0).")
+        EventLog.event(
+            "rest_reset", "why" to "forced", "was" to currentSessionUsage,
+            "sinceLastEnd" to (System.currentTimeMillis() - lastEnd)
+        )
         currentSessionUsage = 0
         sessionEndRecorded = false
         // 下一场到点时要重新走一次「10 秒关屏」
@@ -1050,6 +1362,25 @@ class TimeTrackingService : Service() {
             .putLong(PREF_SESSION_ACTIVE_AT_PREFIX + cProfile.id, 0L)
             .apply()
         sendUsageUpdateBroadcast()
+    }
+
+    /**
+     * 整机模式下自己维护「前台是哪个应用」。
+     *
+     * 原来 lastTopPackage 只由 startRestrictedAppMonitoring() 维护，而整机模式
+     * （没勾具体应用）根本不会启动那个协程 —— 结果就是 lastTopPackage 永远是 null。
+     * 答题门禁要靠它判断「是不是在桌面」、答完题也要靠它回跳，所以这里补一次。
+     */
+    private suspend fun refreshTopPackageIfNeeded() {
+        // 应用级监控协程已经在维护，不要两边同时读 UsageEvents 游标
+        if (appScopedMode()) return
+        val usm = getSystemService(Context.USAGE_STATS_SERVICE) as UsageStatsManager
+        try {
+            val top = withContext(Dispatchers.IO) { getTopPackageName(usm) }
+            if (top != null) lastTopPackage = top
+        } catch (e: Exception) {
+            Log.e("TvLimit", "refresh top package failed: ${e.message}")
+        }
     }
 
     private fun startRestrictedAppMonitoring() {
@@ -1182,8 +1513,10 @@ class TimeTrackingService : Service() {
         }
 
         if (top != lastLoggedTopPackage) {
+            val from = lastLoggedTopPackage
             lastLoggedTopPackage = top
             Log.w("TvLimit", "Foreground -> $top (stack=${resumedStack.size})")
+            EventLog.event("fg", "from" to from, "to" to top, "depth" to resumedStack.size)
         }
         lastKnownTopPackage = top
         return top
@@ -1299,14 +1632,22 @@ class TimeTrackingService : Service() {
         // 现在改成：先用悬浮窗把遮罩贴到最上层（悬浮窗不受后台启动限制），立刻 goHome
         // 让视频应用退到后台、硬件层释放，遮罩自然显形。
         val wasShowing = appBlockedOverlayView != null
+        val t0 = System.currentTimeMillis()
         val shown = showAppBlockedOverlay(packageName)
         if (shown) {
             blockedOverlayPkg = packageName
             blockedOverlayAt = System.currentTimeMillis()
         }
+        EventLog.event(
+            "block", "pkg" to packageName, "how" to if (shown) "overlay" else "activity",
+            "ok" to shown, "ms" to (System.currentTimeMillis() - t0),
+            "s" to currentSessionUsage, "d" to accumulatedDailyUsage,
+            "why" to blockReason()
+        )
         if (!shown) {
             // 悬浮窗权限被系统撤掉时才退回 Activity 方案，聊胜于无
             Log.w("TvLimit", "Overlay unavailable, falling back to AppBlockedActivity")
+            EventLog.event("block_fail", "pkg" to packageName, "why" to "overlay_unavailable")
             val intent = Intent(this, AppBlockedActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP)
             intent.putExtra("blocked_package", packageName)
@@ -1394,7 +1735,7 @@ class TimeTrackingService : Service() {
                 KeyEvent.KEYCODE_DPAD_DOWN,
                 KeyEvent.KEYCODE_DPAD_LEFT,
                 KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                    btnParent.requestFocus()
+                    TvFocus.focus(btnParent)
                     true
                 }
                 KeyEvent.KEYCODE_DPAD_CENTER,
@@ -1423,7 +1764,7 @@ class TimeTrackingService : Service() {
         return try {
             windowManager?.addView(view, params)
             appBlockedOverlayView = view
-            btnParent.post { btnParent.requestFocus() }
+            btnParent.post { TvFocus.focus(btnParent) }
             startAppBlockedHeartbeat()
             Log.w("TvLimit", "App blocked overlay shown for $packageName")
             true
@@ -1446,6 +1787,179 @@ class TimeTrackingService : Service() {
             Log.e("TvLimit", "removeView app blocked overlay failed: ${e.message}")
         }
         Log.d("TvLimit", "App blocked overlay removed")
+    }
+
+    // ==================== 答题门禁 ====================
+
+    private fun initQuizGate() {
+        val wm = windowManager ?: return
+        quizGate = QuizGate(this, wm, object : QuizGate.Callback {
+
+            override fun onPassed(pkg: String?) {
+                QuizSettings.setPending(this@TimeTrackingService, false, null)
+                QuizSettings.resetSeg(this@TimeTrackingService)
+                EventLog.event("quiz_reset", "why" to "passed", "pkg" to pkg)
+                if (quizPreview) {
+                    // 预览：人还停在设置页，什么都不用做
+                    quizPreview = false
+                    return
+                }
+                // 答完继续：回到刚才那个应用。拿不到 launch intent 就停桌面。
+                relaunchApp(pkg)
+            }
+
+            override fun onAbandon() {
+                if (quizPreview) {
+                    quizPreview = false
+                    return
+                }
+                // 「不看了」：题保持 pending，下次打开受限应用还要先答
+                goHome()
+            }
+
+            override fun onParent() {
+                openParentGateActivity()
+            }
+
+            override fun onLog(ev: String, vararg pairs: Pair<String, Any?>) {
+                EventLog.event(ev, *pairs)
+            }
+        })
+    }
+
+    /**
+     * 弹一组题（题量见 QuizSettings.questionsPerSession）。
+     *
+     * 顺序照抄已验证的拦截路径：先挂悬浮窗，再 goHome 释放硬件视频层。
+     * 反过来的话，悬浮窗下面那层视频还在播，声音也还在。
+     */
+    private fun showQuiz(pkg: String?, force: Boolean = false) {
+        val gate = quizGate ?: return
+        if (gate.isShowing) return
+        val p = currentProfile ?: return
+        if (!isScreenOn) return
+        // 以下是「自动弹题」的约束。家长在设置页主动点「试一道」时（force）
+        // 必须绕过：额度用完、临时关闭这两种情况恰恰是最想验证门禁的时候，
+        // 以前这两条 return 会让家长点了按钮毫无反应。
+        if (!force) {
+            if (!p.isRestricted) return
+            if (LimitControl.isPaused(this)) return
+            // 到点休息 / 日额度用完时，休息优先，不另外弹题
+            if (isLimitReached()) return
+        }
+        // 我们自己的界面（家长设置、密码页）在前台时不弹；
+        // 但「现在试一道」是家长主动要求的，允许盖上来。
+        if (isAppInForeground && !force) return
+        if (!force && !inTrackedScope()) return
+
+        // 「现在试一道」是在家长自己的界面上点的，属于预览：
+        // 这时不暂停播放、不 goHome、也不留 pending，
+        // 答完直接回设置页，家长不用再点一次图标进来。
+        val preview = force && isAppInForeground
+        quizPreview = preview
+
+        if (!preview) QuizSettings.setPending(this, true, pkg)
+        gate.show(pkg)
+        if (!preview) {
+            pausePlaybackIfPlaying()
+            goHome()
+        }
+        EventLog.event(
+            "quiz_show", "pkg" to pkg, "s" to currentSessionUsage,
+            "d" to accumulatedDailyUsage, "force" to force, "preview" to preview
+        )
+    }
+
+    /**
+     * 每轮 tick 的判定入口。
+     *
+     * 三种情况会弹题：
+     * ① 累计观看到了家长设的间隔；
+     * ② 上次的题没答完（pending），孩子又打开了应用想接着看；
+     * ③ 开机补弹（onCreate 里单独处理，见 quiz_reboot）。
+     *
+     * 在桌面坐着、切换到不受限应用、家长临时关闭、已经到点休息 —— 都不弹。
+     */
+    private fun maybeQuizGate() {
+        if (!QuizSettings.enabled(this)) return
+        val gate = quizGate ?: return
+        if (gate.isShowing) return
+        val p = currentProfile ?: return
+        if (!p.isRestricted) return
+        if (LimitControl.isPaused(this)) return
+        if (isLimitReached()) return
+        if (!isScreenOn || isAppInForeground) return
+        if (!inTrackedScope()) return
+
+        // 整机限时模式下 inTrackedScope() 恒为 true，桌面也会被算成「在看」。
+        // 这里再挡一次：坐在桌面、停在我们自己的设置页，都不该弹题。
+        val top = lastTopPackage
+        if (top == null || isHomePackage(top) || top == packageName) return
+
+        if (QuizSettings.isPending(this)) {
+            // 上一次没答完：孩子又打开了应用（想接着看）就立刻弹回来。
+            // 在桌面坐着不该被反复糊脸，否则孩子只会学会按主页。
+            showQuiz(top)
+            return
+        }
+
+        // 兜底：家长把间隔设得比单次时长还长时（比如间隔 30 分、单次 20 分），
+        // 到点先撞上 isLimitReached() 直接被上面挡掉，题永远不会弹。
+        // 这时把触发点提前到单次时长的 80%，至少留 20% 时间给孩子答题。
+        val intervalMs = QuizSettings.intervalMinutes(this) * 60_000L
+        val sessionLimitMs = if (p.sessionLimitMinutes > 0) {
+            p.sessionLimitMinutes * 60_000L
+        } else {
+            Long.MAX_VALUE
+        }
+        val triggerMs = minOf(intervalMs, sessionLimitMs / 5 * 4)
+        if (QuizSettings.segMs(this) < triggerMs) return
+        showQuiz(top)
+    }
+
+    /** 家长解锁 / 切档案 / 关掉门禁时，把待答状态一并清掉。 */
+    private fun clearQuizGate(why: String) {
+        val wasPending = QuizSettings.isPending(this)
+        QuizSettings.setPending(this, false, null)
+        QuizSettings.resetSeg(this)
+        quizGate?.let { if (it.isShowing) it.dismiss() }
+        if (wasPending) EventLog.event("quiz_clear", "why" to why)
+    }
+
+    /** 答完题后回到原应用。失败就停桌面，孩子自己点。 */
+    private fun relaunchApp(pkg: String?) {
+        if (pkg == null || pkg == packageName) {
+            goHome()
+            return
+        }
+        val intent = packageManager.getLaunchIntentForPackage(pkg)
+        if (intent == null) {
+            EventLog.event("quiz_relaunch", "pkg" to pkg, "ok" to false)
+            goHome()
+            return
+        }
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        try {
+            startActivity(intent)
+            EventLog.event("quiz_relaunch", "pkg" to pkg, "ok" to true)
+        } catch (e: Exception) {
+            EventLog.event("quiz_relaunch", "pkg" to pkg, "ok" to false, "msg" to e.message)
+            goHome()
+        }
+    }
+
+    private fun openParentGateActivity() {
+        val intent = Intent(applicationContext, ParentGateActivity::class.java)
+        intent.addFlags(
+            Intent.FLAG_ACTIVITY_NEW_TASK or
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                Intent.FLAG_ACTIVITY_CLEAR_TASK
+        )
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Log.e("TvLimit", "open parent gate failed: ${e.message}")
+        }
     }
 
     /**
@@ -1488,9 +2002,9 @@ class TimeTrackingService : Service() {
                         } catch (e: Exception) {
                             Log.e("TvLimit", "updateViewLayout failed: ${e.message}")
                         }
-                        btn.requestFocus()
+                        TvFocus.focus(btn)
                     } else if (!btn.isFocused) {
-                        btn.requestFocus()
+                        TvFocus.focus(btn)
                     }
                 }
             }
@@ -1507,6 +2021,12 @@ class TimeTrackingService : Service() {
     private suspend fun updateUsage() {
         // 临时关闭期间不计数，孩子今天剩下的额度不会被这段时间吃掉
         if (LimitControl.isPaused(this)) {
+            lastTickAt = 0L
+            return
+        }
+        // 题没答完时不算观看：人不在看，是「被拦住了」。
+        // 否则孩子把答题页挂着不管，今天的额度会被白白耗光。
+        if (QuizSettings.enabled(this) && QuizSettings.isPending(this)) {
             lastTickAt = 0L
             return
         }
@@ -1531,7 +2051,15 @@ class TimeTrackingService : Service() {
         }
 
         pendingMs += now - lastTickAt
+        val watchedMs = now - lastTickAt
         lastTickAt = now
+
+        // 答题门禁的「这一段看了多久」也用同一份真实观看时长，
+        // 桌面时间、休息时间、暂停时间都不会算进去。
+        if (QuizSettings.enabled(this) && !QuizSettings.isPending(this)) {
+            QuizSettings.addSegMs(this, watchedMs)
+        }
+
         val minutes = (pendingMs / 60_000L).toInt()
         if (minutes <= 0) return
         pendingMs -= minutes * 60_000L
@@ -1544,6 +2072,7 @@ class TimeTrackingService : Service() {
         // 记下「最后一次真的在看」的时刻：服务被杀后要不要续算，就看这个时间新不新
         PreferenceManager.getDefaultSharedPreferences(applicationContext).edit()
             .putLong(PREF_SESSION_ACTIVE_AT_PREFIX + cProfile.id, now)
+            .putLong(PREF_LAST_WATCH_AT_PREFIX + cProfile.id, now)
             .apply()
 
         // Use currentLogDate instead of LocalDate.now() to anchor to the "Logical Day"
@@ -1649,7 +2178,7 @@ class TimeTrackingService : Service() {
                         KeyEvent.KEYCODE_DPAD_DOWN,
                         KeyEvent.KEYCODE_DPAD_LEFT,
                         KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                            overlayView?.findViewById<Button>(R.id.btnSwitchProfile)?.requestFocus()
+                            TvFocus.focus(overlayView?.findViewById<Button>(R.id.btnSwitchProfile))
                             true
                         }
                         // 兜底二：焦点在根布局时 OK 键没人接，直接当成点按钮。
@@ -1734,7 +2263,7 @@ class TimeTrackingService : Service() {
         btn.isFocusable = true
         btn.post {
             if (overlayView?.isAttachedToWindow == true && !btn.isFocused) {
-                btn.requestFocus()
+                TvFocus.focus(btn)
             }
         }
     }
@@ -1799,10 +2328,10 @@ class TimeTrackingService : Service() {
                     if (overlayView?.hasWindowFocus() != true) {
                         Log.w("TvLimit", "Overlay has no window focus, reclaiming")
                         forceOverlayWindowFocus()
-                        btn.requestFocus()
+                        TvFocus.focus(btn)
                     } else if (!btn.isFocused) {
                         Log.d("TvLimit", "Overlay lost focus, restoring to button")
-                        btn.requestFocus()
+                        TvFocus.focus(btn)
                     }
                 }
             }
@@ -2229,6 +2758,8 @@ class TimeTrackingService : Service() {
         if (isAppInForeground) {
             Log.d("TvLimit", "App in foreground. Pausing tracking.")
             stopTracking()
+            // 本应用到前台（家长在设置/输密码）也是「没在看」，休息照样计时
+            markIdleNow("app_fg")
             // 休息中被孩子从主页绕进本应用时，遮罩要撤（不然盖住我们自己的界面），
             // 但音频焦点不能还 —— 还了后面的视频就自己续播，成了绕过口子
             removeOverlay(releaseFocus = !isLimitReached())
@@ -2245,6 +2776,7 @@ class TimeTrackingService : Service() {
     }
 
     override fun onDestroy() {
+        EventLog.event("svc_stop", "s" to currentSessionUsage, "d" to accumulatedDailyUsage)
         // 先把悬浮窗摘掉。服务被 stop 而进程还活着时，这两个 View 会永久糊在画面上，
         // 而且因为 Service 实例没了，之后没有任何代码能把它移除 —— 电视就废了。
         try {
@@ -2253,6 +2785,8 @@ class TimeTrackingService : Service() {
         }
         overlayView = null
         isOverlayShowing = false
+        selfHealJob?.cancel()
+        selfHealJob = null
         sleepTimer?.cancel()
         overlayHeartbeatJob?.cancel()
         overlayHeartbeatJob = null
@@ -2272,6 +2806,13 @@ class TimeTrackingService : Service() {
         appBlockedOverlayView = null
         appBlockedHeartbeatJob?.cancel()
         appBlockedHeartbeatJob = null
+
+        // 答题页同样不能留：服务没了没人能撤它，电视会一直卡在做题界面
+        try {
+            quizGate?.dismiss()
+        } catch (_: Exception) {
+        }
+        quizGate = null
 
         // 进度同步落盘：不依赖协程，进程随时可能被干掉
         try {

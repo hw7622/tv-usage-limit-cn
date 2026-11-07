@@ -13,6 +13,24 @@ import android.view.ViewGroup
  */
 object TvFocus {
 
+    /**
+     * 把焦点给某个控件，并要求「一定成功」。
+     *
+     * 为什么不能用 requestFocus()：整机处于触摸模式（刚用鼠标/触摸点过屏幕）时，
+     * 非 focusableInTouchMode 的 View 调用 requestFocus() 会直接返回 false，
+     * 于是「题出来了但没有任何高亮，按一下方向键才亮」。requestFocusFromTouch()
+     * 会先退出触摸模式再聚焦，遥控器和鼠标混用时才稳。
+     */
+    fun focus(view: View?): Boolean {
+        val v = view ?: return false
+        if (v.requestFocus()) return true
+        return try {
+            v.requestFocusFromTouch()
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     fun attach(vararg views: View, scale: Float = 1.02f) {
         views.forEach { attach(it, scale) }
     }

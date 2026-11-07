@@ -1,0 +1,1927 @@
+{
+  "version": 1,
+  "license": "CC BY-SA 4.0",
+  "note": "自编题，禁止从教材/教辅复制",
+  "questions": [
+    {
+      "id": "chinese-g2-0000",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "拼音",
+      "stem": "「蜻蜓」的「蜓」读第几声？",
+      "options": [
+        "第一声",
+        "第二声",
+        "第三声",
+        "第四声"
+      ],
+      "answer": 1,
+      "explain": "蜓读 tíng，第二声，也是后鼻音。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0001",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "拼音",
+      "stem": "「鹅」读第几声？",
+      "options": [
+        "第一声",
+        "第二声",
+        "第三声",
+        "第四声"
+      ],
+      "answer": 1,
+      "explain": "鹅读 é，第二声。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0002",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "拼音",
+      "stem": "下面哪个字读翘舌音？",
+      "options": [
+        "书 shū",
+        "四 sì",
+        "丝 sī",
+        "字 zì"
+      ],
+      "answer": 0,
+      "explain": "sh 是翘舌音；s、z 都是平舌音。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0003",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "拼音",
+      "stem": "「我们」的「们」应该读？",
+      "options": [
+        "第一声",
+        "第二声",
+        "第三声",
+        "轻声"
+      ],
+      "answer": 3,
+      "explain": "「们」作人称代词后缀时读轻声。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0004",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "拼音",
+      "stem": "「青」的声母是？",
+      "options": [
+        "q",
+        "j",
+        "x",
+        "c"
+      ],
+      "answer": 0,
+      "explain": "青的声母是 q。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0005",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "汉字",
+      "stem": "「绿」的部首是？",
+      "options": [
+        "纟",
+        "录",
+        "水",
+        "青"
+      ],
+      "answer": 0,
+      "explain": "「绿」左边是绞丝旁。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0006",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "汉字",
+      "stem": "「休」字由哪两部分组成？",
+      "options": [
+        "亻+木",
+        "亻+本",
+        "木+目",
+        "人+禾"
+      ],
+      "answer": 0,
+      "explain": "人靠在树旁休息。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0007",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "汉字",
+      "stem": "「天」的部首是？",
+      "options": [
+        "大",
+        "一",
+        "二",
+        "人"
+      ],
+      "answer": 0,
+      "explain": "「天」的部首是「大」。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0008",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "汉字",
+      "stem": "「花」一共有几画？",
+      "options": [
+        "6 画",
+        "7 画",
+        "8 画",
+        "9 画"
+      ],
+      "answer": 1,
+      "explain": "艹 3 画 + 化 4 画。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0009",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "词语",
+      "stem": "与「高兴」意思最接近的是？",
+      "options": [
+        "快乐",
+        "难过",
+        "生气",
+        "害怕"
+      ],
+      "answer": 0,
+      "explain": "高兴和快乐都是心情好。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0010",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "词语",
+      "stem": "「寒冷」的反义词是？",
+      "options": [
+        "温暖",
+        "冰凉",
+        "凉快",
+        "刮风"
+      ],
+      "answer": 0,
+      "explain": "寒冷对温暖。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0011",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "词语",
+      "stem": "「仔细」的近义词是？",
+      "options": [
+        "认真",
+        "马虎",
+        "快速",
+        "随便"
+      ],
+      "answer": 0,
+      "explain": "仔细就是认真、不马虎。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0012",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "词语",
+      "stem": "下面哪个词表示颜色？",
+      "options": [
+        "碧绿",
+        "奔跑",
+        "快乐",
+        "高大"
+      ],
+      "answer": 0,
+      "explain": "碧绿是颜色。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0013",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「白日依山尽」的下一句是？",
+      "options": [
+        "黄河入海流",
+        "欲穷千里目",
+        "更上一层楼",
+        "春风吹又生"
+      ],
+      "answer": 0,
+      "explain": "出自《登鹳雀楼》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0014",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「春眠不觉晓」的下一句是？",
+      "options": [
+        "处处闻啼鸟",
+        "夜来风雨声",
+        "花落知多少",
+        "床前明月光"
+      ],
+      "answer": 0,
+      "explain": "出自《春晓》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0015",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「离离原上草」的下一句是？",
+      "options": [
+        "一岁一枯荣",
+        "野火烧不尽",
+        "春风吹又生",
+        "远芳侵古道"
+      ],
+      "answer": 0,
+      "explain": "出自《赋得古原草送别》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0016",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「锄禾日当午」的下一句是？",
+      "options": [
+        "汗滴禾下土",
+        "谁知盘中餐",
+        "粒粒皆辛苦",
+        "春种一粒粟"
+      ],
+      "answer": 0,
+      "explain": "出自《悯农》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0017",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「床前明月光」的下一句是？",
+      "options": [
+        "疑是地上霜",
+        "举头望明月",
+        "低头思故乡",
+        "夜来风雨声"
+      ],
+      "answer": 0,
+      "explain": "出自《静夜思》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0018",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「两个黄鹂鸣翠柳」的下一句是？",
+      "options": [
+        "一行白鹭上青天",
+        "窗含西岭千秋雪",
+        "门泊东吴万里船",
+        "千山鸟飞绝"
+      ],
+      "answer": 0,
+      "explain": "出自《绝句》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0019",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「小荷才露尖尖角」的下一句是？",
+      "options": [
+        "早有蜻蜓立上头",
+        "映日荷花别样红",
+        "接天莲叶无穷碧",
+        "泉眼无声惜细流"
+      ],
+      "answer": 0,
+      "explain": "出自《小池》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0020",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "古诗",
+      "stem": "「不知细叶谁裁出」的下一句是？",
+      "options": [
+        "二月春风似剪刀",
+        "万条垂下绿丝绦",
+        "碧玉妆成一树高",
+        "春风又绿江南岸"
+      ],
+      "answer": 0,
+      "explain": "出自《咏柳》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0021",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "文学常识",
+      "stem": "《静夜思》的作者是？",
+      "options": [
+        "李白",
+        "杜甫",
+        "白居易",
+        "王维"
+      ],
+      "answer": 0,
+      "explain": "李白是唐代诗人。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0022",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "文学常识",
+      "stem": "李白是哪个朝代的诗人？",
+      "options": [
+        "唐",
+        "宋",
+        "元",
+        "明"
+      ],
+      "answer": 0,
+      "explain": "李白被称为诗仙。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0023",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "成语",
+      "stem": "「一言既出」的下一句是？",
+      "options": [
+        "驷马难追",
+        "寸有所长",
+        "必有我师",
+        "下笔如有神"
+      ],
+      "answer": 0,
+      "explain": "形容说话算数。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0024",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "成语",
+      "stem": "「尺有所短」的下一句是？",
+      "options": [
+        "寸有所长",
+        "驷马难追",
+        "焉知非福",
+        "必有我师"
+      ],
+      "answer": 0,
+      "explain": "每个人都有长处。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0025",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "成语",
+      "stem": "「三人行」的下一句是？",
+      "options": [
+        "必有我师焉",
+        "寸有所长",
+        "不亦说乎",
+        "可以为师矣"
+      ],
+      "answer": 0,
+      "explain": "出自《论语》。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0026",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "成语",
+      "stem": "「拔苗助长」告诉我们什么？",
+      "options": [
+        "做事不能急于求成",
+        "要多帮助别人",
+        "要节约粮食",
+        "要早睡早起"
+      ],
+      "answer": 0,
+      "explain": "违反规律反而坏事。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0027",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "成语",
+      "stem": "「亡羊补牢」的意思是？",
+      "options": [
+        "出了问题及时补救",
+        "丢了东西不再找",
+        "做事要有计划",
+        "不要相信别人"
+      ],
+      "answer": 0,
+      "explain": "补牢还不算晚。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0028",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "成语",
+      "stem": "「守株待兔」讽刺的是？",
+      "options": [
+        "不努力只想靠运气",
+        "做事太着急",
+        "说话不算数",
+        "骄傲自满"
+      ],
+      "answer": 0,
+      "explain": "偶然的成功不能当本事。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g2-0029",
+      "subject": "chinese",
+      "grade": 2,
+      "knowledge": "句子",
+      "stem": "「弯弯的月亮像小船」用了什么修辞？",
+      "options": [
+        "比喻",
+        "拟人",
+        "夸张",
+        "排比"
+      ],
+      "answer": 0,
+      "explain": "把月亮比作小船。",
+      "difficulty": 1
+    },
+    {
+      "id": "chinese-g3-0030",
+      "subject": "chinese",
+      "grade": 3,
+      "knowledge": "成语",
+      "stem": "「胸有成竹」比喻？",
+      "options": [
+        "做事前已有把握",
+        "肚子里有竹子",
+        "非常饥饿",
+        "喜欢画画"
+      ],
+      "answer": 0,
+      "explain": "画竹前心中已有竹子的样子。",
+      "difficulty": 2
+    },
+    {
+      "id": "chinese-g3-0031",
+      "subject": "chinese",
+      "grade": 3,
+      "knowledge": "成语",
+      "stem": "「画蛇添足」比喻？",
+      "options": [
+        "多此一举",
+        "画得很快",
+        "锦上添花",
+        "做事细致"
+      ],
+      "answer": 0,
+      "explain": "多做了反而坏事。",
+      "difficulty": 2
+    },
+    {
+      "id": "chinese-g3-0032",
+      "subject": "chinese",
+      "grade": 3,
+      "knowledge": "成语",
+      "stem": "「刻舟求剑」讽刺？",
+      "options": [
+        "不懂事物在变化",
+        "做事很认真",
+        "宝剑很锋利",
+        "坐船很危险"
+      ],
+      "answer": 0,
+      "explain": "船动了，剑不会跟着动。",
+      "difficulty": 2
+    },
+    {
+      "id": "chinese-g4-0033",
+      "subject": "chinese",
+      "grade": 4,
+      "knowledge": "词语",
+      "stem": "与「举世闻名」意思相近的是？",
+      "options": [
+        "闻名中外",
+        "默默无闻",
+        "井底之蛙",
+        "一举两得"
+      ],
+      "answer": 0,
+      "explain": "都是说名气很大。",
+      "difficulty": 2
+    },
+    {
+      "id": "chinese-g4-0034",
+      "subject": "chinese",
+      "grade": 4,
+      "knowledge": "古诗",
+      "stem": "「一寸光阴一寸金」的下一句是？",
+      "options": [
+        "寸金难买寸光阴",
+        "光阴似箭",
+        "日月如梭",
+        "少壮不努力"
+      ],
+      "answer": 0,
+      "explain": "时间比黄金更珍贵。",
+      "difficulty": 2
+    },
+    {
+      "id": "chinese-g4-0035",
+      "subject": "chinese",
+      "grade": 4,
+      "knowledge": "古诗",
+      "stem": "「读书破万卷」的下一句是？",
+      "options": [
+        "下笔如有神",
+        "书中自有黄金屋",
+        "学而时习之",
+        "腹有诗书气自华"
+      ],
+      "answer": 0,
+      "explain": "多读才能写得好。",
+      "difficulty": 2
+    },
+    {
+      "id": "chinese-g5-0036",
+      "subject": "chinese",
+      "grade": 5,
+      "knowledge": "古诗",
+      "stem": "「海内存知己」的下一句是？",
+      "options": [
+        "天涯若比邻",
+        "千里共婵娟",
+        "不及汪伦送我情",
+        "西出阳关无故人"
+      ],
+      "answer": 0,
+      "explain": "出自《送杜少府之任蜀州》。",
+      "difficulty": 3
+    },
+    {
+      "id": "chinese-g5-0037",
+      "subject": "chinese",
+      "grade": 5,
+      "knowledge": "古诗",
+      "stem": "「会当凌绝顶」的下一句是？",
+      "options": [
+        "一览众山小",
+        "更上一层楼",
+        "山高我为峰",
+        "直挂云帆济沧海"
+      ],
+      "answer": 0,
+      "explain": "出自《望岳》。",
+      "difficulty": 3
+    },
+    {
+      "id": "chinese-g6-0038",
+      "subject": "chinese",
+      "grade": 6,
+      "knowledge": "古诗",
+      "stem": "「但愿人长久」的下一句是？",
+      "options": [
+        "千里共婵娟",
+        "天涯若比邻",
+        "明月几时有",
+        "把酒问青天"
+      ],
+      "answer": 0,
+      "explain": "出自《水调歌头》。",
+      "difficulty": 3
+    },
+    {
+      "id": "chinese-g6-0039",
+      "subject": "chinese",
+      "grade": 6,
+      "knowledge": "词语",
+      "stem": "「春风又绿江南岸」中「绿」的用法是？",
+      "options": [
+        "使……变绿（动词）",
+        "绿色的（形容词）",
+        "绿色（名词）",
+        "绿油油（叠词）"
+      ],
+      "answer": 0,
+      "explain": "一个「绿」字把春天写活了。",
+      "difficulty": 3
+    },
+    {
+      "id": "english-g2-0040",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "apple 是什么意思？",
+      "options": [
+        "苹果",
+        "香蕉",
+        "橘子",
+        "葡萄"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0041",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "banana 是什么意思？",
+      "options": [
+        "香蕉",
+        "苹果",
+        "西瓜",
+        "梨"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0042",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "orange 是什么意思？",
+      "options": [
+        "橘子",
+        "苹果",
+        "香蕉",
+        "草莓"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0043",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "book 是什么意思？",
+      "options": [
+        "书",
+        "笔",
+        "桌子",
+        "书包"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0044",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "cat 是什么意思？",
+      "options": [
+        "猫",
+        "狗",
+        "鸟",
+        "鱼"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0045",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "dog 是什么意思？",
+      "options": [
+        "狗",
+        "猫",
+        "猪",
+        "羊"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0046",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "red 是什么颜色？",
+      "options": [
+        "红色",
+        "蓝色",
+        "绿色",
+        "黄色"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0047",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "blue 是什么颜色？",
+      "options": [
+        "蓝色",
+        "红色",
+        "黑色",
+        "白色"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0048",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "three 是数字几？",
+      "options": [
+        "3",
+        "2",
+        "4",
+        "5"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0049",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "单词",
+      "stem": "seven 是数字几？",
+      "options": [
+        "7",
+        "6",
+        "8",
+        "9"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0050",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "日常用语",
+      "stem": "Good morning 是什么意思？",
+      "options": [
+        "早上好",
+        "晚安",
+        "谢谢",
+        "再见"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g2-0051",
+      "subject": "english",
+      "grade": 2,
+      "knowledge": "日常用语",
+      "stem": "别人说 Thank you，你应该回答？",
+      "options": [
+        "You're welcome.",
+        "Good morning.",
+        "I'm sorry.",
+        "How old are you?"
+      ],
+      "answer": 0,
+      "explain": "意思是「不客气」。",
+      "difficulty": 1
+    },
+    {
+      "id": "english-g3-0052",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "单词",
+      "stem": "Monday 是星期几？",
+      "options": [
+        "星期一",
+        "星期二",
+        "星期日",
+        "星期六"
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g3-0053",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "句型",
+      "stem": "I ___ a student.（选 am/is/are）",
+      "options": [
+        "am",
+        "is",
+        "are",
+        "be"
+      ],
+      "answer": 0,
+      "explain": "主语是 I，用 am。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g3-0054",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "句型",
+      "stem": "She ___ to school every day.",
+      "options": [
+        "goes",
+        "go",
+        "going",
+        "went"
+      ],
+      "answer": 0,
+      "explain": "第三人称单数加 -es。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g3-0055",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "句型",
+      "stem": "How many ___ do you have?",
+      "options": [
+        "apples",
+        "apple",
+        "an apple",
+        "the apple"
+      ],
+      "answer": 0,
+      "explain": "How many 后面用复数。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g3-0056",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "句型",
+      "stem": "—What's your name? —___",
+      "options": [
+        "My name is Tom.",
+        "I'm eight.",
+        "It's a cat.",
+        "I'm fine."
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g3-0057",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "句型",
+      "stem": "—How old are you? —___",
+      "options": [
+        "I'm eight.",
+        "My name is Tom.",
+        "I'm fine.",
+        "It's red."
+      ],
+      "answer": 0,
+      "explain": "",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g3-0058",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "句型",
+      "stem": "This is ___ book.",
+      "options": [
+        "my",
+        "me",
+        "I",
+        "mine"
+      ],
+      "answer": 0,
+      "explain": "my 后面接名词。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g3-0059",
+      "subject": "english",
+      "grade": 3,
+      "knowledge": "句型",
+      "stem": "I like ___ very much.",
+      "options": [
+        "apples",
+        "apple",
+        "an apple",
+        "the apple"
+      ],
+      "answer": 0,
+      "explain": "表达喜欢某类事物用复数。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g4-0060",
+      "subject": "english",
+      "grade": 4,
+      "knowledge": "语法",
+      "stem": "He ___ TV every evening.",
+      "options": [
+        "watches",
+        "watch",
+        "watching",
+        "watched"
+      ],
+      "answer": 0,
+      "explain": "第三人称单数。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g4-0061",
+      "subject": "english",
+      "grade": 4,
+      "knowledge": "语法",
+      "stem": "There ___ some milk in the glass.",
+      "options": [
+        "is",
+        "are",
+        "be",
+        "am"
+      ],
+      "answer": 0,
+      "explain": "milk 不可数，用 is。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g4-0062",
+      "subject": "english",
+      "grade": 4,
+      "knowledge": "语法",
+      "stem": "I ___ my homework yesterday.",
+      "options": [
+        "did",
+        "do",
+        "does",
+        "doing"
+      ],
+      "answer": 0,
+      "explain": "yesterday 用过去式。",
+      "difficulty": 2
+    },
+    {
+      "id": "english-g5-0063",
+      "subject": "english",
+      "grade": 5,
+      "knowledge": "语法",
+      "stem": "go 的过去式是？",
+      "options": [
+        "went",
+        "goed",
+        "gone",
+        "going"
+      ],
+      "answer": 0,
+      "explain": "不规则动词。",
+      "difficulty": 3
+    },
+    {
+      "id": "english-g5-0064",
+      "subject": "english",
+      "grade": 5,
+      "knowledge": "语法",
+      "stem": "child 的复数是？",
+      "options": [
+        "children",
+        "childs",
+        "childes",
+        "childrens"
+      ],
+      "answer": 0,
+      "explain": "不规则复数。",
+      "difficulty": 3
+    },
+    {
+      "id": "english-g5-0065",
+      "subject": "english",
+      "grade": 5,
+      "knowledge": "语法",
+      "stem": "bigger 是 big 的什么形式？",
+      "options": [
+        "比较级",
+        "最高级",
+        "过去式",
+        "复数"
+      ],
+      "answer": 0,
+      "explain": "big → bigger → biggest。",
+      "difficulty": 3
+    },
+    {
+      "id": "english-g6-0066",
+      "subject": "english",
+      "grade": 6,
+      "knowledge": "语法",
+      "stem": "She is good ___ English.",
+      "options": [
+        "at",
+        "in",
+        "on",
+        "for"
+      ],
+      "answer": 0,
+      "explain": "be good at 擅长。",
+      "difficulty": 3
+    },
+    {
+      "id": "english-g6-0067",
+      "subject": "english",
+      "grade": 6,
+      "knowledge": "语法",
+      "stem": "If it ___ tomorrow, we'll stay home.",
+      "options": [
+        "rains",
+        "rain",
+        "rained",
+        "raining"
+      ],
+      "answer": 0,
+      "explain": "主将从现。",
+      "difficulty": 3
+    },
+    {
+      "id": "english-g6-0068",
+      "subject": "english",
+      "grade": 6,
+      "knowledge": "语法",
+      "stem": "Have you ___ your homework?",
+      "options": [
+        "finished",
+        "finish",
+        "finishing",
+        "finishes"
+      ],
+      "answer": 0,
+      "explain": "现在完成时用过去分词。",
+      "difficulty": 3
+    },
+    {
+      "id": "english-g6-0069",
+      "subject": "english",
+      "grade": 6,
+      "knowledge": "交际",
+      "stem": "—What did you do last Sunday? —___",
+      "options": [
+        "I played football.",
+        "I play football.",
+        "I will play football.",
+        "I am playing football."
+      ],
+      "answer": 0,
+      "explain": "问过去，答过去。",
+      "difficulty": 3
+    },
+    {
+      "id": "science-g3-0070",
+      "subject": "science",
+      "grade": 3,
+      "knowledge": "植物",
+      "stem": "植物制造养分主要靠什么？",
+      "options": [
+        "光合作用",
+        "呼吸作用",
+        "蒸腾作用",
+        "吸收土壤"
+      ],
+      "answer": 0,
+      "explain": "叶子利用阳光制造养分。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g3-0071",
+      "subject": "science",
+      "grade": 3,
+      "knowledge": "水",
+      "stem": "标准大气压下水的沸点是？",
+      "options": [
+        "100℃",
+        "0℃",
+        "50℃",
+        "212℃"
+      ],
+      "answer": 0,
+      "explain": "标准大气压下是 100 摄氏度。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g3-0072",
+      "subject": "science",
+      "grade": 3,
+      "knowledge": "变化",
+      "stem": "冰融化成水属于什么变化？",
+      "options": [
+        "物理变化",
+        "化学变化",
+        "光合作用",
+        "燃烧"
+      ],
+      "answer": 0,
+      "explain": "没有产生新物质。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g3-0073",
+      "subject": "science",
+      "grade": 3,
+      "knowledge": "天体",
+      "stem": "太阳系的中心是？",
+      "options": [
+        "太阳",
+        "地球",
+        "月球",
+        "火星"
+      ],
+      "answer": 0,
+      "explain": "行星都绕着太阳转。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g3-0074",
+      "subject": "science",
+      "grade": 3,
+      "knowledge": "地球",
+      "stem": "一天中影子最短的时候大约是？",
+      "options": [
+        "正午",
+        "清晨",
+        "傍晚",
+        "半夜"
+      ],
+      "answer": 0,
+      "explain": "太阳最高的时候影子最短。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g4-0075",
+      "subject": "science",
+      "grade": 4,
+      "knowledge": "植物",
+      "stem": "种子发芽一般需要什么？",
+      "options": [
+        "水、空气和适宜温度",
+        "只需要阳光",
+        "只需要土壤",
+        "只需要肥料"
+      ],
+      "answer": 0,
+      "explain": "三者缺一不可。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g4-0076",
+      "subject": "science",
+      "grade": 4,
+      "knowledge": "天体",
+      "stem": "月相变化的周期大约是？",
+      "options": [
+        "一个月",
+        "一天",
+        "一年",
+        "一周"
+      ],
+      "answer": 0,
+      "explain": "约 29.5 天。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g4-0077",
+      "subject": "science",
+      "grade": 4,
+      "knowledge": "电",
+      "stem": "下列属于导体的是？",
+      "options": [
+        "铁钉",
+        "塑料尺",
+        "橡皮",
+        "木筷"
+      ],
+      "answer": 0,
+      "explain": "金属是导体。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g4-0078",
+      "subject": "science",
+      "grade": 4,
+      "knowledge": "人体",
+      "stem": "人体主要的呼吸器官是？",
+      "options": [
+        "肺",
+        "胃",
+        "心脏",
+        "肝"
+      ],
+      "answer": 0,
+      "explain": "肺负责气体交换。",
+      "difficulty": 2
+    },
+    {
+      "id": "science-g4-0079",
+      "subject": "science",
+      "grade": 4,
+      "knowledge": "声音",
+      "stem": "声音靠什么传播？",
+      "options": [
+        "介质（空气等）",
+        "真空",
+        "光",
+        "磁场"
+      ],
+      "answer": 0,
+      "explain": "真空不能传声。",
+      "difficulty": 2
+    },
+    {
+      "id": "physics-g8-0080",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "运动",
+      "stem": "速度的计算公式是？",
+      "options": [
+        "v = s / t",
+        "v = s × t",
+        "v = t / s",
+        "v = s + t"
+      ],
+      "answer": 0,
+      "explain": "速度 = 路程 ÷ 时间。",
+      "difficulty": 3
+    },
+    {
+      "id": "physics-g8-0081",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "单位",
+      "stem": "1 米/秒等于多少千米/时？",
+      "options": [
+        "3.6",
+        "1",
+        "10",
+        "0.36"
+      ],
+      "answer": 0,
+      "explain": "乘以 3.6。",
+      "difficulty": 3
+    },
+    {
+      "id": "physics-g8-0082",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "力",
+      "stem": "力的国际单位是？",
+      "options": [
+        "牛顿",
+        "千克",
+        "焦耳",
+        "帕斯卡"
+      ],
+      "answer": 0,
+      "explain": "符号 N。",
+      "difficulty": 3
+    },
+    {
+      "id": "physics-g8-0083",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "光",
+      "stem": "下列属于光的直线传播现象的是？",
+      "options": [
+        "影子",
+        "彩虹",
+        "水中筷子变弯",
+        "平面镜成像"
+      ],
+      "answer": 0,
+      "explain": "光沿直线传播被挡住形成影子。",
+      "difficulty": 3
+    },
+    {
+      "id": "physics-g8-0084",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "电",
+      "stem": "串联电路中电流的特点是？",
+      "options": [
+        "处处相等",
+        "越往后越小",
+        "各支路之和",
+        "与电阻成正比"
+      ],
+      "answer": 0,
+      "explain": "串联电流处处相等。",
+      "difficulty": 3
+    },
+    {
+      "id": "physics-g8-0085",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "密度",
+      "stem": "密度的计算公式是？",
+      "options": [
+        "ρ = m / V",
+        "ρ = m × V",
+        "ρ = V / m",
+        "ρ = m + V"
+      ],
+      "answer": 0,
+      "explain": "密度 = 质量 ÷ 体积。",
+      "difficulty": 3
+    },
+    {
+      "id": "physics-g8-0086",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "声",
+      "stem": "声音在空气中的传播速度约为？",
+      "options": [
+        "340 m/s",
+        "3×10⁸ m/s",
+        "1500 m/s",
+        "34 m/s"
+      ],
+      "answer": 0,
+      "explain": "15℃ 空气中约 340 米/秒。",
+      "difficulty": 3
+    },
+    {
+      "id": "physics-g8-0087",
+      "subject": "physics",
+      "grade": 8,
+      "knowledge": "光",
+      "stem": "平面镜成像的特点是？",
+      "options": [
+        "等大的虚像",
+        "放大的实像",
+        "缩小的实像",
+        "倒立的实像"
+      ],
+      "answer": 0,
+      "explain": "像与物等大、对称。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0088",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "物质构成",
+      "stem": "水的化学式是？",
+      "options": [
+        "H₂O",
+        "CO₂",
+        "O₂",
+        "H₂O₂"
+      ],
+      "answer": 0,
+      "explain": "两个氢一个氧。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0089",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "空气",
+      "stem": "空气中体积分数最大的气体是？",
+      "options": [
+        "氮气",
+        "氧气",
+        "二氧化碳",
+        "稀有气体"
+      ],
+      "answer": 0,
+      "explain": "氮气约占 78%。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0090",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "性质",
+      "stem": "能使澄清石灰水变浑浊的气体是？",
+      "options": [
+        "二氧化碳",
+        "氧气",
+        "氮气",
+        "氢气"
+      ],
+      "answer": 0,
+      "explain": "生成碳酸钙沉淀。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0091",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "符号",
+      "stem": "铁元素的化学符号是？",
+      "options": [
+        "Fe",
+        "F",
+        "Ir",
+        "Fr"
+      ],
+      "answer": 0,
+      "explain": "Fe 表示铁。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0092",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "环境",
+      "stem": "酸雨的主要成分之一是？",
+      "options": [
+        "二氧化硫",
+        "二氧化碳",
+        "氧气",
+        "氮气"
+      ],
+      "answer": 0,
+      "explain": "燃煤排放的 SO₂。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0093",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "燃烧",
+      "stem": "燃烧需要同时满足的条件是？",
+      "options": [
+        "可燃物、氧气、达到着火点",
+        "只要有氧气",
+        "只要温度足够",
+        "可燃物和二氧化碳"
+      ],
+      "answer": 0,
+      "explain": "三个条件缺一不可。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0094",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "酸碱",
+      "stem": "pH 小于 7 的溶液显？",
+      "options": [
+        "酸性",
+        "碱性",
+        "中性",
+        "无法判断"
+      ],
+      "answer": 0,
+      "explain": "pH 越小酸性越强。",
+      "difficulty": 3
+    },
+    {
+      "id": "chemistry-g9-0095",
+      "subject": "chemistry",
+      "grade": 9,
+      "knowledge": "变化",
+      "stem": "化学变化的本质特征是？",
+      "options": [
+        "有新物质生成",
+        "状态改变",
+        "形状改变",
+        "温度升高"
+      ],
+      "answer": 0,
+      "explain": "看有没有新物质。",
+      "difficulty": 3
+    },
+    {
+      "id": "biology-g7-0096",
+      "subject": "biology",
+      "grade": 7,
+      "knowledge": "细胞",
+      "stem": "细胞的控制中心是？",
+      "options": [
+        "细胞核",
+        "细胞壁",
+        "细胞膜",
+        "液泡"
+      ],
+      "answer": 0,
+      "explain": "遗传信息在细胞核里。",
+      "difficulty": 3
+    },
+    {
+      "id": "biology-g7-0097",
+      "subject": "biology",
+      "grade": 7,
+      "knowledge": "植物",
+      "stem": "光合作用主要发生在？",
+      "options": [
+        "叶绿体",
+        "线粒体",
+        "细胞核",
+        "液泡"
+      ],
+      "answer": 0,
+      "explain": "叶绿体含叶绿素。",
+      "difficulty": 3
+    },
+    {
+      "id": "biology-g7-0098",
+      "subject": "biology",
+      "grade": 7,
+      "knowledge": "人体",
+      "stem": "人体最大的器官是？",
+      "options": [
+        "皮肤",
+        "肝脏",
+        "肺",
+        "大脑"
+      ],
+      "answer": 0,
+      "explain": "皮肤覆盖全身。",
+      "difficulty": 3
+    },
+    {
+      "id": "biology-g7-0099",
+      "subject": "biology",
+      "grade": 7,
+      "knowledge": "人体",
+      "stem": "血液中运输氧气主要靠？",
+      "options": [
+        "红细胞",
+        "白细胞",
+        "血小板",
+        "血浆"
+      ],
+      "answer": 0,
+      "explain": "红细胞含血红蛋白。",
+      "difficulty": 3
+    },
+    {
+      "id": "biology-g8-0100",
+      "subject": "biology",
+      "grade": 8,
+      "knowledge": "遗传",
+      "stem": "生物的遗传物质主要是？",
+      "options": [
+        "DNA",
+        "蛋白质",
+        "糖类",
+        "脂肪"
+      ],
+      "answer": 0,
+      "explain": "DNA 上携带基因。",
+      "difficulty": 3
+    },
+    {
+      "id": "biology-g8-0101",
+      "subject": "biology",
+      "grade": 8,
+      "knowledge": "生态",
+      "stem": "生态系统中的生产者主要是？",
+      "options": [
+        "绿色植物",
+        "动物",
+        "细菌",
+        "真菌"
+      ],
+      "answer": 0,
+      "explain": "通过光合作用制造有机物。",
+      "difficulty": 3
+    },
+    {
+      "id": "history-g7-0102",
+      "subject": "history",
+      "grade": 7,
+      "knowledge": "朝代",
+      "stem": "中国历史上第一个统一的封建王朝是？",
+      "options": [
+        "秦朝",
+        "汉朝",
+        "唐朝",
+        "夏朝"
+      ],
+      "answer": 0,
+      "explain": "公元前 221 年秦统一六国。",
+      "difficulty": 3
+    },
+    {
+      "id": "history-g7-0103",
+      "subject": "history",
+      "grade": 7,
+      "knowledge": "对外交往",
+      "stem": "丝绸之路开通于哪个朝代？",
+      "options": [
+        "汉朝",
+        "秦朝",
+        "唐朝",
+        "宋朝"
+      ],
+      "answer": 0,
+      "explain": "张骞通西域。",
+      "difficulty": 3
+    },
+    {
+      "id": "history-g7-0104",
+      "subject": "history",
+      "grade": 7,
+      "knowledge": "都城",
+      "stem": "唐朝的都城是？",
+      "options": [
+        "长安",
+        "洛阳",
+        "开封",
+        "北京"
+      ],
+      "answer": 0,
+      "explain": "今西安。",
+      "difficulty": 3
+    },
+    {
+      "id": "history-g7-0105",
+      "subject": "history",
+      "grade": 7,
+      "knowledge": "对外交往",
+      "stem": "郑和下西洋发生在哪个朝代？",
+      "options": [
+        "明朝",
+        "元朝",
+        "清朝",
+        "宋朝"
+      ],
+      "answer": 0,
+      "explain": "明成祖时期。",
+      "difficulty": 3
+    },
+    {
+      "id": "history-g8-0106",
+      "subject": "history",
+      "grade": 8,
+      "knowledge": "近代",
+      "stem": "鸦片战争爆发于哪一年？",
+      "options": [
+        "1840 年",
+        "1839 年",
+        "1856 年",
+        "1911 年"
+      ],
+      "answer": 0,
+      "explain": "中国近代史的开端。",
+      "difficulty": 3
+    },
+    {
+      "id": "history-g8-0107",
+      "subject": "history",
+      "grade": 8,
+      "knowledge": "近代",
+      "stem": "辛亥革命发生在哪一年？",
+      "options": [
+        "1911 年",
+        "1840 年",
+        "1919 年",
+        "1949 年"
+      ],
+      "answer": 0,
+      "explain": "推翻清朝统治。",
+      "difficulty": 3
+    },
+    {
+      "id": "geography-g7-0108",
+      "subject": "geography",
+      "grade": 7,
+      "knowledge": "地球",
+      "stem": "地球自转产生的地理现象是？",
+      "options": [
+        "昼夜交替",
+        "四季变化",
+        "五带划分",
+        "昼夜长短变化"
+      ],
+      "answer": 0,
+      "explain": "自转一天一圈。",
+      "difficulty": 3
+    },
+    {
+      "id": "geography-g8-0109",
+      "subject": "geography",
+      "grade": 8,
+      "knowledge": "中国地理",
+      "stem": "中国最长的河流是？",
+      "options": [
+        "长江",
+        "黄河",
+        "珠江",
+        "黑龙江"
+      ],
+      "answer": 0,
+      "explain": "约 6300 千米。",
+      "difficulty": 3
+    },
+    {
+      "id": "geography-g7-0110",
+      "subject": "geography",
+      "grade": 7,
+      "knowledge": "世界地理",
+      "stem": "世界最高峰是？",
+      "options": [
+        "珠穆朗玛峰",
+        "乔戈里峰",
+        "乞力马扎罗山",
+        "富士山"
+      ],
+      "answer": 0,
+      "explain": "海拔 8848.86 米。",
+      "difficulty": 3
+    },
+    {
+      "id": "geography-g8-0111",
+      "subject": "geography",
+      "grade": 8,
+      "knowledge": "中国地理",
+      "stem": "我国面积最大的省级行政区是？",
+      "options": [
+        "新疆",
+        "西藏",
+        "内蒙古",
+        "青海"
+      ],
+      "answer": 0,
+      "explain": "约 166 万平方千米。",
+      "difficulty": 3
+    },
+    {
+      "id": "geography-g8-0112",
+      "subject": "geography",
+      "grade": 8,
+      "knowledge": "气候",
+      "stem": "我国季风气候显著的主要原因是？",
+      "options": [
+        "海陆热力差异",
+        "纬度位置",
+        "地形起伏",
+        "洋流影响"
+      ],
+      "answer": 0,
+      "explain": "海陆比热不同。",
+      "difficulty": 3
+    },
+    {
+      "id": "geography-g7-0113",
+      "subject": "geography",
+      "grade": 7,
+      "knowledge": "地图",
+      "stem": "地图上通常用「上北下南、左西右东」判断方向，这适用于？",
+      "options": [
+        "一般地图",
+        "所有地图",
+        "只有中国地图",
+        "只有世界地图"
+      ],
+      "answer": 0,
+      "explain": "有指向标时以指向标为准。",
+      "difficulty": 3
+    },
+    {
+      "id": "politics-g8-0114",
+      "subject": "politics",
+      "grade": 8,
+      "knowledge": "法律",
+      "stem": "我国的根本法是？",
+      "options": [
+        "宪法",
+        "刑法",
+        "民法典",
+        "未成年人保护法"
+      ],
+      "answer": 0,
+      "explain": "宪法具有最高法律效力。",
+      "difficulty": 3
+    },
+    {
+      "id": "politics-g8-0115",
+      "subject": "politics",
+      "grade": 8,
+      "knowledge": "法律",
+      "stem": "未成年人保护法保护的对象是？",
+      "options": [
+        "未满 18 周岁的公民",
+        "未满 16 周岁的公民",
+        "所有学生",
+        "未满 14 周岁的公民"
+      ],
+      "answer": 0,
+      "explain": "未成年人指未满 18 周岁。",
+      "difficulty": 3
+    },
+    {
+      "id": "politics-g8-0116",
+      "subject": "politics",
+      "grade": 8,
+      "knowledge": "权利",
+      "stem": "下列属于公民基本权利的是？",
+      "options": [
+        "受教育权",
+        "纳税",
+        "服兵役",
+        "遵守法律"
+      ],
+      "answer": 0,
+      "explain": "受教育既是权利也是义务。",
+      "difficulty": 3
+    },
+    {
+      "id": "politics-g9-0117",
+      "subject": "politics",
+      "grade": 9,
+      "knowledge": "价值观",
+      "stem": "社会主义核心价值观国家层面的内容是？",
+      "options": [
+        "富强、民主、文明、和谐",
+        "自由、平等、公正、法治",
+        "爱国、敬业、诚信、友善",
+        "和平、发展、合作、共赢"
+      ],
+      "answer": 0,
+      "explain": "共三个层面 24 个字。",
+      "difficulty": 3
+    },
+    {
+      "id": "politics-g7-0118",
+      "subject": "politics",
+      "grade": 7,
+      "knowledge": "网络",
+      "stem": "网络交往中应该特别注意？",
+      "options": [
+        "保护个人隐私",
+        "公开家庭住址",
+        "随意加陌生人为好友",
+        "转发未核实的信息"
+      ],
+      "answer": 0,
+      "explain": "不泄露个人信息。",
+      "difficulty": 3
+    },
+    {
+      "id": "politics-g7-0119",
+      "subject": "politics",
+      "grade": 7,
+      "knowledge": "安全",
+      "stem": "遇到火灾时正确的做法是？",
+      "options": [
+        "拨打 119 并低姿撤离",
+        "乘电梯下楼",
+        "躲进衣柜",
+        "先收拾贵重物品"
+      ],
+      "answer": 0,
+      "explain": "火灾时不能乘电梯。",
+      "difficulty": 3
+    }
+  ]
+}

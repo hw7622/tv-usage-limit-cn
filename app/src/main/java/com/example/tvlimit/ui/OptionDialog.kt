@@ -10,13 +10,20 @@ import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.StateListDrawable
 import android.view.Gravity
 import android.view.View
+import android.view.View.MeasureSpec
 import android.view.ViewGroup
 import android.widget.LinearLayout
+import android.widget.ScrollView
 import android.widget.TextView
 
 /**
  * 电视端竖向选项弹窗：方向键上下移动，OK 确认，返回键取消。
  * 用于「临时关闭多久」这类几选一的场景，比弹一列按钮更省事。
+ *
+ * 选项超过一屏时要能滚：年级有 9 项、题量有 8 项，真机 720dp 高
+ * 一屏最多摆 7 行，第 8 项起会掉到屏幕外 —— 而且掉出去之后遥控器
+ * 焦点也跟着走丢，家长只会觉得「这个选项根本点不到」。
+ * 所以把选项列放进有高度上限的 ScrollView，焦点移过去时系统会自动滚。
  */
 class OptionDialog(
     context: Context,
@@ -79,13 +86,14 @@ class OptionDialog(
         ).apply { bottomMargin = dp(20) })
 
         var first: View? = null
+        val content = LinearLayout(context).apply { orientation = LinearLayout.VERTICAL }
+
         options.forEachIndexed { index, option ->
             val row = LinearLayout(context).apply {
                 orientation = LinearLayout.VERTICAL
                 gravity = Gravity.CENTER_VERTICAL
                 background = rowBackground()
                 isFocusable = true
-                isFocusableInTouchMode = true
                 isClickable = true
                 setPadding(dp(26), dp(14), dp(26), dp(14))
                 setOnClickListener {
@@ -122,11 +130,35 @@ class OptionDialog(
             }
 
             if (first == null) first = row
-            panel.addView(row, LinearLayout.LayoutParams(
+            content.addView(row, LinearLayout.LayoutParams(
                 ViewGroup.LayoutParams.MATCH_PARENT,
                 ViewGroup.LayoutParams.WRAP_CONTENT
             ).apply { topMargin = if (index == 0) 0 else dp(12) })
         }
+
+        // 列表最多占屏幕 78% 高：再高加上标题和面板内边距就顶出 720dp 屏幕了。
+        val maxListHeight = (context.resources.displayMetrics.heightPixels * 0.78f).toInt()
+        val scroller = object : ScrollView(context) {
+            override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
+                // 父布局给的是 UNSPECIFIED/AT_MOST 都可能，统一换成「最多 maxListHeight」
+                val capped = MeasureSpec.makeMeasureSpec(maxListHeight, MeasureSpec.AT_MOST)
+                super.onMeasure(widthMeasureSpec, capped)
+            }
+        }.apply {
+            isFillViewport = false
+            isVerticalScrollBarEnabled = true
+            // 遥控器焦点移出可见区域时，ScrollView 靠这个把行滚进来
+            descendantFocusability = ViewGroup.FOCUS_AFTER_DESCENDANTS
+            addView(content, ViewGroup.LayoutParams(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.WRAP_CONTENT
+            ))
+        }
+
+        panel.addView(scroller, LinearLayout.LayoutParams(
+            ViewGroup.LayoutParams.MATCH_PARENT,
+            ViewGroup.LayoutParams.WRAP_CONTENT
+        ))
 
         setContentView(panel)
 
@@ -136,6 +168,6 @@ class OptionDialog(
             setGravity(Gravity.CENTER)
         }
 
-        setOnShowListener { first?.requestFocus() }
+        setOnShowListener { TvFocus.focus(first) }
     }
 }

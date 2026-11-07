@@ -17,7 +17,9 @@ import com.example.tvlimit.R
 import com.example.tvlimit.data.AppDatabase
 import com.example.tvlimit.data.LimitControl
 import com.example.tvlimit.data.Profile
+import com.example.tvlimit.quiz.QuizSettings
 import com.example.tvlimit.service.ServiceWatchdog
+import com.example.tvlimit.util.EventLog
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -32,6 +34,8 @@ class AdminActivity : AppCompatActivity() {
     private lateinit var tvPauseState: TextView
     private lateinit var tvBadgeState: TextView
     private lateinit var tvKeepAliveState: TextView
+    private lateinit var tvDiagnosticsState: TextView
+    private lateinit var tvQuizState: TextView
     private val scope = CoroutineScope(Dispatchers.Main + SupervisorJob())
     private val density by lazy { resources.displayMetrics.density }
 
@@ -43,12 +47,22 @@ class AdminActivity : AppCompatActivity() {
         tvPauseState = findViewById(R.id.tvPauseState)
         tvBadgeState = findViewById(R.id.tvBadgeState)
         tvKeepAliveState = findViewById(R.id.tvKeepAliveState)
+        tvDiagnosticsState = findViewById(R.id.tvDiagnosticsState)
+        tvQuizState = findViewById(R.id.tvQuizState)
         val cardPause = findViewById<View>(R.id.cardPause)
         val cardBadge = findViewById<View>(R.id.cardBadge)
         val cardChangePassword = findViewById<View>(R.id.cardChangePassword)
         val cardKeepAlive = findViewById<View>(R.id.cardKeepAlive)
-        TvFocus.attach(cardPause, cardBadge, cardChangePassword, cardKeepAlive)
+        val cardDiagnostics = findViewById<View>(R.id.cardDiagnostics)
+        val cardQuiz = findViewById<View>(R.id.cardQuiz)
+        TvFocus.attach(cardPause, cardBadge, cardChangePassword, cardKeepAlive, cardDiagnostics, cardQuiz)
         cardPause.setOnClickListener { showPauseOptions() }
+        cardQuiz.setOnClickListener {
+            startActivity(Intent(this, QuizSettingsActivity::class.java))
+        }
+        cardDiagnostics.setOnClickListener {
+            startActivity(Intent(this, DiagnosticsActivity::class.java))
+        }
         cardBadge.setOnClickListener {
             val on = !LimitControl.showBadge(this)
             LimitControl.setShowBadge(this, on)
@@ -65,6 +79,82 @@ class AdminActivity : AppCompatActivity() {
         updatePauseCard()
         updateBadgeCard()
         updateKeepAliveCard()
+        updateDiagnosticsCard()
+        updateQuizCard()
+    }
+
+    private fun updateQuizCard() {
+        if (!::tvQuizState.isInitialized) return
+        if (!QuizSettings.enabled(this)) {
+            tvQuizState.text = "已关闭 · 点这里开启"
+            tvQuizState.setTextColor(ContextCompat.getColor(this, R.color.text_dim))
+            return
+        }
+        val subjects = QuizSettings.subjects(this)
+        val subjectText = when {
+            subjects.size == 1 && subjects.contains("math") -> "数学"
+            subjects.size >= 3 -> "多科"
+            else -> subjects.joinToString("、") { subjectShort(it) }
+        }
+        // 这张卡片只有一行 13sp、约 310dp 宽，文案要短：写成「10分/3道」而不是
+        // 「每 10 分钟 3 道题」，否则后面年级和科目会被 ellipsize 截掉。
+        tvQuizState.text = "${QuizSettings.intervalMinutes(this)}分/" +
+            "${QuizSettings.questionsPerSession(this)}道 · " +
+            "${gradeShort(QuizSettings.grade(this))} · $subjectText"
+        tvQuizState.setTextColor(ContextCompat.getColor(this, R.color.lavender))
+    }
+
+    private fun subjectShort(s: String): String = when (s) {
+        "math" -> "数学"
+        "chinese" -> "语文"
+        "english" -> "英语"
+        "science" -> "科学"
+        "physics" -> "物理"
+        "chemistry" -> "化学"
+        "biology" -> "生物"
+        "history" -> "历史"
+        "geography" -> "地理"
+        "politics" -> "道法"
+        else -> s
+    }
+
+    private fun gradeShort(g: Int): String = when (g) {
+        1 -> "一年级"
+        2 -> "二年级"
+        3 -> "三年级"
+        4 -> "四年级"
+        5 -> "五年级"
+        6 -> "六年级"
+        7 -> "初一"
+        8 -> "初二"
+        9 -> "初三"
+        else -> "$g 年级"
+    }
+
+    /** 首页那张卡直接给结论：今天有没有「监控中断」，不点进去也能知道。 */
+    private fun updateDiagnosticsCard() {
+        if (!::tvDiagnosticsState.isInitialized) return
+        val (ms, cnt) = EventLog.gapToday(this)
+        if (cnt == 0) {
+            tvDiagnosticsState.text = "今天没有中断"
+            tvDiagnosticsState.setTextColor(ContextCompat.getColor(this, R.color.mint))
+        } else {
+            tvDiagnosticsState.text = "今天中断 $cnt 次 · 共 ${humanDuration(ms)}"
+            tvDiagnosticsState.setTextColor(ContextCompat.getColor(this, R.color.coral))
+        }
+    }
+
+    /** 4030 秒这种数字家长看不懂，换成「1 小时 7 分」。 */
+    private fun humanDuration(ms: Long): String {
+        val totalMin = ms / 60_000
+        if (totalMin < 1) return "${ms / 1000} 秒"
+        val h = totalMin / 60
+        val m = totalMin % 60
+        return when {
+            h > 0 && m > 0 -> "$h 小时 $m 分"
+            h > 0 -> "$h 小时"
+            else -> "$m 分"
+        }
     }
 
     // ===== 后台常驻 =====
@@ -82,9 +172,9 @@ class AdminActivity : AppCompatActivity() {
         if (!::tvKeepAliveState.isInitialized) return
         val ok = isBatteryExempt()
         tvKeepAliveState.text = if (ok) {
-            "系统不会清理它，开机自动恢复"
+            "开机自动恢复"
         } else {
-            "点这里设置，免得被电视管家杀掉"
+            "点这里设置"
         }
         tvKeepAliveState.setTextColor(
             ContextCompat.getColor(this, if (ok) R.color.mint else R.color.coral)
@@ -197,9 +287,9 @@ class AdminActivity : AppCompatActivity() {
             val row = layoutInflater.inflate(R.layout.item_profile_row, profileList, false)
             val lp = LinearLayout.LayoutParams(
                 LinearLayout.LayoutParams.MATCH_PARENT,
-                (112 * density).toInt()
+                (100 * density).toInt()
             )
-            lp.topMargin = (16 * density).toInt()
+            lp.topMargin = (12 * density).toInt()
             row.layoutParams = lp
 
             row.findViewById<ImageView>(R.id.ivAvatar).setImageResource(
@@ -218,7 +308,7 @@ class AdminActivity : AppCompatActivity() {
         }
 
         profileList.post {
-            (profileList.getChildAt(0) ?: profileList.getChildAt(1))?.requestFocus()
+            TvFocus.focus(profileList.getChildAt(0) ?: profileList.getChildAt(1))
         }
     }
 

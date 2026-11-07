@@ -130,8 +130,9 @@ class PinPadDialog(
                     setTextColor(keyTextColor())
                     background = keyBackground()
                     gravity = Gravity.CENTER
+                    // 只设 focusable：focusableInTouchMode 会让「触摸模式下的第一次点击
+                    // 只取焦点、不派发 onClick」，表现就是每个数字都要点两下（鼠标/触摸测试）。
                     isFocusable = true
-                    isFocusableInTouchMode = true
                     isClickable = true
                     includeFontPadding = false
                     setOnClickListener { onKey(label) }
@@ -175,7 +176,7 @@ class PinPadDialog(
         }
 
         setOnShowListener {
-            first?.requestFocus()
+            TvFocus.focus(first)
         }
     }
 

@@ -36,7 +36,8 @@
         <item name="android:paddingEnd">40dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
+        <!-- 触摸模式下第一次点击只取焦点，会让按钮「点一下没反应」，统一关掉 -->
+        <item name="android:focusableInTouchMode">false</item>
     </style>
 
     <style name="Widget.GhostButton" parent="Widget.AppCompat.Button">
@@ -51,7 +52,8 @@
         <item name="android:paddingEnd">36dp</item>
         <item name="android:stateListAnimator">@null</item>
         <item name="android:focusable">true</item>
-        <item name="android:focusableInTouchMode">true</item>
+        <!-- 触摸模式下第一次点击只取焦点，会让按钮「点一下没反应」，统一关掉 -->
+        <item name="android:focusableInTouchMode">false</item>
     </style>
 
 </resources>

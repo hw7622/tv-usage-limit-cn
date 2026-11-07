@@ -124,7 +124,7 @@ class MainActivity : AppCompatActivity() {
         registerReceiver(pauseReceiver, IntentFilter(LimitControl.ACTION_PAUSE_CHANGED), Context.RECEIVER_NOT_EXPORTED)
 
         clockHandler.post(clockTick)
-        cardSwitch.post { cardSwitch.requestFocus() }
+        cardSwitch.post { TvFocus.focus(cardSwitch) }
     }
 
     override fun onResume() {
@@ -338,7 +338,7 @@ class MainActivity : AppCompatActivity() {
 
         // 提示条显隐会打乱焦点，兜底把焦点放回第一个入口
         if (window.currentFocus == null) {
-            cardSwitch.post { cardSwitch.requestFocus() }
+            cardSwitch.post { TvFocus.focus(cardSwitch) }
         }
     }
 

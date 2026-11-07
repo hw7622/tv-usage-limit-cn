@@ -69,7 +69,7 @@ class ProfileSelectionActivity : AppCompatActivity() {
                     if (!focusRequested && withUsage.isNotEmpty()) {
                         focusRequested = true
                         recyclerView.post {
-                            recyclerView.getChildAt(0)?.requestFocus()
+                            TvFocus.focus(recyclerView.getChildAt(0))
                         }
                     }
                 }
