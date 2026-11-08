@@ -1,7 +1,35 @@
 # 待办与规划
 
-> 本文档记录尚未实现的事项。当前发布版本：**v2.7.8-cn**（versionCode 46）。
+> 本文档记录尚未实现的事项。当前发布版本：**v2.8.0-cn**（versionCode 48）。
 > 每条待办都写清了动机、约束和验收标准，换人接手可以直接开工。
+
+---
+
+## v2.8.0-cn 已完成（原计划项）
+
+手机扫码配置把下面六件事一起做完了，待办里不再重复列。设计细节见
+[WEB_API.md](WEB_API.md)，代码位置见 [HANDOVER.md](HANDOVER.md)。
+
+| # | 功能 | 落点 |
+|---|---|---|
+| 1 | 手机加时（今天 +N 分钟，可撤销，叠加封顶 240） | `HouseRules.addExtraToday()` / `POST /api/extend` |
+| 2 | 作息时段（工作日/周末分开、最多 3 段、跨夜、作息外整屏挡） | `HouseRules.Schedule` / `POST /api/schedule` |
+| 3 | 用量详情页（近 7/14/30 天柱状图 + 趋势 + 活跃天数） | `UsageReport.daily()` / `GET /api/report` |
+| 4 | 题库缺口矩阵（科目 × 年级，按区间判 `na`，标出 <150 道的格子） | `GET /api/bank/gaps` |
+| 5 | 错题详情（按「科目+知识点」合并，带正确项与最近错选） | `quiz/WrongStore.kt` / `GET /api/mistakes` |
+| 6 | 学习周报（用量 + 答题正确率 + 错题前 5，电视端也能看） | `UsageReport.report()` / `StudyReportActivity` |
+
+配套的两个基础设施：
+
+- **扫码进配置页**：纯 Kotlin 二维码编码器（`net/QrCode.kt`，byte 模式 / 纠错 M / v1–v6），
+  `WebSetupActivity` 大字显示，手机扫一下直接进 `http://<电视IP>:8080/`。
+  没有引入任何第三方库，也没用 `zxing`——开源项目装一个 300KB 的依赖只为了画一个二维码不划算。
+- **远程访问**：不做内网穿透、不设中转服务器。默认只放行局域网；
+  打开「允许远程」后额外放行 `100.64/10`（Tailscale）和 `fd7a::/48`（IPv6 ULA），
+  家长装一个 Tailscale 就能在外网扫码。理由写在 [WEB_API.md](WEB_API.md) 的「远程方案对比」。
+- **修掉一个灾难性 bug**：`QuizStats.clear()` 原来会遍历整个 prefs 全删，
+  清一次错题会把家长密码、答题参数、作息、加时一起抹掉（密码回落 1234）。
+  现在只删形如 `math|两位数加法` 的错题计数 key。
 
 ---
 

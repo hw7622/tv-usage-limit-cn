@@ -28,11 +28,15 @@ class QuizSession private constructor(
 
         return if (correct) {
             QuizStats.onRight(ctx, q)
+            WrongStore.onRight(ctx, q)
             queue.removeAt(0)
             wrongOnCurrent = 0
             if (queue.isEmpty()) Outcome.Finished else Outcome.Correct
         } else {
             QuizStats.onWrong(ctx, q)
+            // 同一道题顺手记进错题本：家长在手机上看的是题干和正解，
+            // QuizStats 里只有知识点计数，给人看不够。
+            WrongStore.onWrong(ctx, q, chosenIndex)
             wrongOnCurrent += 1
             val add = wrongOnCurrent.coerceAtMost(5)
             repeat(add) { queue.add(QuizEngine.next(ctx)) }

@@ -139,7 +139,14 @@ adb shell "run-as com.example.tvlimit cat databases/tv_limit_database-wal" > db.
 | 内置题库数据 | `app/src/main/assets/quiz/bank.json` |
 | 家长自己加的题（导入的） | `quiz/BankStore.kt`（`filesDir/custom_bank.json`，同 id 覆盖内置） |
 | 手机配置服务（局域网 HTTP） | `net/ConfigServer.kt`（手写 ServerSocket，无依赖） |
-| 手机配置页面 | `app/src/main/assets/web/index.html`（单页，随 APK 打包，不联网加载） |
+| 手机配置的业务接口 | `net/ApiHandlers.kt`（`object Api`，所有 `/api/*` 的实现） |
+| 二维码编码 | `net/QrCode.kt`（byte 模式 + 纠错 M + 版本 1~6，纯 Kotlin 无依赖） |
+| 二维码显示 / 扫码页 | `ui/QrView.kt`、`ui/WebSetupActivity.kt` |
+| 手机配置页面 | `app/src/main/assets/web/`（`index.html` + `app.css` + `app.js`，零依赖，随 APK 打包） |
+| 作息时段 / 今日加时 / 远程开关 | `data/HouseRules.kt` |
+| 错题本（题干快照） | `quiz/WrongStore.kt`（`filesDir/wrong_book.json`，按「科目+知识点」合并） |
+| 周报 / 每日用量聚合 | `data/UsageReport.kt`（Room 用量 + 错题本 + 事件日志） |
+| 电视上的学习报告页 | `ui/StudyReportActivity.kt` |
 | 家长设置首页 | `ui/AdminActivity.kt` |
 | 答题设置页 | `ui/QuizSettingsActivity.kt` |
 | 孩子看到的剩余时间页 | `ui/MainActivity.kt` |
@@ -191,6 +198,22 @@ adb shell "run-as com.example.tvlimit cat databases/tv_limit_database-wal" > db.
 
 8. **adb server 在某些环境会被回收**
    每条命令都 `adb connect` 一次，或者把 connect 和操作放进同一条命令里；跨调用依赖连接状态会随机失败。
+
+9. **`QuizStats.clear()` 曾经会清空整个 SharedPreferences**
+   它原来遍历 `sp.all.keys` 删掉除 `cleared_at` 之外的一切。而那个默认 prefs 文件同时也是
+   家长密码（`ADMIN_PIN`）、答题参数、作息、今日加时、暂停状态的家 ——
+   在手机上点一次「清空错题」，PIN 回到 1234、答题门禁被关掉、作息和加时全没（2026-11-08 真机踩到）。
+   现在只删含 `|` 的 key（错题计数的 key 形如 `subject|knowledge`）。
+   **以后再往默认 prefs 里加东西，先想想会不会被别的「整体清理」扫到。**
+
+10. **作息外不要走「休息」流程**
+   作息外和「额度用完」共用 `isLimitReached()`，但语义不同：休息是「等 20 分钟就能看」，
+   作息是「今天这个点不能看」。如果照常写 `last_session_end`，孩子第二天早上会莫名少掉一场额度，
+   遮罩还会显示「休息时间到啦」。现在作息外单独分支：不写本场结束、遮罩文案是「现在不是看电视的时间 + 今日时段」。
+
+11. **`assets/web/` 是三个文件，不是一个页面**
+   `index.html` + `app.css` + `app.js`，`ConfigServer.serveAsset()` 是白名单路由。
+   加文件要同时改那里，否则手机上是空白页（并且只有 404，不报错）。
 
 ---
 

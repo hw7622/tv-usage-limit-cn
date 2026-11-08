@@ -55,7 +55,8 @@ class QuizSettingsActivity : AppCompatActivity() {
         val btnPreview = findViewById<View>(R.id.btnQuizPreview)
 
         TvFocus.attach(
-            cardSwitch, cardInterval, cardCount, cardGrade, cardSubjects, cardWeb, btnClear, btnPreview
+            cardSwitch, cardInterval, cardCount, cardGrade, cardSubjects, cardWeb,
+            tvMistakes, btnClear, btnPreview
         )
 
         cardSwitch.setOnClickListener {
@@ -72,7 +73,14 @@ class QuizSettingsActivity : AppCompatActivity() {
         cardCount.setOnClickListener { showCountDialog() }
         cardGrade.setOnClickListener { showGradeDialog() }
         cardSubjects.setOnClickListener { showSubjectsDialog() }
-        cardWeb.setOnClickListener { showWebDialog() }
+        cardWeb.setOnClickListener {
+            // 换成整页二维码：家长要的是「拿手机扫一下」，
+            // 一个只能看地址的对话框在 3 米外根本没法手抄
+            startActivity(Intent(this, WebSetupActivity::class.java))
+        }
+        tvMistakes.setOnClickListener {
+            startActivity(Intent(this, StudyReportActivity::class.java))
+        }
         btnClear.setOnClickListener {
             QuizStats.clear(this)
             updateUi()
@@ -111,7 +119,7 @@ class QuizSettingsActivity : AppCompatActivity() {
         tvMistakes.text = if (wrong == 0) {
             "错题记录：还没有错题"
         } else {
-            "错题记录：$wrong 个知识点错过，这些题会更常出现"
+            "错题记录：$wrong 个知识点错过 · 点这里看这周报告"
         }
 
         val webOn = ConfigServer.running
@@ -119,58 +127,6 @@ class QuizSettingsActivity : AppCompatActivity() {
         tvWebValue.setTextColor(
             ContextCompat.getColor(this, if (webOn) R.color.mint else R.color.text_dim)
         )
-    }
-
-    /**
-     * 手机配置：开关电视上的局域网网页。
-     *
-     * 不放进前台服务：它只是个给家长临时改配置的入口，
-     * 开着就占着一个端口，用完应该能顺手关掉。
-     */
-    private fun showWebDialog() {
-        if (ConfigServer.running) {
-            val url = ConfigServer.url()
-            AlertDialog.Builder(this)
-                .setTitle("手机配置：已开启")
-                .setMessage(
-                    if (url != null) {
-                        "手机连同一个 WiFi，用浏览器打开：\n\n$url\n\n进去后输入家长密码，就能加题、改参数。\n用完了点下面的「停止」，别的设备就访问不到了。"
-                    } else {
-                        "服务已经起来，但这台电视现在没有局域网地址。\n先连上 WiFi 或网线，再回来看这里。"
-                    }
-                )
-                .setPositiveButton("停止") { _, _ ->
-                    ConfigServer.stop()
-                    updateUi()
-                    toast("手机配置已停止")
-                }
-                .setNegativeButton("知道了", null)
-                .show()
-            return
-        }
-
-        AlertDialog.Builder(this)
-            .setTitle("手机配置题库")
-            .setMessage(
-                "会在电视上开一个局域网网页。\n\n" +
-                    "手机连同一个 WiFi，浏览器打开地址，输入家长密码，就能：\n" +
-                    "· 导入自己的题（JSON / CSV）\n" +
-                    "· 看题库统计、导出、清空\n" +
-                    "· 改答题间隔、题数、年级、科目\n\n" +
-                    "只在局域网内可访问，不需要联网。"
-            )
-            .setPositiveButton("开启") { _, _ ->
-                try {
-                    val p = ConfigServer.start(this)
-                    updateUi()
-                    val url = ConfigServer.url()
-                    toast(if (url != null) "已开启：$url" else "已开启（未取到局域网地址），端口 $p")
-                } catch (e: Exception) {
-                    toast("开启失败：${e.message}")
-                }
-            }
-            .setNegativeButton("取消", null)
-            .show()
     }
 
     private fun showIntervalDialog() {

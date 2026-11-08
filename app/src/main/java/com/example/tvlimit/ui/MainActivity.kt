@@ -109,12 +109,16 @@ class MainActivity : AppCompatActivity() {
 
         cardSwitch = findViewById(R.id.cardSwitch)
         val cardSettings = findViewById<View>(R.id.cardSettings)
+        val cardWeb = findViewById<View>(R.id.cardWeb)
 
-        TvFocus.attach(cardSwitch, cardSettings, permissionBar)
+        TvFocus.attach(cardSwitch, cardSettings, cardWeb, permissionBar)
         cardSwitch.setOnClickListener {
             startActivity(Intent(this, ProfileSelectionActivity::class.java))
         }
         cardSettings.setOnClickListener { showAdminPinDialog() }
+        cardWeb.setOnClickListener {
+            startActivity(Intent(this, WebSetupActivity::class.java))
+        }
         permissionBar.setOnClickListener {
             if (LimitControl.isPaused(this)) showResumePinDialog() else requestNextPermission()
         }

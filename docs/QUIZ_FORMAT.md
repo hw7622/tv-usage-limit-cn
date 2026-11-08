@@ -253,20 +253,21 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 
 适合：想把题分发给别人、或者一次导入几千道。
 
-### 7.2 手机上直接导入（2.7.9 起，不用重新打包）
+### 7.2 手机上直接导入（2.7.9 起，2.8.0 起扩到全部设置）
 
-电视里进「家长设置 → 答题门禁 → 手机配置题库」，点「开启」，会显示一个地址，例如：
+电视首页 →「手机配置」，屏幕上直接出现二维码：
 
 ```
 http://192.168.3.191:8080
 ```
 
-手机连**同一个 WiFi**，浏览器打开这个地址，输入家长密码（就是电视上那个），就能：
+手机连**同一个 WiFi**，扫码（或输地址），输入家长密码（就是电视上那个），就能：
 
 - 选文件或直接粘贴 JSON / CSV 导入
-- 看题库统计（科目分布、内置 / 自定义各多少道）
+- 看题库统计、科目 × 年级缺口矩阵
 - 导出自己加过的题、一键清空
 - 改答题间隔、题量、年级、科目
+- 加额度、改作息、临时加时 / 暂停、看周报和错题、改家长密码
 - 在电视上立刻试一组题
 
 **合并规则**：自定义题存在 `filesDir/custom_bank.json`，抽题时与内置库合并，
@@ -279,8 +280,9 @@ http://192.168.3.191:8080
 **限制**：单个文件 ≤ 8MB（现有 3245 道约 640KB）；导入时逐题校验，坏题会被拒绝并给出题号与原因，
 例如「第 4 题：科目「wrongsubject」不认识」「第 5 题：答案下标越界」，好题照常入库。
 
-**安全**：服务只监听局域网、只在家长手动开启时存在，所有接口都要先用家长密码换 token
+**安全**：默认只接受局域网来源（公网地址直接 403），所有接口都要先用家长密码换 token
 （同一个 IP 一分钟错 5 次锁一分钟）。关掉服务后 token 立即失效。
+全部接口清单见 [WEB_API.md](WEB_API.md)。
 
 命令行也能用，方便脚本批量导入：
 
@@ -293,12 +295,12 @@ curl -c ck.txt -X POST -H "Content-Type: application/json" -d '{"pin":"1470"}' \
 curl -b ck.txt -X POST -H "Content-Type: application/json" \
     --data-binary @tmp/new.json http://192.168.3.191:8080/api/bank/import
 
-# 看状态 / 导出 / 清空
-curl -b ck.txt http://192.168.3.191:8080/api/status
+# 看缺口 / 导出 / 清空
+curl -b ck.txt http://192.168.3.191:8080/api/bank/gaps
 curl -b ck.txt -o custom.json http://192.168.3.191:8080/api/bank/export
 curl -b ck.txt -X POST http://192.168.3.191:8080/api/bank/clear
 ```
 
-实现：`net/ConfigServer.kt`（手写 HTTP，无第三方依赖）+ `quiz/BankStore.kt`（导入校验与合并）+
-`assets/web/index.html`（页面）。`QuestionBank` 的缓存在导入后会 `invalidate()`，不用重启进程。
+实现：`net/ConfigServer.kt`（手写 HTTP，无依赖）+ `net/ApiHandlers.kt`（业务）+ `quiz/BankStore.kt`
+（导入校验与合并）+ `assets/web/`（页面）。`QuestionBank` 的缓存在导入后会 `invalidate()`，不用重启进程。
 

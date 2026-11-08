@@ -39,6 +39,10 @@ interface ProfileDao {
     @Query("SELECT * FROM usage_logs WHERE profileId = :profileId AND date = :date LIMIT 1")
     suspend fun getUsageLog(profileId: Int, date: String): UsageLog?
 
+    /** 报表用：某个档案从某天起的每日用量（date 是 ISO 字符串，可以直接比大小）。 */
+    @Query("SELECT * FROM usage_logs WHERE profileId = :profileId AND date >= :fromDate ORDER BY date")
+    suspend fun getUsageLogsSince(profileId: Int, fromDate: String): List<UsageLog>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertUsageLog(usageLog: UsageLog)
 

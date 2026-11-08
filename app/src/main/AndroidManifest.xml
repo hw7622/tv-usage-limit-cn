@@ -78,6 +78,8 @@
         <activity android:name=".ui.AdminActivity" />
         <activity android:name=".ui.DiagnosticsActivity" />
         <activity android:name=".ui.QuizSettingsActivity" />
+        <activity android:name=".ui.WebSetupActivity" />
+        <activity android:name=".ui.StudyReportActivity" />
         <activity android:name=".ui.EditProfileActivity" />
         <activity android:name=".ui.ProfileSelectionActivity" />
         <!-- singleTop：孩子狂按遥控器时不要堆出一摞拦截页；不留在最近任务里 -->

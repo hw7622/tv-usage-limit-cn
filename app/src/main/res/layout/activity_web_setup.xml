@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg_deep"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:paddingStart="48dp"
+    android:paddingEnd="48dp"
+    android:paddingTop="36dp"
+    android:paddingBottom="36dp">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="手机扫码配置"
+        android:textColor="@color/text_main"
+        android:textSize="32sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false" />
+
+    <TextView
+        android:id="@+id/tvWebSetupSub"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="手机连同一个 WiFi，扫下面的码"
+        android:textColor="@color/text_sub"
+        android:textSize="17sp"
+        android:includeFontPadding="false" />
+
+    <com.example.tvlimit.ui.QrView
+        android:id="@+id/qrView"
+        android:layout_width="240dp"
+        android:layout_height="240dp"
+        android:layout_marginTop="22dp"
+        android:background="@color/white"
+        android:contentDescription="二维码" />
+
+    <TextView
+        android:id="@+id/tvWebUrl"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="18dp"
+        android:textColor="@color/mint"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:includeFontPadding="false" />
+
+    <TextView
+        android:id="@+id/tvWebState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textColor="@color/text_dim"
+        android:textSize="15sp"
+        android:includeFontPadding="false" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:orientation="horizontal">
+
+        <Button
+            android:id="@+id/btnWebToggle"
+            android:layout_width="200dp"
+            android:layout_height="62dp"
+            android:background="@drawable/selector_btn_primary"
+            android:text="停止"
+            android:textColor="@color/bg_deep"
+            android:textSize="19sp"
+            android:textStyle="bold"
+            android:focusable="true" />
+
+        <Button
+            android:id="@+id/btnWebRemote"
+            android:layout_width="220dp"
+            android:layout_height="62dp"
+            android:layout_marginStart="16dp"
+            android:background="@drawable/selector_btn_ghost"
+            android:text="允许远程：关"
+            android:textColor="@color/text_main"
+            android:textSize="18sp"
+            android:focusable="true" />
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/tvWebTip"
+        android:layout_width="600dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="22dp"
+        android:gravity="center"
+        android:text="进去后输入家长密码，能改额度、作息、答题参数、题库和错题。\n只在你自己家的网络里能打开，不需要联网。"
+        android:textColor="@color/text_dim"
+        android:textSize="14sp"
+        android:lineSpacingExtra="4dp" />
+</LinearLayout>

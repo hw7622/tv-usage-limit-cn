@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <!-- 三个定位方块 + 右下角数据点，一眼能认成二维码 -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M3,3h7v7h-7zM5,5v3h3v-3z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M14,3h7v7h-7zM16,5v3h3v-3z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M3,14h7v7h-7zM5,16v3h3v-3z" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M14,14h3v3h-3zM18,14h3v3h-3zM14,18h3v3h-3zM18,18h3v3h-3z" />
+</vector>

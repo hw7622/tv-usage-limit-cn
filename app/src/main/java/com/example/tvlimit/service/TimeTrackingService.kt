@@ -40,6 +40,7 @@ import androidx.core.app.NotificationCompat
 import androidx.preference.PreferenceManager
 import com.example.tvlimit.R
 import com.example.tvlimit.data.AppDatabase
+import com.example.tvlimit.data.HouseRules
 import com.example.tvlimit.data.LimitControl
 import com.example.tvlimit.data.Profile
 import com.example.tvlimit.data.UsageLog
@@ -316,6 +317,16 @@ class TimeTrackingService : Service() {
                     if (isScreenOn && !isAppInForeground && currentProfile != null) refreshBadge()
                 }
                 ACTION_RECHECK -> handleRecheck()
+                HouseRules.ACTION_RULES_CHANGED -> {
+                    // 手机上加时 / 改作息：1.2 秒后按新规则重判一次。
+                    // 加时是「立刻生效」，不能等下一轮 20 秒 tick —— 孩子还盯着遮罩等呢。
+                    Log.d("TvLimit", "House rules changed. extra=${HouseRules.extraToday(this@TimeTrackingService)}")
+                    EventLog.event(
+                        "rules", "extra" to HouseRules.extraToday(this@TimeTrackingService),
+                        "outside" to HouseRules.isOutsideSchedule(this@TimeTrackingService)
+                    )
+                    handleRecheck()
+                }
                 ACTION_QUIZ_TEST -> {
                     // 家长在设置页主动要求试一道：允许在自己界面上弹，方便马上看效果
                     EventLog.event("quiz_test", "enabled" to QuizSettings.enabled(this@TimeTrackingService))
@@ -381,6 +392,7 @@ class TimeTrackingService : Service() {
         val pauseFilter = IntentFilter().apply {
             addAction(LimitControl.ACTION_PAUSE_CHANGED)
             addAction(LimitControl.ACTION_BADGE_CHANGED)
+            addAction(HouseRules.ACTION_RULES_CHANGED)
             addAction(ACTION_RECHECK)
             addAction(ACTION_QUIZ_TEST)
         }
@@ -640,7 +652,13 @@ class TimeTrackingService : Service() {
         if (!cProfile.isRestricted) return false
         // 家长临时关掉限制期间一律不拦，也不计时（见 updateUsage）
         if (LimitControl.isPaused(this)) return false
-        val daily = cProfile.dailyLimitMinutes
+        // 作息外和「额度用完」同等对待，走同一套遮罩 + 休息流程。
+        // 家长自己要在禁看时段看，用密码临时关闭限制即可 —— 不另开一条绕过路径。
+        if (HouseRules.isOutsideSchedule(this)) {
+            Log.d("TvLimit", "Outside schedule, treat as limit reached")
+            return true
+        }
+        val daily = HouseRules.dailyLimitWithExtra(this, cProfile.dailyLimitMinutes)
         val session = cProfile.sessionLimitMinutes
 
         val dailyReached = daily > -1 && accumulatedDailyUsage >= daily
@@ -1215,27 +1233,42 @@ class TimeTrackingService : Service() {
                         // 第一次到达限额时记下「本场结束」时间点，休息从这里开始算。
                         // 注意只写一次：服务重启或每轮循环都重写的话，休息永远不满，孩子会被永久锁死。
                         if (!sessionEndRecorded) {
-                            sessionEndRecorded = markSessionEndOnce()
-                            Log.w(
-                                "TvLimit",
-                                "Limit reached -> rest starts. daily=$accumulatedDailyUsage/${currentProfile?.dailyLimitMinutes}, " +
-                                    "session=$currentSessionUsage/${currentProfile?.sessionLimitMinutes}"
-                            )
-                            EventLog.event(
-                                "limit",
-                                "d" to accumulatedDailyUsage,
-                                "dmax" to (currentProfile?.dailyLimitMinutes ?: -1),
-                                "s" to currentSessionUsage,
-                                "smax" to (currentProfile?.sessionLimitMinutes ?: -1),
-                                "top" to lastTopPackage,
-                                "scope" to inTrackedScope(),
-                                "mode" to if (appScopedMode()) "apps" else "all"
-                            )
-                            // 到点这一刻让正在播的停下来。
-                            // 勾了具体应用的模式不显示全屏遮罩，光靠拦截页盖不住声音，这里也要停。
-                            pausePlaybackIfPlaying()
+                            if (HouseRules.isOutsideSchedule(this@TimeTrackingService)) {
+                                // 作息外不是「本场看完要休息」：不写 last_session_end，
+                                // 否则 21:00 被拦一次，第二天早上这场进度和休息计时都被这笔账带偏。
+                                // 只需要让正在播的停下来（每轮只做一次，别每 20 秒按一次暂停键）。
+                                if (!restingLockAttempted) {
+                                    restingLockAttempted = true
+                                    pausePlaybackIfPlaying()
+                                    EventLog.event(
+                                        "limit", "why" to "schedule",
+                                        "top" to lastTopPackage,
+                                        "s" to currentSessionUsage, "d" to accumulatedDailyUsage
+                                    )
+                                }
+                            } else {
+                                sessionEndRecorded = markSessionEndOnce()
+                                Log.w(
+                                    "TvLimit",
+                                    "Limit reached -> rest starts. daily=$accumulatedDailyUsage/${currentProfile?.dailyLimitMinutes}, " +
+                                        "session=$currentSessionUsage/${currentProfile?.sessionLimitMinutes}"
+                                )
+                                EventLog.event(
+                                    "limit",
+                                    "d" to accumulatedDailyUsage,
+                                    "dmax" to (currentProfile?.dailyLimitMinutes ?: -1),
+                                    "s" to currentSessionUsage,
+                                    "smax" to (currentProfile?.sessionLimitMinutes ?: -1),
+                                    "top" to lastTopPackage,
+                                    "scope" to inTrackedScope(),
+                                    "mode" to if (appScopedMode()) "apps" else "all"
+                                )
+                                // 到点这一刻让正在播的停下来。
+                                // 勾了具体应用的模式不显示全屏遮罩，光靠拦截页盖不住声音，这里也要停。
+                                pausePlaybackIfPlaying()
+                            }
                         }
-                        if (appScopedMode()) {
+                        if (appScopedMode() && !HouseRules.isOutsideSchedule(this@TimeTrackingService)) {
                             // 只限制勾选的应用：不整屏遮罩，让应用监控逐个把它们挡掉，
                             // 其他应用（学习类之类）还能正常用
                             if (isOverlayShowing) removeOverlay()
@@ -1560,9 +1593,11 @@ class TimeTrackingService : Service() {
      */
     private fun blockReason(): String? {
         val p = currentProfile ?: return null
-        val daily = p.dailyLimitMinutes
+        val daily = HouseRules.dailyLimitWithExtra(this, p.dailyLimitMinutes)
         val session = p.sessionLimitMinutes
         return when {
+            HouseRules.isOutsideSchedule(this) ->
+                "现在不是看电视的时间，" + HouseRules.todayLabel(this)
             daily > -1 && accumulatedDailyUsage >= daily ->
                 "今天 ${daily} 分钟已经用完了，明天再来吧"
             session > -1 && currentSessionUsage >= session ->
@@ -1578,10 +1613,12 @@ class TimeTrackingService : Service() {
     private fun blockDetailText(appName: String?, reason: String?): String {
         val prefix = if (appName != null) "「$appName」" else ""
         val p = currentProfile
-        val daily = p?.dailyLimitMinutes ?: -1
+        val daily = HouseRules.dailyLimitWithExtra(this, p?.dailyLimitMinutes ?: -1)
         val dailyUsedUp = daily > 0 && accumulatedDailyUsage >= daily
         val session = p?.sessionLimitMinutes ?: -1
         return when {
+            HouseRules.isOutsideSchedule(this) ->
+                "${prefix}现在不是看电视的时间，" + HouseRules.todayLabel(this)
             dailyUsedUp -> "${prefix}今天的 $daily 分钟已经用完了，明天再来吧"
             session > -1 && currentSessionUsage >= session -> "${prefix}这次 $session 分钟到点了"
             reason != null -> reason
@@ -2107,7 +2144,9 @@ class TimeTrackingService : Service() {
 
     private fun checkLimits() {
          if (isLimitReached()) {
-             if (appScopedMode()) {
+             // 作息外必须整屏挡。家长勾了「只限制这几个应用」时，孩子换个没勾的
+             // 应用照样能看，作息就形同虚设 —— 这一条和额度用完不是一回事。
+             if (appScopedMode() && !HouseRules.isOutsideSchedule(this)) {
                  // 只限制部分应用时不做整屏遮罩
                  if (isOverlayShowing) removeOverlay()
                  refreshBadge()
@@ -2371,8 +2410,13 @@ class TimeTrackingService : Service() {
             setCountdown(10, 10)
         }
         v.findViewById<View>(R.id.restBlock)?.visibility = View.GONE
-        v.findViewById<TextView>(R.id.tvTitle)?.text = "休息时间到啦"
-        v.findViewById<TextView>(R.id.tvMessage)?.text = "让眼睛放个假，看看远处吧"
+        // 作息外和「看够了要休息」是两件事，文案不能共用：
+        // 说「休息时间到啦」孩子会以为等 20 分钟就能接着看，到点又被拦一次。
+        val outside = HouseRules.isOutsideSchedule(this)
+        v.findViewById<TextView>(R.id.tvTitle)?.text =
+            if (outside) "现在不是看电视的时间" else "休息时间到啦"
+        v.findViewById<TextView>(R.id.tvMessage)?.text =
+            if (outside) HouseRules.todayLabel(this) else "让眼睛放个假，看看远处吧"
         v.findViewById<TextView>(R.id.tvTimer)?.apply {
             visibility = View.VISIBLE
             text = "屏幕马上自动关掉"
@@ -2392,13 +2436,22 @@ class TimeTrackingService : Service() {
         v.findViewById<CountdownRingView>(R.id.ringCountdown)?.visibility = View.GONE
 
         val p = currentProfile
-        val dailyLimit = p?.dailyLimitMinutes ?: -1
+        val dailyLimit = HouseRules.dailyLimitWithExtra(this, p?.dailyLimitMinutes ?: -1)
         val dailyUsedUp = dailyLimit > 0 && accumulatedDailyUsage >= dailyLimit
+        // 作息外不是「休息一会儿就好」，而是「今天这个点不能看」：
+        // 挂一个 20 分钟倒计时会让孩子以为等到点就行，结果到点又被拦一次。
+        val outside = HouseRules.isOutsideSchedule(this)
 
-        v.findViewById<TextView>(R.id.tvTitle)?.text =
-            if (dailyUsedUp) "今天看完啦" else "休息时间到啦"
-        v.findViewById<TextView>(R.id.tvMessage)?.text =
-            if (dailyUsedUp) "明天再来吧" else "让眼睛放个假，看看远处吧"
+        v.findViewById<TextView>(R.id.tvTitle)?.text = when {
+            outside -> "现在不是看电视的时间"
+            dailyUsedUp -> "今天看完啦"
+            else -> "休息时间到啦"
+        }
+        v.findViewById<TextView>(R.id.tvMessage)?.text = when {
+            outside -> HouseRules.todayLabel(this)
+            dailyUsedUp -> "明天再来吧"
+            else -> "让眼睛放个假，看看远处吧"
+        }
 
         // 进入休息态：心跳从下一秒开始负责把「分/秒」往下跳
         isRestUiActive = true
@@ -2417,14 +2470,23 @@ class TimeTrackingService : Service() {
      */
     private fun updateRestBlockUi(v: View) {
         val p = currentProfile
-        val dailyLimit = p?.dailyLimitMinutes ?: -1
+        val dailyLimit = HouseRules.dailyLimitWithExtra(this, p?.dailyLimitMinutes ?: -1)
         val dailyUsedUp = dailyLimit > 0 && accumulatedDailyUsage >= dailyLimit
         val restBlock = v.findViewById<View>(R.id.restBlock)
         val tvTimer = v.findViewById<TextView>(R.id.tvTimer)
+        val outside = HouseRules.isOutsideSchedule(this)
 
-        if (!dailyUsedUp && applyRestCountdown(v, R.id.tvRestMin, R.id.tvRestSec)) {
+        if (!dailyUsedUp && !outside && applyRestCountdown(v, R.id.tvRestMin, R.id.tvRestSec)) {
             if (restBlock != null && restBlock.visibility != View.VISIBLE) {
                 restBlock.visibility = View.VISIBLE
+            }
+            if (tvTimer != null && tvTimer.visibility != View.GONE) {
+                tvTimer.visibility = View.GONE
+            }
+        } else if (outside) {
+            // 时段已经写在上面那行了，这里再写一遍就是重复
+            if (restBlock != null && restBlock.visibility != View.GONE) {
+                restBlock.visibility = View.GONE
             }
             if (tvTimer != null && tvTimer.visibility != View.GONE) {
                 tvTimer.visibility = View.GONE
@@ -2435,10 +2497,10 @@ class TimeTrackingService : Service() {
             }
             tvTimer?.apply {
                 if (visibility != View.VISIBLE) visibility = View.VISIBLE
-                val t = if (dailyUsedUp) {
-                    if (dailyLimit > 0) "今天已经看满 $dailyLimit 分钟" else "明天再来吧"
-                } else {
-                    "休息好了就能接着看"
+                val t = when {
+                    outside -> HouseRules.todayLabel(this@TimeTrackingService)
+                    dailyUsedUp -> if (dailyLimit > 0) "今天已经看满 $dailyLimit 分钟" else "明天再来吧"
+                    else -> "休息好了就能接着看"
                 }
                 if (text != t) text = t
             }
@@ -2909,7 +2971,9 @@ class TimeTrackingService : Service() {
                 }
 
                 // Calculate remaining time
-                val dailyLimit = cProfile.dailyLimitMinutes
+                val dailyLimit = HouseRules.dailyLimitWithExtra(
+                    this@TimeTrackingService, cProfile.dailyLimitMinutes
+                )
                 val sessionLimit = cProfile.sessionLimitMinutes
 
                 var remainingDaily = if (dailyLimit > -1) dailyLimit - accumulatedDailyUsage else Int.MAX_VALUE

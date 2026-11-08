@@ -6,10 +6,13 @@ import android.os.Build
 import android.util.Log
 import androidx.preference.PreferenceManager
 import com.example.tvlimit.data.AppDatabase
+import com.example.tvlimit.data.HouseRules
+import com.example.tvlimit.data.LimitControl
 import com.example.tvlimit.quiz.BankStore
 import com.example.tvlimit.quiz.QuestionBank
 import com.example.tvlimit.quiz.QuizSettings
 import com.example.tvlimit.quiz.QuizStats
+import com.example.tvlimit.quiz.WrongStore
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import org.json.JSONObject
@@ -18,6 +21,8 @@ import java.io.BufferedOutputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
 import java.net.Inet4Address
+import java.net.Inet6Address
+import java.net.InetAddress
 import java.net.InetSocketAddress
 import java.net.NetworkInterface
 import java.net.ServerSocket
@@ -30,14 +35,21 @@ import java.util.concurrent.Executors
 import kotlin.concurrent.thread
 
 /**
- * 局域网配置服务：电视上开一个极小的 HTTP 服务，家长用手机浏览器改题库和参数。
+ * 手机配置服务：电视上开一个极小的 HTTP 服务，家长用手机浏览器改所有设置。
  *
- * 为什么不用 NanoHTTPD 之类的库：整个功能就是一个页面 + 六个接口，
+ * 为什么不用 NanoHTTPD 之类的库：整个功能就是几个页面 + 一组接口，
  * 引一个依赖要改 gradle、要担心混淆和体积，还要多一份别人的代码。
  * 这里手写的解析只认「请求行 + header + 定长 body」，够用且没有隐藏行为。
  *
- * 安全边界：只监听局域网，所有 /api/ 接口都要先输家长 PIN 换一个内存里的 token；
- * 不读不写用户的任意文件，导入的题只落在 App 自己的 filesDir 里。
+ * 三层安全边界：
+ * ① 网络层：默认只接受局域网来源（见 [isClientAllowed]），公网地址直接 403；
+ * ② 应用层：所有 /api/ 接口都要先用家长 PIN 换一个内存里的 token（cookie）；
+ * ③ 数据层：不读不写用户的任意文件，导入的题只落在 App 自己的 filesDir 里。
+ *
+ * 「在外面也能改」走的是同一条通道。我们不做任何内网穿透 ——
+ * 家长在外面用 Tailscale / ZeroTier 这类点对点组网连回家时，来源地址是
+ * 100.64/10（CGNAT）或 fd7a::/48（IPv6 ULA），打开设置里的「允许远程」就放行。
+ * 这样开源项目不必背一台公网服务器，也不用碰证书和域名。
  */
 object ConfigServer {
 
@@ -50,7 +62,9 @@ object ConfigServer {
 
     private var serverSocket: ServerSocket? = null
     private var acceptThread: Thread? = null
-    private var html: ByteArray? = null
+
+    /** 静态页面按路径缓存：一个 60KB 的页面每次请求都读 assets，电视的 eMMC 会明显卡。 */
+    private val assets = HashMap<String, ByteArray>()
 
     /** 登录成功后发的 token，只存在内存里：关掉服务就全部失效。 */
     private val tokens = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
@@ -71,9 +85,32 @@ object ConfigServer {
 
     val running: Boolean get() = serverSocket?.isClosed == false
 
+    data class Endpoint(val url: String, val label: String, val remote: Boolean)
+
     fun url(): String? {
         val ip = lanIp() ?: return null
         return if (port > 0) "http://$ip:$port" else null
+    }
+
+    /**
+     * 所有能打开配置页的地址。
+     * @param includeRemote 是否把 100.64/10（Tailscale）这类地址也列出来
+     */
+    fun endpoints(includeRemote: Boolean): List<Endpoint> {
+        if (port <= 0) return emptyList()
+        val out = ArrayList<Endpoint>()
+        for ((ip, name) in ipv4Addresses()) {
+            val remote = !isLanAddress(ip)
+            if (remote && !includeRemote) continue
+            out.add(
+                Endpoint(
+                    url = "http://$ip:$port",
+                    label = if (remote) "远程 · ${name.ifEmpty { ip }}" else name.ifEmpty { ip },
+                    remote = remote
+                )
+            )
+        }
+        return out
     }
 
     @Synchronized
@@ -113,23 +150,68 @@ object ConfigServer {
         Log.i(TAG, "config server stopped")
     }
 
-    /** 局域网 IPv4。优先 wlan/eth，跳过 tun、rmnet 这类虚拟网卡。 */
+    /** 开启时用：方便家长在电视上看到「手机该打开哪个地址」。 */
     fun lanIp(): String? {
+        val list = ipv4Addresses()
+        return list.firstOrNull { isLanAddress(it.first) }?.first ?: list.firstOrNull()?.first
+    }
+
+    private fun ipv4Addresses(): List<Pair<String, String>> {
+        val out = ArrayList<Pair<String, String>>()
         try {
             for (nif in Collections.list(NetworkInterface.getNetworkInterfaces())) {
                 if (!nif.isUp || nif.isLoopback) continue
                 val name = nif.name
-                if (name.startsWith("tun") || name.startsWith("rmnet") || name.startsWith("dummy")) continue
+                if (name.startsWith("dummy")) continue
                 for (addr in nif.inetAddresses) {
-                    if (addr is Inet4Address && !addr.isLoopbackAddress && addr.isSiteLocalAddress) {
+                    if (addr is Inet4Address && !addr.isLoopbackAddress) {
                         @Suppress("DEPRECATION")
-                        return addr.hostAddress
+                        val ip = addr.hostAddress ?: continue
+                        out.add(ip to name)
                     }
                 }
             }
         } catch (e: Exception) {
         }
-        return null
+        return out
+    }
+
+    /** 局域网地址：10/8、172.16/12、192.168/16、169.254/16。 */
+    private fun isLanAddress(ip: String): Boolean {
+        val parts = ip.split('.').mapNotNull { it.toIntOrNull() }
+        if (parts.size != 4) return false
+        val (a, b) = parts
+        return a == 10 ||
+            (a == 172 && b in 16..31) ||
+            (a == 192 && b == 168) ||
+            (a == 169 && b == 254)
+    }
+
+    /**
+     * 这个来源能不能用配置页。
+     *
+     * 默认只放行局域网 —— 「只监听局域网」这句话不能靠「路由器不会转发」来保证，
+     * 光猫把电视放到 DMZ、或者家里开了端口映射，这条服务就直接暴露在公网上了。
+     */
+    fun isClientAllowed(addr: InetAddress?, allowRemote: Boolean): Boolean {
+        if (addr == null) return true
+        if (addr.isLoopbackAddress) return true
+        if (allowRemote) return true
+        return when (addr) {
+            is Inet4Address -> {
+                @Suppress("DEPRECATION")
+                isLanAddress(addr.hostAddress ?: return false)
+            }
+
+            is Inet6Address -> {
+                // 链路本地 fe80::/10 与 ULA fc00::/7 都是「家里这张网」的地址
+                val b = addr.address
+                val b0 = b[0].toInt() and 0xFF
+                b0 == 0xFE || (b0 and 0xFE) == 0xFC
+            }
+
+            else -> false
+        }
     }
 
     // ===== HTTP =====
@@ -176,6 +258,14 @@ object ConfigServer {
                 }
             }
 
+            // 来源检查放在最前面：连页面都不给，别提试 PIN 了
+            val allowRemote = HouseRules.allowRemote(ctx)
+            if (!isClientAllowed(socket.inetAddress, allowRemote)) {
+                Log.w(TAG, "rejected non-lan client: ${socket.inetAddress?.hostAddress}")
+                respond(out, 403, "text/html; charset=utf-8", FORBIDDEN_PAGE.toByteArray())
+                return
+            }
+
             val length = headers["content-length"]?.toIntOrNull() ?: 0
             if (length > MAX_BODY) {
                 json(out, 413, error("内容太大，最大 8MB"))
@@ -185,6 +275,14 @@ object ConfigServer {
 
             route(ctx, method, path, query, headers, body, out)
             out.flush()
+        } catch (e: ApiError) {
+            // 业务层抛出来的错误：状态码和文案都是给家长看的
+            try {
+                val out = BufferedOutputStream(socket.getOutputStream())
+                json(out, e.status, error(e.message))
+                out.flush()
+            } catch (ignored: Exception) {
+            }
         } catch (e: Exception) {
             Log.w(TAG, "request failed: ${e.message}")
         } finally {
@@ -234,10 +332,9 @@ object ConfigServer {
         body: ByteArray,
         out: BufferedOutputStream
     ) {
-        // 首页不需要登录：家长得先看到页面才能输 PIN
-        if (method == "GET" && (path == "/" || path == "/index.html")) {
-            val bytes = html ?: ctx.assets.open("web/index.html").readBytes().also { html = it }
-            respond(out, 200, "text/html; charset=utf-8", bytes)
+        // 登录页不需要 token：家长得先看到页面才能输 PIN
+        if (method == "GET" && !path.startsWith("/api/")) {
+            serveAsset(ctx, path, out)
             return
         }
 
@@ -256,37 +353,83 @@ object ConfigServer {
             return
         }
 
-        when (path) {
-            "/api/status" -> json(out, 200, status(ctx))
-            "/api/bank/import" -> importBank(ctx, query, body, out)
-            "/api/bank/clear" -> {
-                val n = BankStore.clear(ctx)
-                json(out, 200, JSONObject().put("ok", true).put("removed", n))
-            }
+        val result = when (path) {
+            "/api/overview" -> Api.overview(ctx)
+            "/api/report" -> Api.report(ctx, query)
+            "/api/extend" -> Api.extend(ctx, body)
+            "/api/pause" -> Api.pause(ctx, body)
+            "/api/resume" -> Api.resume(ctx)
+            "/api/profiles" -> Api.profiles(ctx)
+            "/api/profile" -> Api.updateProfile(ctx, body)
+            "/api/profile/switch" -> Api.switchProfile(ctx, body)
+            "/api/schedule" -> if (method == "POST") Api.setSchedule(ctx, body) else Api.schedule(ctx)
+            "/api/settings" -> if (method == "POST") Api.setSettings(ctx, body) else Api.settings(ctx)
+            "/api/config" -> if (method == "POST") Api.setConfig(ctx, body) else Api.config(ctx)
+            "/api/pin" -> Api.changePin(ctx, body)
+            "/api/quiz/test" -> Api.quizTest(ctx)
+            "/api/bank/gaps" -> Api.bankGaps(ctx)
+            "/api/bank/import" -> Api.importBank(ctx, query, body)
+            "/api/bank/clear" -> Api.clearBank(ctx)
             "/api/bank/export" -> {
                 val bytes = BankStore.exportJson(ctx).toByteArray()
                 respond(
                     out, 200, "application/json; charset=utf-8", bytes,
                     "Content-Disposition: attachment; filename=\"custom_bank.json\"\r\n"
                 )
+                return
             }
-            "/api/settings" -> updateSettings(ctx, body, out)
-            "/api/mistakes/clear" -> {
-                QuizStats.clear(ctx)
-                json(out, 200, JSONObject().put("ok", true))
+
+            "/api/mistakes" -> Api.mistakes(ctx)
+            "/api/mistakes/clear" -> Api.clearMistakes(ctx)
+            "/api/logout" -> {
+                logout(headers)
+                JSONObject().put("ok", true)
             }
-            "/api/quiz/test" -> {
-                // 家长在手机上点「在电视上试一组」：走和遥控器试答同一条广播
-                ctx.sendBroadcast(
-                    Intent("com.example.tvlimit.ACTION_QUIZ_TEST").setPackage(ctx.packageName)
-                )
-                json(out, 200, JSONObject().put("ok", true))
+
+            else -> {
+                json(out, 404, error("没有这个接口"))
+                return
             }
-            else -> json(out, 404, error("没有这个接口"))
         }
+        json(out, 200, result)
     }
 
-    private fun login(ctx: Context, headers: Map<String, String>, body: ByteArray, out: BufferedOutputStream) {
+    private fun serveAsset(ctx: Context, path: String, out: BufferedOutputStream) {
+        val name = when (path) {
+            "/", "/index.html" -> "index.html"
+            "/app.js" -> "app.js"
+            "/app.css" -> "app.css"
+            "/favicon.ico" -> {
+                respond(out, 204, "image/x-icon", ByteArray(0))
+                return
+            }
+
+            else -> {
+                json(out, 404, error("没有这个页面"))
+                return
+            }
+        }
+        val bytes = assets[name] ?: try {
+            ctx.assets.open("web/$name").readBytes().also { assets[name] = it }
+        } catch (e: Exception) {
+            json(out, 404, error("缺少页面文件 $name"))
+            return
+        }
+        val type = when {
+            name.endsWith(".html") -> "text/html; charset=utf-8"
+            name.endsWith(".js") -> "application/javascript; charset=utf-8"
+            name.endsWith(".css") -> "text/css; charset=utf-8"
+            else -> "application/octet-stream"
+        }
+        respond(out, 200, type, bytes)
+    }
+
+    private fun login(
+        ctx: Context,
+        headers: Map<String, String>,
+        body: ByteArray,
+        out: BufferedOutputStream
+    ) {
         val ip = headers["x-forwarded-for"] ?: "local"
         val now = System.currentTimeMillis()
         val rec = fails.getOrPut(ip) { Attempts() }
@@ -322,138 +465,31 @@ object ConfigServer {
         respond(
             out, 200, "application/json; charset=utf-8",
             JSONObject().put("ok", true).toString().toByteArray(),
-            "Set-Cookie: $COOKIE=$token; Path=/; Max-Age=86400; HttpOnly\r\n"
+            "Set-Cookie: $COOKIE=$token; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax\r\n"
         )
+    }
+
+    private fun logout(headers: Map<String, String>) {
+        tokenOf(headers)?.let { tokens.remove(it) }
+    }
+
+    private fun tokenOf(headers: Map<String, String>): String? {
+        val cookie = headers["cookie"] ?: return null
+        val hit = cookie.split(';').map { it.trim() }.firstOrNull { it.startsWith("$COOKIE=") }
+            ?: return null
+        return hit.substringAfter('=')
     }
 
     private fun isAuthed(headers: Map<String, String>): Boolean {
-        val cookie = headers["cookie"] ?: return false
-        val hit = cookie.split(';').map { it.trim() }.firstOrNull { it.startsWith("$COOKIE=") } ?: return false
-        return tokens.contains(hit.substringAfter('='))
-    }
-
-    private fun status(ctx: Context): JSONObject {
-        val all = QuestionBank.all(ctx)
-        val builtin = QuestionBank.builtin(ctx)
-        val custom = BankStore.loadCustom(ctx)
-
-        val bySubject = JSONObject()
-        val byGrade = JSONObject()
-        all.forEach { q ->
-            bySubject.put(q.subject, bySubject.optInt(q.subject, 0) + 1)
-            val k = q.grade.toString()
-            byGrade.put(k, byGrade.optInt(k, 0) + 1)
-        }
-
-        val version = try {
-            ctx.packageManager.getPackageInfo(ctx.packageName, 0).versionName ?: ""
-        } catch (e: Exception) {
-            ""
-        }
-
-        val settings = JSONObject()
-            .put("enabled", QuizSettings.enabled(ctx))
-            .put("interval", QuizSettings.intervalMinutes(ctx))
-            .put("count", QuizSettings.questionsPerSession(ctx))
-            .put("grade", QuizSettings.grade(ctx))
-            .put("subjects", JSONArray(QuizSettings.subjects(ctx).toList()))
-
-        return JSONObject()
-            .put(
-                "device", JSONObject()
-                    .put("model", Build.MODEL)
-                    .put("android", Build.VERSION.RELEASE)
-                    .put("version", version)
-                    .put("ip", lanIp() ?: "")
-                    .put("port", port)
-            )
-            .put(
-                "bank", JSONObject()
-                    .put("builtin", builtin.size)
-                    .put("custom", custom.size)
-                    .put("total", all.size)
-                    .put("bySubject", bySubject)
-                    .put("byGrade", byGrade)
-                    .put("meta", BankStore.meta(ctx) ?: JSONObject.NULL)
-            )
-            .put("settings", settings)
-            .put("usage", usage(ctx))
-            .put("mistakes", QuizStats.wrongKnowledgeCount(ctx))
-    }
-
-    /** 今日用量只读展示：真正的累计在追踪服务内存里，从这里改会被它下次 tick 覆盖掉。 */
-    private fun usage(ctx: Context): JSONObject {
-        val prefs = PreferenceManager.getDefaultSharedPreferences(ctx.applicationContext)
-        val name = prefs.getString("CURRENT_PROFILE_NAME", "儿童") ?: "儿童"
-        return try {
-            val dao = AppDatabase.getDatabase(ctx).profileDao()
-            val profile = runBlocking { dao.getProfileByName(name) }
-            val log = if (profile != null) {
-                runBlocking { dao.getUsageLog(profile.id, LocalDate.now().toString()) }
-            } else null
-            JSONObject()
-                .put("profile", profile?.name ?: name)
-                .put("today", log?.totalUsageMinutes ?: 0)
-                .put("dailyLimit", profile?.dailyLimitMinutes ?: -1)
-                .put("sessionLimit", profile?.sessionLimitMinutes ?: -1)
-        } catch (e: Exception) {
-            JSONObject().put("profile", name).put("today", 0).put("dailyLimit", -1).put("sessionLimit", -1)
-        }
-    }
-
-    private fun importBank(ctx: Context, query: String, body: ByteArray, out: BufferedOutputStream) {
-        if (body.isEmpty()) {
-            json(out, 400, error("没有收到内容"))
-            return
-        }
-        val replace = query.split('&').any { it == "replace=1" }
-        try {
-            val result = BankStore.import(ctx, String(body, Charsets.UTF_8), replace)
-            json(
-                out, 200, JSONObject()
-                    .put("ok", true)
-                    .put("result", result.toJson())
-                    .put("total", QuestionBank.all(ctx).size)
-            )
-        } catch (e: Exception) {
-            json(out, 400, error(e.message ?: "导入失败"))
-        }
-    }
-
-    private fun updateSettings(ctx: Context, body: ByteArray, out: BufferedOutputStream) {
-        val o = try {
-            JSONObject(String(body, Charsets.UTF_8))
-        } catch (e: Exception) {
-            json(out, 400, error("参数不是合法 JSON"))
-            return
-        }
-        if (o.has("enabled")) QuizSettings.setEnabled(ctx, o.optBoolean("enabled"))
-        if (o.has("interval")) QuizSettings.setIntervalMinutes(ctx, o.optInt("interval"))
-        if (o.has("count")) QuizSettings.setQuestionsPerSession(ctx, o.optInt("count"))
-        if (o.has("grade")) QuizSettings.setGrade(ctx, o.optInt("grade"))
-        val subjects = o.optJSONArray("subjects")
-        if (subjects != null && subjects.length() > 0) {
-            val set = HashSet<String>()
-            for (i in 0 until subjects.length()) set.add(subjects.optString(i))
-            QuizSettings.setSubjects(ctx, set)
-        }
-        json(
-            out, 200, JSONObject().put("ok", true).put(
-                "settings", JSONObject()
-                    .put("enabled", QuizSettings.enabled(ctx))
-                    .put("interval", QuizSettings.intervalMinutes(ctx))
-                    .put("count", QuizSettings.questionsPerSession(ctx))
-                    .put("grade", QuizSettings.grade(ctx))
-                    .put("subjects", JSONArray(QuizSettings.subjects(ctx).toList()))
-            )
-        )
+        val t = tokenOf(headers) ?: return false
+        return tokens.contains(t)
     }
 
     // ===== 响应 =====
 
-    private fun error(msg: String) = JSONObject().put("ok", false).put("error", msg)
+    internal fun error(msg: String?) = JSONObject().put("ok", false).put("error", msg ?: "出错了")
 
-    private fun json(out: BufferedOutputStream, code: Int, obj: JSONObject) {
+    internal fun json(out: BufferedOutputStream, code: Int, obj: JSONObject) {
         respond(out, code, "application/json; charset=utf-8", obj.toString().toByteArray())
     }
 
@@ -469,6 +505,7 @@ object ConfigServer {
             append("Content-Type: ").append(contentType).append("\r\n")
             append("Content-Length: ").append(body.size).append("\r\n")
             append("Cache-Control: no-store\r\n")
+            append("X-Content-Type-Options: nosniff\r\n")
             append("Connection: close\r\n")
             if (extraHeaders.isNotEmpty()) append(extraHeaders)
             append("\r\n")
@@ -480,6 +517,7 @@ object ConfigServer {
 
     private fun reason(code: Int): String = when (code) {
         200 -> "OK"
+        204 -> "No Content"
         400 -> "Bad Request"
         401 -> "Unauthorized"
         403 -> "Forbidden"
@@ -488,4 +526,17 @@ object ConfigServer {
         429 -> "Too Many Requests"
         else -> "Error"
     }
+
+    private val FORBIDDEN_PAGE = """
+        <!doctype html><html lang="zh-CN"><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>不能在当前网络打开</title>
+        <body style="background:#0d1220;color:#e8eef9;font:16px/1.7 -apple-system,system-ui,sans-serif;padding:32px">
+        <h2 style="color:#ff7a7a">这个地址不能打开电视配置页</h2>
+        <p>手机和电视需要连在同一个 WiFi（家里那张网）。</p>
+        <p>如果你在外面，先在电视的设置里打开「允许远程」，并让两台设备都登录同一个
+        Tailscale / ZeroTier 账号，再用电视上显示的那个 100.x 地址。</p>
+        <p style="color:#9faac2">出于安全考虑，公网地址一律拒绝，不做任何例外。</p>
+        </body></html>
+    """.trimIndent()
 }

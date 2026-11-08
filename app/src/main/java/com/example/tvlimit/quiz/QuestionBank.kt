@@ -178,7 +178,13 @@ object QuizStats {
 
     fun clear(ctx: Context) {
         val editor = sp(ctx).edit()
-        sp(ctx).all.keys.filter { it != CLEAR_AT }.forEach { editor.remove(it) }
+        // 只删「错题计数」的 key，形如 "math|两位数加法"。
+        //
+        // 以前的写法是 `all.keys.filter { it != CLEAR_AT }.forEach { remove(it) }`，
+        // 而这个 prefs 文件同时也是家长密码、答题参数、作息时段、今日加时的家 ——
+        // 家长在手机上一点「清空错题」，PIN 回到 1234、答题门禁被关掉、
+        // 作息和加时全部消失（2026-11-08 真机踩到，靠日志才定位到）。
+        sp(ctx).all.keys.filter { it.contains('|') }.forEach { editor.remove(it) }
         editor.putLong(CLEAR_AT, System.currentTimeMillis()).apply()
     }
 }
