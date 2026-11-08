@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  4K 电视（3840x2160 @ density 320 → 1920x1080dp）。
+
+  这种屏幕的 dp 数量是 1080p 的 1.5 倍，尺寸照搬 1080p 的话所有内容会缩到屏幕中间
+  一小块 —— 也就是「换台电视就不好看」。
+
+  注意：不少 4K 电视其实仍以 1080p 渲染再放大，那种情况不会命中这里，走标准档即可。
+  本档的可用宽度（1920dp）同时满足 w1600dp 和 h700dp，Android 的限定符优先级里
+  宽度高于高度，所以最终用的是这一份。
+-->
+<resources>
+    <!-- 4K 面板的 overscan 更明显（3% ≈ 58dp），边距要跟着放大 -->
+    <dimen name="screen_pad_h">104dp</dimen>
+    <dimen name="screen_pad_v">68dp</dimen>
+
+    <dimen name="text_hero">124dp</dimen>
+    <dimen name="hero_size">140sp</dimen>
+    <dimen name="text_h1">56sp</dimen>
+    <dimen name="text_h2">40sp</dimen>
+    <dimen name="text_body">34sp</dimen>
+    <dimen name="text_note">28sp</dimen>
+    <dimen name="text_tiny">22sp</dimen>
+
+    <dimen name="radius_card">30dp</dimen>
+    <dimen name="radius_pill">100dp</dimen>
+    <dimen name="gap">34dp</dimen>
+    <dimen name="card_pad">60dp</dimen>
+
+    <!-- 焦点描边在 4K 上要更粗，否则远看只剩一条细线 -->
+    <dimen name="focus_stroke">6dp</dimen>
+
+    <dimen name="header_height">92dp</dimen>
+    <dimen name="main_gap_top">40dp</dimen>
+    <dimen name="main_side_width">480dp</dimen>
+    <dimen name="side_icon">62dp</dimen>
+    <dimen name="side_icon_gap">26dp</dimen>
+    <dimen name="side_sub_gap">12dp</dimen>
+    <dimen name="side_title">36sp</dimen>
+    <dimen name="side_sub">26sp</dimen>
+    <dimen name="badge_height">56dp</dimen>
+    <dimen name="badge_text">26sp</dimen>
+    <dimen name="bar_min_height">100dp</dimen>
+
+    <dimen name="tip_max_width">840dp</dimen>
+
+    <!-- 表单类页面 -->
+    <dimen name="page_pad_top">64dp</dimen>
+    <dimen name="page_pad_bottom">52dp</dimen>
+    <dimen name="row_h">128dp</dimen>
+    <dimen name="stepper_size">92dp</dimen>
+    <dimen name="row_gap">20dp</dimen>
+    <dimen name="footer_h">96dp</dimen>
+    <dimen name="qr_size">340dp</dimen>
+</resources>

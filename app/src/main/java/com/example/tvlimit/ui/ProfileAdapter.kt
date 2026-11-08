@@ -32,7 +32,7 @@ class ProfileAdapter(private val onItemClick: (ProfileWithUsage) -> Unit) :
         private val tvSub: TextView = itemView.findViewById(R.id.tvProfileSub)
 
         init {
-            TvFocus.attach(card, 1.04f)
+            TvFocus.attach(card)
         }
 
         fun bind(item: ProfileWithUsage) {

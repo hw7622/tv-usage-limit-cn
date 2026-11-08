@@ -1,6 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  小徽章（「数学 · 二年级」「儿童」）。
+
+  原来是白色实心，靠 backgroundTint 染成深色。但答题页那边忘了设 tint，
+  于是在电视上显示成「白底 + 浅黄字」，对比度 1.5:1 —— 家长反馈「那一小块看不清」。
+  干脆把漆直接刷在这里：深褐底 + 浅黄字，不需要任何调用方再去 tint。
+-->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
-    <solid android:color="#FFFFFF" />
+    <solid android:color="@color/sun_deep" />
     <corners android:radius="100dp" />
 </shape>

@@ -6,7 +6,6 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -32,8 +31,8 @@ class WebSetupActivity : AppCompatActivity() {
     private lateinit var tvState: TextView
     private lateinit var tvSub: TextView
     private lateinit var tvTip: TextView
-    private lateinit var btnToggle: Button
-    private lateinit var btnRemote: Button
+    private lateinit var btnToggle: TextView
+    private lateinit var btnRemote: TextView
 
     /** 上一次看到的运行状态，用来判断是不是「刚刚被自动关掉了」。 */
     private var lastRunning = false

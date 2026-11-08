@@ -1,15 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  次要按钮：透明底 + 灰色细边，焦点时换成 4dp 的天蓝环。
+
+  非焦点 2dp / 焦点 4dp，粗细差一倍 —— 这个差别比「把按钮放大 2%」更能被眼睛抓住，
+  而且完全不改变控件尺寸，所以永远不会被父容器裁掉、也不会盖住旁边的按钮。
+-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape android:shape="rectangle">
             <solid android:color="@color/surface_hi" />
-            <stroke android:width="@dimen/focus_stroke" android:color="@color/sky" />
+            <stroke android:width="4dp" android:color="@color/sky" />
             <corners android:radius="@dimen/radius_pill" />
         </shape>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <solid android:color="@color/surface_hi" />
+            <stroke android:width="2dp" android:color="@color/stroke_hi" />
             <corners android:radius="@dimen/radius_pill" />
         </shape>
     </item>

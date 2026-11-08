@@ -1,11 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  主按钮（亮黄底 + 深色字）。
+
+  焦点态是「两条环」，而不是一条白边：
+
+  这个按钮的填充是亮黄，直接描一圈白，对比度只有 1.3:1，电视上隔着三米等于没描边 ——
+  这就是「按钮边框显示不全」的来源。改成两环后，两条环各自贴着一侧：
+
+      外圈 3dp 白   ← 贴着深色背景，对比 15:1
+      内圈 3dp 深褐 ← 贴着亮黄填充，对比 8:1
+
+  内外两侧都有强对比，不管电视亮度调多低、面板偏色多严重，这一圈都看得见。
+  另外焦点时填充从 #FFC94A 提亮到 #FFE9A8，远看还有「这个亮了」的信号。
+-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
-        <shape android:shape="rectangle">
-            <solid android:color="#FFD975" />
-            <stroke android:width="4dp" android:color="#FFFFFF" />
-            <corners android:radius="@dimen/radius_pill" />
-        </shape>
+        <layer-list>
+            <item>
+                <shape android:shape="rectangle">
+                    <solid android:color="#FFE9A8" />
+                    <stroke android:width="6dp" android:color="#FFFFFF" />
+                    <corners android:radius="@dimen/radius_pill" />
+                </shape>
+            </item>
+            <item
+                android:left="3dp"
+                android:right="3dp"
+                android:top="3dp"
+                android:bottom="3dp">
+                <shape android:shape="rectangle">
+                    <solid android:color="#FFE9A8" />
+                    <stroke android:width="3dp" android:color="#5C4300" />
+                    <corners android:radius="@dimen/radius_pill" />
+                </shape>
+            </item>
+        </layer-list>
     </item>
     <item android:state_pressed="true">
         <shape android:shape="rectangle">

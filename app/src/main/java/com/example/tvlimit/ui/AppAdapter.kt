@@ -31,7 +31,7 @@ class AppAdapter(
         private val ivCheck: ImageView = view.findViewById(R.id.ivCheck)
 
         init {
-            TvFocus.attach(card, 1.02f)
+            TvFocus.attach(card)
         }
 
         private fun bindCheck(item: AppItem) {

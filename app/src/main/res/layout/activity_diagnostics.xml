@@ -132,7 +132,7 @@
         android:ellipsize="end"
         android:text=""
         android:textColor="@color/text_dim"
-        android:textSize="15sp"
+        android:textSize="16sp"
         android:includeFontPadding="false" />
 
     <FrameLayout
@@ -159,7 +159,7 @@
                 android:text=""
                 android:textColor="@color/text_dim"
                 android:textIsSelectable="false"
-                android:textSize="12sp"
+                android:textSize="14sp"
                 android:typeface="monospace"
                 android:lineSpacingExtra="3dp" />
         </ScrollView>
@@ -171,7 +171,7 @@
         android:layout_marginTop="12dp"
         android:orientation="horizontal">
 
-        <Button
+        <TextView
             android:id="@+id/btnRefresh"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -180,9 +180,10 @@
             android:focusable="true"
             android:text="刷新"
             android:textColor="@color/text_main"
-            android:textSize="19sp" />
+            android:textSize="19sp"
+            android:gravity="center" />
 
-        <Button
+        <TextView
             android:id="@+id/btnExport"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -191,10 +192,11 @@
             android:background="@drawable/selector_btn_primary"
             android:focusable="true"
             android:text="导出日志"
-            android:textColor="@color/text_main"
-            android:textSize="19sp" />
+            android:textColor="#241A02"
+            android:textSize="19sp"
+            android:gravity="center" />
 
-        <Button
+        <TextView
             android:id="@+id/btnBack"
             android:layout_width="0dp"
             android:layout_height="match_parent"
@@ -204,7 +206,8 @@
             android:focusable="true"
             android:text="返回"
             android:textColor="@color/text_main"
-            android:textSize="19sp" />
+            android:textSize="19sp"
+            android:gravity="center" />
     </LinearLayout>
 
 </LinearLayout>

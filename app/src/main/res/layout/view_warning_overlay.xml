@@ -10,8 +10,10 @@
     android:background="@drawable/bg_rest_scrim"
     android:orientation="vertical"
     android:gravity="center"
-    android:paddingTop="40dp"
-    android:paddingBottom="40dp">
+    android:paddingStart="@dimen/screen_pad_h"
+    android:paddingEnd="@dimen/screen_pad_h"
+    android:paddingTop="@dimen/screen_pad_v"
+    android:paddingBottom="@dimen/screen_pad_v">
 
     <!-- 只在「10 秒后关屏」那段倒计时里出现；进入休息态后整块 GONE，把空间让给大数字 -->
     <com.example.tvlimit.ui.CountdownRingView
@@ -131,7 +133,7 @@
         </LinearLayout>
     </LinearLayout>
 
-    <Button
+    <TextView
         android:id="@+id/btnSwitchProfile"
         style="@style/Widget.GhostButton"
         android:layout_width="wrap_content"
@@ -142,6 +144,7 @@
         android:paddingEnd="56dp"
         android:text="我是家长"
         android:textColor="@color/sun"
-        android:textSize="26sp" />
+        android:textSize="26sp"
+        android:gravity="center" />
 
 </LinearLayout>

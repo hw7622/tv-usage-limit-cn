@@ -38,18 +38,8 @@ class OptionDialog(
 
     private fun dp(v: Int): Int = (v * density).toInt()
 
-    private fun rowBackground(): StateListDrawable {
-        fun shape(fill: String, stroke: String, strokeW: Int) = GradientDrawable().apply {
-            cornerRadius = dp(18).toFloat()
-            setColor(Color.parseColor(fill))
-            setStroke(dp(strokeW), Color.parseColor(stroke))
-        }
-        return StateListDrawable().apply {
-            addState(intArrayOf(android.R.attr.state_focused), shape("#FFC94A", "#FFFFFF", 3))
-            addState(intArrayOf(android.R.attr.state_pressed), shape("#FFC94A", "#FFFFFF", 3))
-            addState(intArrayOf(), shape("#1E2740", "#33405F", 2))
-        }
-    }
+    /** 焦点态的统一写法见 [TvDrawables]：外圈白 + 内圈深褐，不再是「亮黄底配白边」。 */
+    private fun rowBackground(): StateListDrawable = TvDrawables.rowBackground(::dp, 18)
 
     private fun labelColor(): ColorStateList = ColorStateList(
         arrayOf(intArrayOf(android.R.attr.state_focused), intArrayOf()),
@@ -66,11 +56,7 @@ class OptionDialog(
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER_HORIZONTAL
             setPadding(dp(34), dp(30), dp(34), dp(30))
-            background = GradientDrawable().apply {
-                cornerRadius = dp(30).toFloat()
-                setColor(Color.parseColor("#F5161D2E"))
-                setStroke(dp(2), Color.parseColor("#33405F"))
-            }
+            background = TvDrawables.panel(::dp)
         }
 
         panel.addView(TextView(context).apply {
@@ -136,8 +122,11 @@ class OptionDialog(
             ).apply { topMargin = if (index == 0) 0 else dp(12) })
         }
 
-        // 列表最多占屏幕 78% 高：再高加上标题和面板内边距就顶出 720dp 屏幕了。
-        val maxListHeight = (context.resources.displayMetrics.heightPixels * 0.78f).toInt()
+        // 列表高度 = 屏幕高 - 固定开销（标题 + 面板内边距 + 上下留白）。
+        // 用比例（0.78）算的话，小屏电视上「78% + 标题 + padding」会超过 100%，
+        // 面板被窗口裁掉一圈，最后一项看着像被切了 —— 直接减固定值更稳。
+        val maxListHeight =
+            (context.resources.displayMetrics.heightPixels - dp(190)).coerceAtLeast(dp(200))
         val scroller = object : ScrollView(context) {
             override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
                 // 父布局给的是 UNSPECIFIED/AT_MOST 都可能，统一换成「最多 maxListHeight」

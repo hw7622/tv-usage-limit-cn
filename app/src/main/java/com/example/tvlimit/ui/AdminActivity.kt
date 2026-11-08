@@ -304,7 +304,7 @@ class AdminActivity : AppCompatActivity() {
                     Intent(this, EditProfileActivity::class.java).putExtra("PROFILE_ID", profile.id)
                 )
             }
-            TvFocus.attach(row, 1.02f)
+            TvFocus.attach(row)
             profileList.addView(row)
         }
 

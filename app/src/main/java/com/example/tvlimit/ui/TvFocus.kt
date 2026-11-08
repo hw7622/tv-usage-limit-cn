@@ -1,15 +1,33 @@
 package com.example.tvlimit.ui
 
 import android.view.View
-import android.view.ViewGroup
 
 /**
- * 电视端焦点反馈：遥控器移上去时轻微放大，配合 selector 描边，
- * 远距离一眼就能看出「现在选中的是哪一个」。
+ * 电视端焦点辅助。
  *
- * 注意：放大后的卡片会超出父容器边界，而 ViewGroup 默认会把超出的部分裁掉，
- * 表现就是「描边只有三条边、右边和圆角被切平」。所以这里顺带把整条祖先链的
- * 裁剪都关掉，让放大后的描边能完整画出来。
+ * ## 为什么焦点反馈不再「放大」
+ *
+ * 以前是 `scale = 1.02`（列表卡片 1.04），想做出「选中项跳出来」的效果。问题是放大
+ * **必然**让控件超出自己的布局边界，于是描边被吃掉：
+ *
+ * - 父容器默认 `clipChildren = true`，把超出的那条边裁掉 → 「边框只有三条边」；
+ * - 就算关掉裁剪，放大后的控件会盖住兄弟控件，后画的把先画的描边压掉；
+ * - 各厂商 ROM 对 View 边界、阴影的处理不一致，所以这个毛病「换台电视就换个样」。
+ *
+ * 试过「非焦点 0.98、焦点 1.0」（只缩不放），确实不会溢出，但只有被 [attach] 过的
+ * 控件才缩，同一行里漏掉一个就会差 2% 高矮不齐 —— 比没有动效更难看。
+ *
+ * 所以现在**不改变任何控件尺寸**，焦点完全由 selector 的描边承担：
+ * 非焦点 1~2dp 细边、焦点 4dp 亮色粗边。粗细差一倍，三米外一眼就能看见。
+ *
+ * ## 千万不要再去动祖先的 clipChildren
+ *
+ * 之前这里为了让放大的描边不被裁，会把整条祖先链的 `clipChildren` 设成 false。
+ * 这个做法有个隐蔽的副作用：**`ScrollView` 就是靠 `clipChildren` 裁剪滚动内容的**。
+ * 关掉之后，滚出视口的卡片会继续往下画，直接糊在固定底栏的按钮上 ——
+ * 表现出来是「按钮的边框被别的东西盖住，显示不全」。
+ *
+ * 既然现在不放大，这一步也就不需要了，一并删掉。
  */
 object TvFocus {
 
@@ -31,29 +49,18 @@ object TvFocus {
         }
     }
 
-    fun attach(vararg views: View, scale: Float = 1.02f) {
-        views.forEach { attach(it, scale) }
+    /**
+     * 把控件纳入焦点体系。
+     *
+     * 现在只做一件事：确保它真的能被遥控器选中。以前这里会改祖先的裁剪、挂缩放动画，
+     * 现在焦点样式完全交给 selector，所以剩下的就是把 `focusable` 补齐 ——
+     * 用 `<TextView>` 当按钮时最容易漏这个属性，漏了页面就没有任何焦点。
+     */
+    fun attach(vararg views: View) {
+        views.forEach { attach(it) }
     }
 
-    fun attach(view: View, scale: Float = 1.02f) {
-        allowOverflow(view)
-        view.setOnFocusChangeListener { v, hasFocus ->
-            v.animate().cancel()
-            v.animate()
-                .scaleX(if (hasFocus) scale else 1f)
-                .scaleY(if (hasFocus) scale else 1f)
-                .setDuration(140)
-                .start()
-        }
-    }
-
-    /** 关掉所有祖先容器的子视图裁剪，避免缩放后的描边被切掉。 */
-    private fun allowOverflow(view: View) {
-        var parent = view.parent
-        while (parent is ViewGroup) {
-            parent.clipChildren = false
-            parent.clipToPadding = false
-            parent = parent.parent
-        }
+    fun attach(view: View) {
+        view.isFocusable = true
     }
 }

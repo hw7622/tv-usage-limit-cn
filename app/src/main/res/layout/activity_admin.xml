@@ -86,7 +86,7 @@
                     android:maxLines="1"
                     android:text="已关闭"
                     android:textColor="@color/text_dim"
-                    android:textSize="13sp" />
+                    android:textSize="15sp" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
@@ -155,7 +155,7 @@
                 android:ellipsize="end"
                 android:text="暂停计时和拦截"
                 android:textColor="@color/text_dim"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 android:includeFontPadding="false" />
         </LinearLayout>
 
@@ -201,7 +201,7 @@
                 android:ellipsize="end"
                 android:text="不显示"
                 android:textColor="@color/text_dim"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 android:includeFontPadding="false" />
         </LinearLayout>
 
@@ -246,7 +246,7 @@
                 android:ellipsize="end"
                 android:text="改成 4 位数字"
                 android:textColor="@color/text_dim"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 android:includeFontPadding="false" />
         </LinearLayout>
 
@@ -292,7 +292,7 @@
                 android:ellipsize="end"
                 android:text="检查中…"
                 android:textColor="@color/text_dim"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 android:includeFontPadding="false" />
         </LinearLayout>
 
@@ -338,7 +338,7 @@
                 android:ellipsize="end"
                 android:text="中断 · 答题"
                 android:textColor="@color/text_dim"
-                android:textSize="13sp"
+                android:textSize="15sp"
                 android:includeFontPadding="false" />
         </LinearLayout>
     </LinearLayout>

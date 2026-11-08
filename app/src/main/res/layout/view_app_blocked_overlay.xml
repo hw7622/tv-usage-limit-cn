@@ -13,7 +13,10 @@
     android:background="@drawable/bg_screen"
     android:gravity="center"
     android:orientation="vertical"
-    android:padding="48dp">
+    android:paddingStart="@dimen/screen_pad_h"
+    android:paddingEnd="@dimen/screen_pad_h"
+    android:paddingTop="@dimen/screen_pad_v"
+    android:paddingBottom="@dimen/screen_pad_v">
 
     <ImageView
         android:layout_width="88dp"
@@ -122,22 +125,24 @@
         android:layout_marginTop="34dp"
         android:orientation="horizontal">
 
-        <Button
+        <TextView
             android:id="@+id/btnAppBlockedHome"
             style="@style/Widget.GhostButton"
             android:layout_width="wrap_content"
             android:layout_height="68dp"
             android:minWidth="220dp"
-            android:text="回到首页" />
+            android:text="回到首页"
+            android:gravity="center" />
 
-        <Button
+        <TextView
             android:id="@+id/btnAppBlockedParent"
             style="@style/Widget.BigButton"
             android:layout_width="wrap_content"
             android:layout_height="68dp"
             android:layout_marginStart="24dp"
             android:minWidth="220dp"
-            android:text="我是家长" />
+            android:text="我是家长"
+            android:gravity="center" />
     </LinearLayout>
 
 </LinearLayout>

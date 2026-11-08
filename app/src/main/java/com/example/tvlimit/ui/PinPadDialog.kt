@@ -35,24 +35,10 @@ class PinPadDialog(
 
     private fun dp(v: Int): Int = (v * density).toInt()
 
-    private fun panelBackground(): GradientDrawable = GradientDrawable().apply {
-        cornerRadius = dp(30).toFloat()
-        setColor(Color.parseColor("#F5161D2E"))
-        setStroke(dp(2), Color.parseColor("#33405F"))
-    }
+    private fun panelBackground(): GradientDrawable = TvDrawables.panel(::dp)
 
-    private fun keyBackground(): StateListDrawable {
-        fun shape(fill: String, stroke: String, strokeW: Int = 2) = GradientDrawable().apply {
-            cornerRadius = dp(20).toFloat()
-            setColor(Color.parseColor(fill))
-            setStroke(dp(strokeW), Color.parseColor(stroke))
-        }
-        return StateListDrawable().apply {
-            addState(intArrayOf(android.R.attr.state_focused), shape("#FFC94A", "#FFFFFF", 4))
-            addState(intArrayOf(android.R.attr.state_pressed), shape("#FFC94A", "#FFFFFF", 4))
-            addState(intArrayOf(), shape("#1E2740", "#33405F", 2))
-        }
-    }
+    /** 焦点态的统一写法见 [TvDrawables]：外圈白 + 内圈深褐，不再是「亮黄底配白边」。 */
+    private fun keyBackground(): StateListDrawable = TvDrawables.rowBackground(::dp, 20)
 
     private fun keyTextColor(): ColorStateList = ColorStateList(
         arrayOf(

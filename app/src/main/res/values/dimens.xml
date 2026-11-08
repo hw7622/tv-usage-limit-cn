@@ -1,20 +1,59 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  紧凑档：可用高度 < 700dp 的电视。
+
+  典型是 720p 面板 + density 213 —— 只有 961x541dp，比 1080p（1280x720dp）少了
+  整整 180dp 的高度。原来按 1080p 写死的字号塞进去，主界面左侧的「20 分钟」大数字
+  会被卡片裁掉一半，右侧三张卡的标题也只剩上半截。这一档就是给它用的。
+
+  为什么默认值 = 紧凑值：宁可在一台超大屏上显得小一点，也不要在任何一台电视上「显示不全」。
+  大屏走 values-h700dp（1080p）和 values-w1600dp（4K）两档覆盖。
+-->
 <resources>
-    <!-- 电视实机 1920x1080 / density 240 → 可用空间 1280x720dp -->
-    <dimen name="screen_pad_h">64dp</dimen>
-    <dimen name="screen_pad_v">40dp</dimen>
+    <!-- 屏幕安全边距（含 overscan 余量） -->
+    <dimen name="screen_pad_h">52dp</dimen>
+    <dimen name="screen_pad_v">24dp</dimen>
 
-    <dimen name="text_hero">88dp</dimen>
-    <dimen name="text_h1">40sp</dimen>
-    <dimen name="text_h2">28sp</dimen>
-    <dimen name="text_body">24sp</dimen>
-    <dimen name="text_note">20sp</dimen>
-    <dimen name="text_tiny">16sp</dimen>
+    <!-- 字号 -->
+    <dimen name="text_hero">64dp</dimen>
+    <dimen name="hero_size">64sp</dimen>
+    <dimen name="text_h1">32sp</dimen>
+    <dimen name="text_h2">24sp</dimen>
+    <dimen name="text_body">20sp</dimen>
+    <dimen name="text_note">17sp</dimen>
+    <dimen name="text_tiny">15sp</dimen>
 
-    <dimen name="radius_card">22dp</dimen>
+    <!-- 圆角与间距 -->
+    <dimen name="radius_card">18dp</dimen>
     <dimen name="radius_pill">100dp</dimen>
-    <dimen name="gap">24dp</dimen>
+    <dimen name="gap">18dp</dimen>
+    <dimen name="card_pad">28dp</dimen>
 
-    <dimen name="card_pad">44dp</dimen>
+    <!-- 焦点描边：非焦点 1~2dp、焦点 4dp，粗细差一倍才看得清 -->
     <dimen name="focus_stroke">3dp</dimen>
+
+    <!-- 主界面 -->
+    <dimen name="header_height">48dp</dimen>
+    <dimen name="main_gap_top">16dp</dimen>
+    <dimen name="main_side_width">280dp</dimen>
+    <dimen name="side_icon">30dp</dimen>
+    <dimen name="side_icon_gap">12dp</dimen>
+    <dimen name="side_sub_gap">6dp</dimen>
+    <dimen name="side_title">21sp</dimen>
+    <dimen name="side_sub">15sp</dimen>
+    <dimen name="badge_height">32dp</dimen>
+    <dimen name="badge_text">15sp</dimen>
+    <dimen name="bar_min_height">56dp</dimen>
+
+    <!-- 扫码页说明文字的宽度上限 -->
+    <dimen name="tip_max_width">520dp</dimen>
+
+    <!-- 表单类页面 -->
+    <dimen name="page_pad_top">24dp</dimen>
+    <dimen name="page_pad_bottom">24dp</dimen>
+    <dimen name="row_h">64dp</dimen>
+    <dimen name="stepper_size">52dp</dimen>
+    <dimen name="row_gap">10dp</dimen>
+    <dimen name="footer_h">56dp</dimen>
+    <dimen name="qr_size">168dp</dimen>
 </resources>

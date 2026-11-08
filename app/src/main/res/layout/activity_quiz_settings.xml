@@ -5,10 +5,16 @@
     所以整页套一层 ScrollView 兜底：真放不下时遥控器移动焦点，系统会自动滚动到可见位置。
     卡片高度同时压到 68dp，正常情况下一屏能全看到，不用滚。
 -->
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/bg_screen"
+    android:orientation="vertical">
+
+<ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:layout_weight="1"
     android:fillViewport="true"
     android:scrollbars="none">
 
@@ -37,7 +43,7 @@
             android:includeFontPadding="false"
             android:text="每看一段时间弹一组题，一组全答对才能接着看。到点该休息时休息优先，不另外弹题。"
             android:textColor="@color/text_dim"
-            android:textSize="14sp" />
+            android:textSize="16sp" />
 
         <!-- 开关 -->
         <LinearLayout
@@ -78,7 +84,7 @@
                     android:maxLines="1"
                     android:text="关着的时候和以前一样，只按时间管"
                     android:textColor="@color/text_dim"
-                    android:textSize="13sp" />
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <TextView
@@ -130,7 +136,7 @@
                     android:maxLines="1"
                     android:text="只算真的在看的时间，桌面和休息不算"
                     android:textColor="@color/text_dim"
-                    android:textSize="13sp" />
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <TextView
@@ -182,7 +188,7 @@
                     android:maxLines="1"
                     android:text="必须全部答对；答错还会追加题目"
                     android:textColor="@color/text_dim"
-                    android:textSize="13sp" />
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <TextView
@@ -234,7 +240,7 @@
                     android:maxLines="1"
                     android:text="数学按年级生成，其他科目从题库选相近年级"
                     android:textColor="@color/text_dim"
-                    android:textSize="13sp" />
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <TextView
@@ -286,7 +292,7 @@
                     android:maxLines="1"
                     android:text="可以多选，至少留一科"
                     android:textColor="@color/text_dim"
-                    android:textSize="13sp" />
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <TextView
@@ -338,7 +344,7 @@
                     android:maxLines="1"
                     android:text="手机连同一个 WiFi，浏览器打开就能加题、改设置"
                     android:textColor="@color/text_dim"
-                    android:textSize="13sp" />
+                    android:textSize="15sp" />
             </LinearLayout>
 
             <TextView
@@ -359,40 +365,41 @@
             android:layout_marginTop="8dp"
             android:includeFontPadding="false"
             android:text=""
-            android:textColor="@color/text_faint"
-            android:textSize="14sp" />
+            android:textColor="@color/text_dim"
+            android:textSize="16sp" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="46dp"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <Button
-                android:id="@+id/btnQuizClearMistakes"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:background="@drawable/selector_btn_ghost"
-                android:focusable="true"
-                android:text="清空错题记录"
-                android:textAllCaps="false"
-                android:textColor="@color/text_sub"
-                android:textSize="16sp" />
-
-            <!-- 测试用：不用真的等 10 分钟，点一下就能看到答题页长什么样 -->
-            <Button
-                android:id="@+id/btnQuizPreview"
-                android:layout_width="0dp"
-                android:layout_height="match_parent"
-                android:layout_marginStart="12dp"
-                android:layout_weight="1"
-                android:background="@drawable/selector_btn_ghost"
-                android:focusable="true"
-                android:text="现在答一组试试"
-                android:textAllCaps="false"
-                android:textColor="@color/sun"
-                android:textSize="16sp" />
-        </LinearLayout>
     </LinearLayout>
 </ScrollView>
+
+    <!-- 底部按钮固定在屏幕底部，不跟着内容滚。
+         961x541dp 那种小屏电视上，六行卡片一定装不下；按钮如果留在滚动区里，
+         家长根本不知道下面还有东西。 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:paddingStart="@dimen/screen_pad_h"
+        android:paddingEnd="@dimen/screen_pad_h"
+        android:paddingTop="6dp"
+        android:paddingBottom="10dp">
+
+        <TextView
+            android:id="@+id/btnQuizClearMistakes"
+            style="@style/Widget.GhostButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/footer_h"
+            android:minWidth="200dp"
+            android:text="清空错题记录" />
+
+        <TextView
+            android:id="@+id/btnQuizPreview"
+            style="@style/Widget.GhostButton"
+            android:layout_width="wrap_content"
+            android:layout_height="@dimen/footer_h"
+            android:layout_marginStart="14dp"
+            android:minWidth="200dp"
+            android:text="现在答一组试试"
+            android:textColor="@color/sun" />
+    </LinearLayout>
+</LinearLayout>

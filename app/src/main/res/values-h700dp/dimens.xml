@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  标准档：可用高度 ≥ 700dp，也就是 1080p 电视（1920x1080 @ density 240 = 1280x720dp）。
+  国内绝大多数电视都是这个组合，是设计基准。
+-->
+<resources>
+    <!-- 屏幕安全边距（含 overscan 余量）。
+         1080p 下 5% 的过扫描约 64dp，原来正好卡在临界值上，
+         「按钮边框显示不全」有一部分就是描边落在了被裁掉的那几行里。 -->
+    <dimen name="screen_pad_h">72dp</dimen>
+    <dimen name="screen_pad_v">48dp</dimen>
+
+    <!-- 字号 -->
+    <dimen name="text_hero">88dp</dimen>
+    <dimen name="hero_size">96sp</dimen>
+    <dimen name="text_h1">40sp</dimen>
+    <dimen name="text_h2">28sp</dimen>
+    <dimen name="text_body">24sp</dimen>
+    <dimen name="text_note">20sp</dimen>
+    <dimen name="text_tiny">16sp</dimen>
+
+    <!-- 圆角与间距 -->
+    <dimen name="radius_card">22dp</dimen>
+    <dimen name="radius_pill">100dp</dimen>
+    <dimen name="gap">24dp</dimen>
+    <dimen name="card_pad">44dp</dimen>
+
+    <!-- 焦点描边：非焦点 1~2dp、焦点 4dp，粗细差一倍才看得清 -->
+    <dimen name="focus_stroke">4dp</dimen>
+
+    <!-- 主界面 -->
+    <dimen name="header_height">64dp</dimen>
+    <dimen name="main_gap_top">28dp</dimen>
+    <dimen name="main_side_width">340dp</dimen>
+    <dimen name="side_icon">44dp</dimen>
+    <dimen name="side_icon_gap">18dp</dimen>
+    <dimen name="side_sub_gap">8dp</dimen>
+    <dimen name="side_title">26sp</dimen>
+    <dimen name="side_sub">18sp</dimen>
+    <dimen name="badge_height">40dp</dimen>
+    <dimen name="badge_text">18sp</dimen>
+    <dimen name="bar_min_height">72dp</dimen>
+
+    <!-- 扫码页说明文字的宽度上限 -->
+    <dimen name="tip_max_width">600dp</dimen>
+
+    <!-- 表单类页面 -->
+    <dimen name="page_pad_top">44dp</dimen>
+    <dimen name="page_pad_bottom">36dp</dimen>
+    <dimen name="row_h">88dp</dimen>
+    <dimen name="stepper_size">64dp</dimen>
+    <dimen name="row_gap">14dp</dimen>
+    <dimen name="footer_h">68dp</dimen>
+    <dimen name="qr_size">240dp</dimen>
+</resources>

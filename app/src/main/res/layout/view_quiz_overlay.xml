@@ -20,10 +20,10 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        android:paddingStart="56dp"
-        android:paddingEnd="56dp"
-        android:paddingTop="36dp"
-        android:paddingBottom="28dp">
+        android:paddingStart="@dimen/screen_pad_h"
+        android:paddingEnd="@dimen/screen_pad_h"
+        android:paddingTop="@dimen/screen_pad_v"
+        android:paddingBottom="@dimen/screen_pad_v">
 
         <!-- 顶部：年级科目 + 还剩几题 -->
         <LinearLayout
@@ -310,11 +310,10 @@
             android:gravity="center_vertical"
             android:orientation="horizontal">
 
-            <Button
+            <TextView
                 android:id="@+id/btnQuizParent"
                 android:nextFocusUp="@id/opt2"
                 android:nextFocusRight="@id/btnQuizQuit"
-                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="56dp"
                 android:background="@drawable/selector_btn_ghost"
@@ -322,17 +321,16 @@
                 android:paddingStart="26dp"
                 android:paddingEnd="26dp"
                 android:text="我是家长"
-                android:textAllCaps="false"
                 android:textColor="@color/text_sub"
-                android:textSize="19sp" />
+                android:textSize="19sp"
+                android:gravity="center" />
 
             <!-- 返回键在悬浮窗上不一定收得到（系统会把它交给下层），
                  所以必须有一个看得见、方向键够得着的出口。 -->
-            <Button
+            <TextView
                 android:id="@+id/btnQuizQuit"
                 android:nextFocusUp="@id/opt3"
                 android:nextFocusLeft="@id/btnQuizParent"
-                style="@style/Widget.AppCompat.Button.Borderless"
                 android:layout_width="wrap_content"
                 android:layout_height="56dp"
                 android:layout_marginStart="14dp"
@@ -341,9 +339,9 @@
                 android:paddingStart="26dp"
                 android:paddingEnd="26dp"
                 android:text="不看了"
-                android:textAllCaps="false"
                 android:textColor="@color/text_sub"
-                android:textSize="19sp" />
+                android:textSize="19sp"
+                android:gravity="center" />
 
             <Space
                 android:layout_width="0dp"
@@ -355,7 +353,7 @@
                 android:layout_height="wrap_content"
                 android:includeFontPadding="false"
                 android:text="方向键选择 · OK 确认 · 答完继续看"
-                android:textColor="@color/text_faint"
+                android:textColor="@color/text_dim"
                 android:textSize="18sp" />
         </LinearLayout>
     </LinearLayout>

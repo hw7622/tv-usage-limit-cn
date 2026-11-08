@@ -3,7 +3,7 @@ package com.example.tvlimit.ui
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.recyclerview.widget.GridLayoutManager
@@ -19,7 +19,7 @@ class AppSelectionActivity : ComponentActivity() {
 
     private lateinit var adapter: AppAdapter
     private lateinit var rv: RecyclerView
-    private lateinit var btnDone: Button
+    private lateinit var btnDone: TextView
     private val appList = mutableListOf<AppItem>()
     private var saving = false
 

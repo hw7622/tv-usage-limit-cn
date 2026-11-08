@@ -1,9 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+  + / − 步进按钮（64dp 的小圆）。
+
+  原来焦点态是「太阳黄底 + 3dp 白描边」，白在亮黄上几乎不可见，看起来就像没有边框。
+  现在改成「暖褐底 + 4dp 亮黄环」：
+  环的外侧是深色背景、内侧是暖褐，两边都有对比，描边一定看得见。
+  底色由冷灰转暖褐，也顺带给出「这个被选中了」的信号。
+-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_focused="true">
         <shape android:shape="rectangle">
-            <solid android:color="@color/sun" />
-            <stroke android:width="3dp" android:color="#FFFFFF" />
+            <solid android:color="#4A3A14" />
+            <stroke android:width="4dp" android:color="@color/sun" />
             <corners android:radius="100dp" />
         </shape>
     </item>

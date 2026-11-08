@@ -23,36 +23,63 @@
         <item name="colorAccent">@color/sun</item>
     </style>
 
-    <!-- ===== 通用大按钮 ===== -->
-    <style name="Widget.BigButton" parent="Widget.AppCompat.Button">
+    <!--
+      ===== 通用大按钮 =====
+
+      刻意继承 TextView 而不是 Widget.AppCompat.Button：
+
+      1. Button 会被 AppCompat 的 backgroundTint 逻辑接管。这套主题在不同厂商 ROM 上
+         表现不一样（有的把 backgroundTint 设成 ?attr/colorButtonNormal），一旦生效，
+         我们精心画的 selector 会被染成一整块纯色 —— 焦点框那一圈就「看不见了」。
+         这是「按钮边框总是显示不全」最常见的成因。
+      2. Button 在 Material 主题下自带 elevation/stateListAnimator，会在按钮周围画阴影，
+         阴影被父容器裁掉一半，看起来像边框缺了一条边。
+      3. TextView 没有上面两套逻辑，背景画成什么样就是什么样。
+
+      代价是要自己补 gravity（Button 默认居中，TextView 默认左上）。
+    -->
+    <style name="Widget.BigButton" parent="android:Widget.TextView">
         <item name="android:background">@drawable/selector_btn_primary</item>
         <item name="android:textColor">#241A02</item>
         <item name="android:textSize">@dimen/text_body</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textAllCaps">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:includeFontPadding">false</item>
         <item name="android:minHeight">68dp</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:paddingStart">40dp</item>
         <item name="android:paddingEnd">40dp</item>
-        <item name="android:stateListAnimator">@null</item>
+        <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
         <!-- 触摸模式下第一次点击只取焦点，会让按钮「点一下没反应」，统一关掉 -->
         <item name="android:focusableInTouchMode">false</item>
     </style>
 
-    <style name="Widget.GhostButton" parent="Widget.AppCompat.Button">
+    <style name="Widget.GhostButton" parent="android:Widget.TextView">
         <item name="android:background">@drawable/selector_btn_ghost</item>
         <item name="android:textColor">@color/text_sub</item>
         <item name="android:textSize">@dimen/text_note</item>
         <item name="android:textStyle">bold</item>
-        <item name="android:textAllCaps">false</item>
+        <item name="android:gravity">center</item>
+        <item name="android:includeFontPadding">false</item>
         <item name="android:minHeight">64dp</item>
         <item name="android:minWidth">0dp</item>
         <item name="android:paddingStart">36dp</item>
         <item name="android:paddingEnd">36dp</item>
-        <item name="android:stateListAnimator">@null</item>
+        <item name="android:clickable">true</item>
         <item name="android:focusable">true</item>
-        <!-- 触摸模式下第一次点击只取焦点，会让按钮「点一下没反应」，统一关掉 -->
+        <item name="android:focusableInTouchMode">false</item>
+    </style>
+
+    <!-- 黄色的圆角步进按钮（+ / −），只有 64dp，描边要比大按钮细一档 -->
+    <style name="Widget.Stepper" parent="android:Widget.TextView">
+        <item name="android:background">@drawable/selector_stepper</item>
+        <item name="android:textColor">@color/text_main</item>
+        <item name="android:textSize">34sp</item>
+        <item name="android:gravity">center</item>
+        <item name="android:includeFontPadding">false</item>
+        <item name="android:clickable">true</item>
+        <item name="android:focusable">true</item>
         <item name="android:focusableInTouchMode">false</item>
     </style>
 

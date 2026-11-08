@@ -46,11 +46,24 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!--
+      显式声明支持大屏：不写的话，部分电视盒子/投影会按 normal 屏处理，
+      把界面当成 480dp 宽来排版，于是所有内容挤成一团。
+      anyDensity 保证在非标准 density 的国产电视上不会取错资源。
+    -->
+    <supports-screens
+        android:anyDensity="true"
+        android:largeScreens="true"
+        android:normalScreens="true"
+        android:smallScreens="true"
+        android:xlargeScreens="true" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="电视时间管家"
         android:banner="@drawable/ic_launcher"
+        android:resizeableActivity="true"
         android:supportsRtl="true"
         android:theme="@style/Theme.TvLimit">
 
