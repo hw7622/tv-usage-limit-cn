@@ -32,7 +32,7 @@
 {
   "version": 2,
   "source": "自编",
-  "license": "CC BY-SA 4.0",
+  "license": "Apache-2.0",
   "retrievedAt": "2026-11-07",
   "questions": [
     {
@@ -94,7 +94,7 @@ python tools/import_bank.py export app/src/main/assets/quiz/bank.json -o 题库.
 改完转回去：
 
 ```bash
-python tools/import_bank.py convert 题库.csv -o tmp/new.json --source 自编 --license "CC BY-SA 4.0"
+python tools/import_bank.py convert 题库.csv -o tmp/new.json --source 自编 --license "Apache-2.0"
 python tools/import_bank.py rebalance tmp/new.json        # 打散正确答案的位置
 python tools/import_bank.py merge app/src/main/assets/quiz/bank.json tmp/new.json \
     --stamp 2026-11-07 -o app/src/main/assets/quiz/bank.json

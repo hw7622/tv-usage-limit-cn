@@ -139,7 +139,8 @@ class AdminActivity : AppCompatActivity() {
             tvDiagnosticsState.text = "今天没有中断"
             tvDiagnosticsState.setTextColor(ContextCompat.getColor(this, R.color.mint))
         } else {
-            tvDiagnosticsState.text = "今天中断 $cnt 次 · 共 ${humanDuration(ms)}"
+            // 卡片只有 200dp 宽，长句会被省略号吃掉，这里只留最关键的结论
+            tvDiagnosticsState.text = "中断 $cnt 次 · ${humanDuration(ms)}"
             tvDiagnosticsState.setTextColor(ContextCompat.getColor(this, R.color.coral))
         }
     }
@@ -217,17 +218,17 @@ class AdminActivity : AppCompatActivity() {
 
     private fun updateBadgeCard() {
         tvBadgeState.text = if (LimitControl.showBadge(this)) {
-            "已显示在右上角"
+            "已显示"
         } else {
-            "不显示，画面更干净"
+            "不显示"
         }
     }
 
     private fun updatePauseCard() {
         tvPauseState.text = if (LimitControl.isPaused(this)) {
-            "已关闭 · 还剩 ${LimitControl.remainMinutes(this)} 分钟自动恢复"
+            "已关闭 · 剩 ${LimitControl.remainMinutes(this)} 分"
         } else {
-            "家长想自己看一会儿时，可以先关掉一段时间"
+            "暂停计时和拦截"
         }
     }
 

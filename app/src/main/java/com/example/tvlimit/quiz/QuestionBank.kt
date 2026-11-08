@@ -74,11 +74,16 @@ object QuestionBank {
         // 家长设了二年级却抽到三年级题，看着就像设置没生效。
         val same = all.filter { it.grade == grade }
         val near = all.filter { it.grade in (grade - 1)..(grade + 1) }
-        val pool = when {
+        val base = when {
             same.isNotEmpty() -> same
             near.isNotEmpty() -> near
             else -> all
         }
+        // 再避开最近出过的题：题库再大，随机抽也会「刚问过又问」，
+        // 孩子会觉得程序在糊弄他。剩下的新题不足 10 道时才允许重复。
+        val recent = QuizStats.recentIds(ctx)
+        val fresh = base.filter { it.id !in recent }
+        val pool = if (fresh.size >= 10) fresh else base
         return weightedPick(ctx, pool, rand)
     }
 
@@ -107,6 +112,9 @@ object QuizStats {
 
     private const val PREF = "quiz_mistakes"
     private const val CLEAR_AT = "cleared_at"
+    private const val PREF_RECENT = "quiz_recent_ids"
+    /** 记住最近这么多道题不重复。按每天 24 道非数学题算，够撑 20 多天。 */
+    private const val RECENT_MAX = 600
 
     private fun sp(ctx: Context) =
         PreferenceManager.getDefaultSharedPreferences(ctx.applicationContext)
@@ -148,6 +156,23 @@ object QuizStats {
         }
     }
 
+    /** 最近出过的题（新→旧），用于避免短时间内重复出同一道。 */
+    fun recentIds(ctx: Context): Set<String> {
+        val raw = sp(ctx).getString(PREF_RECENT, null) ?: return emptySet()
+        if (raw.isEmpty()) return emptySet()
+        return raw.split('\n').toHashSet()
+    }
+
+    fun markSeen(ctx: Context, id: String) {
+        if (id.isEmpty()) return
+        val list = (sp(ctx).getString(PREF_RECENT, null) ?: "")
+            .split('\n').filter { it.isNotEmpty() }.toMutableList()
+        if (list.lastOrNull() == id) return
+        list.add(id)
+        val trimmed = if (list.size > RECENT_MAX) list.subList(list.size - RECENT_MAX, list.size) else list
+        sp(ctx).edit().putString(PREF_RECENT, trimmed.joinToString("\n")).apply()
+    }
+
     fun clear(ctx: Context) {
         val editor = sp(ctx).edit()
         sp(ctx).all.keys.filter { it != CLEAR_AT }.forEach { editor.remove(it) }
@@ -166,7 +191,11 @@ object QuizEngine {
         if (mathEnabled && (subjects.size == 1 || rand.nextInt(100) < 55)) {
             return MathQuestionGenerator.generate(grade, rand)
         }
-        return QuestionBank.pick(ctx, grade, subjects, rand)
-            ?: MathQuestionGenerator.generate(grade, rand)
+        val fromBank = QuestionBank.pick(ctx, grade, subjects, rand)
+        if (fromBank != null) {
+            QuizStats.markSeen(ctx, fromBank.id)
+            return fromBank
+        }
+        return MathQuestionGenerator.generate(grade, rand)
     }
 }

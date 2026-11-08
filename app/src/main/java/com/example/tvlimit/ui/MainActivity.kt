@@ -260,14 +260,18 @@ class MainActivity : AppCompatActivity() {
                 tvRemainUnit.text = ""
             }
             else -> {
-                tvRemainLabel.text = "今天还能看"
+                // 大数字跟着「当前生效的那个限制」走，标题也得跟着变，
+                // 否则本场剩 20 分钟会被读成「今天只剩 20 分钟」。
+                tvRemainLabel.text = if (useSession) "本场还能看" else "今天还能看"
                 tvRemainHero.text = remain.toString()
                 val c = ContextCompat.getColor(ctx, if (remain <= 5) R.color.coral else R.color.sun)
                 tvRemainHero.setTextColor(c)
                 tvRemainUnit.text = "分钟"
                 tvRemainUnit.setTextColor(c)
                 val parts = mutableListOf<String>()
-                if (sessionRemain >= 0) parts.add("本场还能看 $sessionRemain 分钟")
+                // 副行只放「另一个口径」，别把同一个数字再说一遍
+                if (useSession && dailyRemain >= 0) parts.add("今天还剩 $dailyRemain 分钟")
+                if (!useSession && sessionRemain >= 0) parts.add("本场还能看 $sessionRemain 分钟")
                 if (p.restDurationMinutes > 0) parts.add("看完休息 ${p.restDurationMinutes} 分钟")
                 tvDetail.text = if (parts.isEmpty()) "今天不限时长" else parts.joinToString(" · ")
             }
@@ -299,7 +303,8 @@ class MainActivity : AppCompatActivity() {
         val color = ContextCompat.getColor(this, if (remain <= 5) R.color.coral else R.color.sun)
         tvRemainHero.setTextColor(color)
         tvRemainUnit.setTextColor(color)
-        tvDetail.text = "本场还能看 $remain 分钟 · 今天已看 $daily 分钟"
+        tvRemainLabel.text = "本场还能看"
+        tvDetail.text = "今天已看 $daily 分钟"
     }
 
     // ===== 权限 =====

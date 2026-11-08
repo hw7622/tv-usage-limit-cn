@@ -62,6 +62,7 @@
             android:layout_height="match_parent"
             android:layout_weight="1"
             android:orientation="vertical"
+            android:gravity="center_vertical"
             android:background="@drawable/selector_card_gold"
             android:padding="48dp">
 
@@ -80,15 +81,11 @@
                 android:textStyle="bold"
                 android:includeFontPadding="false" />
 
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
             <TextView
                 android:id="@+id/tvRemainLabel"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
                 android:text="今天还能看"
                 android:textColor="@color/text_dim"
                 android:textSize="22sp"
@@ -134,15 +131,11 @@
                 android:progress="62"
                 android:progressDrawable="@drawable/progress_bar_horizontal_custom" />
 
-            <Space
-                android:layout_width="1dp"
-                android:layout_height="0dp"
-                android:layout_weight="1" />
-
             <TextView
                 android:id="@+id/tvDetail"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="18dp"
                 android:text="本场还能看 18 分钟，之后要休息一下"
                 android:textColor="@color/text_dim"
                 android:textSize="20sp"
