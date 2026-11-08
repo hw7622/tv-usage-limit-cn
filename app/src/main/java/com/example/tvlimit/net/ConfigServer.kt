@@ -42,9 +42,14 @@ import kotlin.concurrent.thread
  * 这里手写的解析只认「请求行 + header + 定长 body」，够用且没有隐藏行为。
  *
  * 三层安全边界：
- * ① 网络层：默认只接受局域网来源（见 [isClientAllowed]），公网地址直接 403；
- * ② 应用层：所有 /api/ 接口都要先用家长 PIN 换一个内存里的 token（cookie）；
+ * ① 网络层：只接受「自己家这张网」的来源（见 [isClientAllowed]）——局域网、IPv6 链路本地，
+ *    打开「允许远程」再加 CGNAT（Tailscale 的 100.64/10）与 IPv6 ULA；
+ *    **公网地址任何情况下都 403**，哪怕路由器把 8080 端口映射出去了也一样；
+ * ② 应用层：所有 /api/ 接口都要先用家长 PIN 换一个内存里的 token（cookie，12 小时过期）；
  * ③ 数据层：不读不写用户的任意文件，导入的题只落在 App 自己的 filesDir 里。
+ *
+ * 另外两道兜底：Host 头必须是 IP 字面量或已知的组网域名（防 DNS rebinding），
+ * 20 分钟没有任何请求就自动关掉服务（防「开完忘了关」）。
  *
  * 「在外面也能改」走的是同一条通道。我们不做任何内网穿透 ——
  * 家长在外面用 Tailscale / ZeroTier 这类点对点组网连回家时，来源地址是
@@ -60,14 +65,30 @@ object ConfigServer {
     private const val MAX_BODY = BankStore.MAX_BYTES + 64 * 1024
     private const val COOKIE = "tvt"
 
+    /** 登录后 token 的有效期。过期要重新输 PIN，别让一个 cookie 长期等于家长身份。 */
+    private const val TOKEN_TTL_MS = 12 * 60 * 60 * 1000L
+
+    /** 同时最多留这么多个有效 token，防止反复登录把内存撑大。 */
+    private const val TOKEN_MAX = 32
+
+    /**
+     * 多久没人用就自动关掉。
+     *
+     * 家长最容易犯的错不是「密码设弱了」，而是「开完忘了关」——
+     * 电视上的服务一旦开着，家里任何一台能连 WiFi 的设备都能试着进来。
+     * 与其在文档里写三遍「用完记得关」，不如让它自己关。
+     */
+    private const val IDLE_STOP_MS = 20 * 60 * 1000L
+
     private var serverSocket: ServerSocket? = null
     private var acceptThread: Thread? = null
+    private var watchdog: Thread? = null
 
     /** 静态页面按路径缓存：一个 60KB 的页面每次请求都读 assets，电视的 eMMC 会明显卡。 */
-    private val assets = HashMap<String, ByteArray>()
+    private val assets = ConcurrentHashMap<String, ByteArray>()
 
-    /** 登录成功后发的 token，只存在内存里：关掉服务就全部失效。 */
-    private val tokens = Collections.newSetFromMap(ConcurrentHashMap<String, Boolean>())
+    /** 登录成功后发的 token（值 = 过期时间戳），只存在内存里：关掉服务就全部失效。 */
+    private val tokens = ConcurrentHashMap<String, Long>()
 
     /** 暴力试 PIN：同一 IP 一分钟内最多错 5 次。 */
     private class Attempts {
@@ -76,6 +97,10 @@ object ConfigServer {
     }
 
     private val fails = ConcurrentHashMap<String, Attempts>()
+
+    /** 最后一次收到请求的时间，用来判断「没人用就关掉」。 */
+    @Volatile
+    private var lastActiveAt = 0L
 
     private val pool = Executors.newFixedThreadPool(4)
 
@@ -125,8 +150,11 @@ object ConfigServer {
                 ss.bind(InetSocketAddress(p), 16)
                 serverSocket = ss
                 port = p
+                lastActiveAt = System.currentTimeMillis()
                 acceptThread = thread(isDaemon = true, name = "config-server") { acceptLoop(app, ss) }
+                watchdog = thread(isDaemon = true, name = "config-idle") { idleLoop(app) }
                 Log.i(TAG, "config server listening on $p")
+                notifyState(app)
                 return p
             } catch (e: Exception) {
                 lastError = e
@@ -138,7 +166,7 @@ object ConfigServer {
     }
 
     @Synchronized
-    fun stop() {
+    fun stop(ctx: Context? = null) {
         tokens.clear()
         try {
             serverSocket?.close()
@@ -146,8 +174,38 @@ object ConfigServer {
         }
         serverSocket = null
         acceptThread = null
+        watchdog = null
         port = 0
+        lastActiveAt = 0
         Log.i(TAG, "config server stopped")
+        ctx?.let { notifyState(it.applicationContext) }
+    }
+
+    const val ACTION_STATE_CHANGED = "com.example.tvlimit.ACTION_CONFIG_SERVER_STATE"
+
+    private fun notifyState(ctx: Context) {
+        try {
+            ctx.sendBroadcast(Intent(ACTION_STATE_CHANGED).setPackage(ctx.packageName))
+        } catch (_: Exception) {
+        }
+    }
+
+    /** 每 15 秒看一次：超过 [IDLE_STOP_MS] 没有任何请求就自己关掉。 */
+    private fun idleLoop(ctx: Context) {
+        while (true) {
+            try {
+                Thread.sleep(15_000)
+            } catch (e: InterruptedException) {
+                return
+            }
+            if (!running) return
+            val idle = System.currentTimeMillis() - lastActiveAt
+            if (idle >= IDLE_STOP_MS) {
+                Log.i(TAG, "config server idle ${idle / 1000}s, stopping")
+                stop(ctx)
+                return
+            }
+        }
     }
 
     /** 开启时用：方便家长在电视上看到「手机该打开哪个地址」。 */
@@ -187,31 +245,70 @@ object ConfigServer {
             (a == 169 && b == 254)
     }
 
+    /** Tailscale / ZeroTier 这一类组网工具分到的 CGNAT 段：100.64.0.0/10。 */
+    private fun isCgnatAddress(ip: String): Boolean {
+        val parts = ip.split('.').mapNotNull { it.toIntOrNull() }
+        if (parts.size != 4) return false
+        return parts[0] == 100 && parts[1] in 64..127
+    }
+
     /**
      * 这个来源能不能用配置页。
      *
-     * 默认只放行局域网 —— 「只监听局域网」这句话不能靠「路由器不会转发」来保证，
-     * 光猫把电视放到 DMZ、或者家里开了端口映射，这条服务就直接暴露在公网上了。
+     * 判断逻辑刻意写成「白名单式」：列出来的才放行，其余一律拒绝。
+     * 不靠「路由器不会转发 8080」这种假设 —— 光猫把电视放进 DMZ、
+     * 或者家里开了端口映射、或者宽带直接给了公网 IPv6，这条服务就裸露在公网上了。
+     *
+     * **公网地址任何情况下都拒绝，[allowRemote] 也不放行。**
+     * 那个开关的语义是「允许组网工具（Tailscale/ZeroTier）连进来」，
+     * 不是「对全世界开放」。真需要从星巴克直接连家里，那是另一件事，
+     * 本项目不做，也不该用这种方式做。
      */
     fun isClientAllowed(addr: InetAddress?, allowRemote: Boolean): Boolean {
-        if (addr == null) return true
+        // 连来源地址都拿不到的连接属于异常，直接拒
+        if (addr == null) return false
         if (addr.isLoopbackAddress) return true
-        if (allowRemote) return true
         return when (addr) {
             is Inet4Address -> {
                 @Suppress("DEPRECATION")
-                isLanAddress(addr.hostAddress ?: return false)
+                val ip = addr.hostAddress ?: return false
+                isLanAddress(ip) || (allowRemote && isCgnatAddress(ip))
             }
 
             is Inet6Address -> {
-                // 链路本地 fe80::/10 与 ULA fc00::/7 都是「家里这张网」的地址
                 val b = addr.address
                 val b0 = b[0].toInt() and 0xFF
-                b0 == 0xFE || (b0 and 0xFE) == 0xFC
+                // fe80::/10 链路本地 = 同一个网段；
+                // fc00::/7 ULA = 家里自己划的地址段，Tailscale 默认就在 fd7a::/48 里。
+                // 这两个都不可能路由到公网，所以开着「允许远程」也不需要再放宽。
+                b0 == 0xFE || (allowRemote && (b0 and 0xFE) == 0xFC)
             }
 
             else -> false
         }
+    }
+
+    /**
+     * Host 头校验：只认「IP 字面量」和几种由我们信任的一方托管的域名。
+     *
+     * 挡的是 DNS rebinding：恶意网页把自己的域名解析到 192.168.x.x，
+     * 浏览器就会当作同源请求，把 cookie 一起送过来 —— 单靠来源 IP 白名单挡不住，
+     * 因为请求确实来自局域网内。要求 Host 必须是 IP，这条路就没了。
+     */
+    private fun hostAllowed(hostHeader: String?): Boolean {
+        if (hostHeader.isNullOrBlank()) return true
+        val raw = hostHeader.trim()
+        // IPv6 字面量：浏览器会写成 [fd7a::1]:8080
+        if (raw.startsWith("[")) return true
+        val host = raw.substringBeforeLast(':').ifEmpty { raw }.lowercase()
+        if (host.isEmpty()) return false
+        // IPv4 字面量
+        val parts = host.split('.')
+        if (parts.size == 4 && parts.all { it.isNotEmpty() && it.all(Char::isDigit) }) return true
+        return host == "localhost" ||
+            host.endsWith(".ts.net") ||          // Tailscale MagicDNS
+            host.endsWith(".tailscale.net") ||
+            host.endsWith(".local")              // mDNS
     }
 
     // ===== HTTP =====
@@ -260,11 +357,21 @@ object ConfigServer {
 
             // 来源检查放在最前面：连页面都不给，别提试 PIN 了
             val allowRemote = HouseRules.allowRemote(ctx)
-            if (!isClientAllowed(socket.inetAddress, allowRemote)) {
-                Log.w(TAG, "rejected non-lan client: ${socket.inetAddress?.hostAddress}")
+            val clientAddr = socket.inetAddress
+            if (!isClientAllowed(clientAddr, allowRemote)) {
+                Log.w(TAG, "rejected non-lan client: ${clientAddr?.hostAddress}")
                 respond(out, 403, "text/html; charset=utf-8", FORBIDDEN_PAGE.toByteArray())
                 return
             }
+
+            // Host 不是 IP / 已知组网域名 → 多半是 DNS rebinding，连 PIN 都不让他试
+            if (!hostAllowed(headers["host"])) {
+                Log.w(TAG, "rejected host header: ${headers["host"]}")
+                respond(out, 403, "text/html; charset=utf-8", BAD_HOST_PAGE.toByteArray())
+                return
+            }
+
+            lastActiveAt = System.currentTimeMillis()
 
             val length = headers["content-length"]?.toIntOrNull() ?: 0
             if (length > MAX_BODY) {
@@ -273,7 +380,7 @@ object ConfigServer {
             }
             val body = if (length > 0) readBody(input, length) else ByteArray(0)
 
-            route(ctx, method, path, query, headers, body, out)
+            route(ctx, method, path, query, headers, body, out, clientAddr)
             out.flush()
         } catch (e: ApiError) {
             // 业务层抛出来的错误：状态码和文案都是给家长看的
@@ -330,7 +437,8 @@ object ConfigServer {
         query: String,
         headers: Map<String, String>,
         body: ByteArray,
-        out: BufferedOutputStream
+        out: BufferedOutputStream,
+        clientAddr: InetAddress?
     ) {
         // 登录页不需要 token：家长得先看到页面才能输 PIN
         if (method == "GET" && !path.startsWith("/api/")) {
@@ -339,7 +447,7 @@ object ConfigServer {
         }
 
         if (path == "/api/login" && method == "POST") {
-            login(ctx, headers, body, out)
+            login(ctx, clientAddr, body, out)
             return
         }
 
@@ -421,21 +529,36 @@ object ConfigServer {
             name.endsWith(".css") -> "text/css; charset=utf-8"
             else -> "application/octet-stream"
         }
-        respond(out, 200, type, bytes)
+        // 页面里的内容全是拼字符串渲染的，CSP 是最后一道兜底：
+        // 万一哪天漏了一个转义，注入的脚本也执行不了
+        respond(out, 200, type, bytes, cspHeader())
     }
+
+    private fun cspHeader(): String =
+        "Content-Security-Policy: default-src 'self'; script-src 'self'; " +
+            "style-src 'self' 'unsafe-inline'; img-src 'self' data:; " +
+            "connect-src 'self'; frame-ancestors 'none'; base-uri 'none'; form-action 'none'\r\n"
 
     private fun login(
         ctx: Context,
-        headers: Map<String, String>,
+        clientAddr: InetAddress?,
         body: ByteArray,
         out: BufferedOutputStream
     ) {
-        val ip = headers["x-forwarded-for"] ?: "local"
+        // 限流的 key 必须来自 socket，不能用 X-Forwarded-For：
+        // 那个头是客户端自己填的，随便换个值就能无限次试 PIN，
+        // 4 位数字在一台局域网里的手机上几秒钟就穷举完了。
+        val ip = clientAddr?.hostAddress ?: "unknown"
         val now = System.currentTimeMillis()
+        // 表别无限长：伪造/大量来源时至少要能自己收回来
+        if (fails.size > 256) {
+            fails.entries.removeIf { it.value.lockUntil < now && it.value.count == 0 }
+        }
         val rec = fails.getOrPut(ip) { Attempts() }
         synchronized(rec) {
             if (rec.lockUntil > now) {
-                json(out, 429, error("试错太多次，请等一分钟"))
+                val wait = ((rec.lockUntil - now) / 1000).coerceAtLeast(1)
+                json(out, 429, error("试错太多次，请等 $wait 秒再试"))
                 return
             }
         }
@@ -456,15 +579,24 @@ object ConfigServer {
                     rec.lockUntil = now + 60_000
                 }
             }
+            Log.w(TAG, "wrong pin from $ip (${rec.count}/5)")
             json(out, 403, error("家长密码不对"))
             return
         }
 
+        fails.remove(ip)
         val token = UUID.randomUUID().toString()
-        tokens.add(token)
+        if (tokens.size >= TOKEN_MAX) {
+            tokens.entries.removeIf { it.value < now }
+            // 还是满的就把最早到期的挤掉，保证不会因为反复登录而无限增长
+            if (tokens.size >= TOKEN_MAX) {
+                tokens.entries.minByOrNull { it.value }?.let { tokens.remove(it.key) }
+            }
+        }
+        tokens[token] = now + TOKEN_TTL_MS
         respond(
             out, 200, "application/json; charset=utf-8",
-            JSONObject().put("ok", true).toString().toByteArray(),
+            JSONObject().put("ok", true).put("pinDefault", stored == "1234").toString().toByteArray(),
             "Set-Cookie: $COOKIE=$token; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax\r\n"
         )
     }
@@ -482,7 +614,12 @@ object ConfigServer {
 
     private fun isAuthed(headers: Map<String, String>): Boolean {
         val t = tokenOf(headers) ?: return false
-        return tokens.contains(t)
+        val expireAt = tokens[t] ?: return false
+        if (expireAt < System.currentTimeMillis()) {
+            tokens.remove(t)
+            return false
+        }
+        return true
     }
 
     // ===== 响应 =====
@@ -533,10 +670,24 @@ object ConfigServer {
         <title>不能在当前网络打开</title>
         <body style="background:#0d1220;color:#e8eef9;font:16px/1.7 -apple-system,system-ui,sans-serif;padding:32px">
         <h2 style="color:#ff7a7a">这个地址不能打开电视配置页</h2>
-        <p>手机和电视需要连在同一个 WiFi（家里那张网）。</p>
+        <p>手机和电视需要连在<strong>同一个路由器</strong>上：电视插网线的话，
+        手机也要连这个路由器发出的 WiFi，不能连手机流量、也不能连邻居家的网。</p>
         <p>如果你在外面，先在电视的设置里打开「允许远程」，并让两台设备都登录同一个
         Tailscale / ZeroTier 账号，再用电视上显示的那个 100.x 地址。</p>
-        <p style="color:#9faac2">出于安全考虑，公网地址一律拒绝，不做任何例外。</p>
+        <p style="color:#9faac2">公网地址一律拒绝，不做任何例外 —— 打开「允许远程」也一样。
+        这样做是为了：万一你家路由器把 8080 端口映射出去了，别人也进不来。</p>
+        </body></html>
+    """.trimIndent()
+
+    private val BAD_HOST_PAGE = """
+        <!doctype html><html lang="zh-CN"><meta charset="utf-8">
+        <meta name="viewport" content="width=device-width,initial-scale=1">
+        <title>请用 IP 地址打开</title>
+        <body style="background:#0d1220;color:#e8eef9;font:16px/1.7 -apple-system,system-ui,sans-serif;padding:32px">
+        <h2 style="color:#ff7a7a">请直接扫电视上的二维码</h2>
+        <p>这个页面只接受用 IP 地址访问。你刚才用的是域名，
+        为了防「把一个陌生域名指向家里电视」这类攻击，域名一律不放行。</p>
+        <p>回电视上打开「手机配置」，扫屏幕上那个二维码就行。</p>
         </body></html>
     """.trimIndent()
 }

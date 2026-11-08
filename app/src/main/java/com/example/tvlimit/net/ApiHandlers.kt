@@ -125,6 +125,8 @@ object Api {
         return JSONObject()
             .put("ok", true)
             .put("device", device)
+            // 还是默认密码就提醒一句：电视上的二维码摆在客厅，孩子也能扫
+            .put("pinDefault", (prefs(ctx).getString(PREF_PIN, "1234") ?: "1234") == "1234")
             .put("profile", profileJson)
             .put("extra", extra)
             .put("paused", JSONObject()
@@ -402,20 +404,29 @@ object Api {
                 if (q.grade in 1..9) arr[q.grade] += 1
             }
         }
+        // 两个阈值，回答两个不同的问题：
+        // THRESHOLD（8）——「这格几乎没题」，孩子当天就会撞见重复；
+        // TARGET（150）——「这格够不够撑一周」，项目的长期目标。
+        // 只报 8 会把 116 道的五年级英语也说成没问题，家长就不知道该补哪。
         val THRESHOLD = 8
+        val TARGET = 150
         val gaps = JSONArray()
         val subjects = JSONArray()
+        var thin = 0
         ranges.forEach { (subject, range) ->
             val (from, to) = range
             val row = JSONArray()
             for (g in 1..9) {
                 val n = counts[subject]?.get(g) ?: 0
                 row.put(n)
-                if (g in from..to && n < THRESHOLD) {
-                    gaps.put(
-                        JSONObject().put("subject", subject).put("grade", g)
-                            .put("count", n).put("need", THRESHOLD)
-                    )
+                if (g in from..to) {
+                    if (n < TARGET) thin += 1
+                    if (n < THRESHOLD) {
+                        gaps.put(
+                            JSONObject().put("subject", subject).put("grade", g)
+                                .put("count", n).put("need", THRESHOLD)
+                        )
+                    }
                 }
             }
             subjects.put(
@@ -425,6 +436,8 @@ object Api {
         }
         return JSONObject().put("ok", true)
             .put("threshold", THRESHOLD)
+            .put("target", TARGET)
+            .put("thin", thin)
             .put("grades", JSONArray((1..9).toList()))
             .put("subjects", subjects)
             .put("gaps", gaps)

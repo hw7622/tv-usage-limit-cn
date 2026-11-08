@@ -215,6 +215,22 @@ adb shell "run-as com.example.tvlimit cat databases/tv_limit_database-wal" > db.
    `index.html` + `app.css` + `app.js`，`ConfigServer.serveAsset()` 是白名单路由。
    加文件要同时改那里，否则手机上是空白页（并且只有 404，不报错）。
 
+12. **「按 IP 限流」不能用 `X-Forwarded-For`**
+   这个头是客户端自己填的。拿它当 key，等于把「错 5 次锁一分钟」关掉 ——
+   4 位 PIN 在一台局域网里的手机上几秒就穷举完了，而且还能灌随机 key 把 `fails` 表撑爆。
+   现在只用 `socket.inetAddress`（v2.8.1 修）。
+
+13. **「允许远程」不能写成「不再限制来源」**
+   字面上很自然，实际上是：家长为了在外面看一眼而打开开关 → 8080 就挂在公网上了。
+   国内宽带现在大量下发公网 IPv6（电视的 `2408:...` 是全网可达的），光猫 DMZ 也不少见，
+   防护就只剩一个 4 位数字。现在只在白名单里追加 `100.64/10` 与 IPv6 ULA，**公网永远 403**。
+   加任何「放宽来源」的开关前，先想清楚它放宽的到底是哪一段地址。
+
+14. **没有 Host 校验就挡不住 DNS rebinding**
+   恶意网页把域名解析到 `192.168.x.x`，浏览器认为是同源、连 cookie 一起发过去，
+   来源 IP 白名单完全没用（请求确实来自局域网内）。现在 Host 必须是 IP 字面量，
+   或用 `*.ts.net` / `*.local` 这些「我们信任的一方在管解析」的域名。
+
 ---
 
 ## 7. 调试
@@ -256,7 +272,8 @@ adb shell run-as com.example.tvlimit tail -50 files/logs/events-$(date +%Y%m%d).
 - 设置页五张卡一屏可见；题量选项可滚到「10 道」
 - 配置迁移：vc43→44 覆盖安装后 `quiz_interval_minutes=10`、`quiz_questions_per_session=3` 自动生效，答题开关不丢
 
-**尚未在真机上验证**：真实的「看满 10 分钟自动弹题」（当天额度已用完，计时不走）。清单见 ROADMAP 的 P1。
+**真实的「看满 10 分钟自动弹题」已于 2026-11-08 自然触发并验证**（`quiz_show force=false preview=false`，答完自动跳回视频）。
+其余未验证项见 ROADMAP 的 P1。
 
 ---
 

@@ -165,6 +165,7 @@
     if (o.paused.on) tags.push('<span class="tag sky">限制已暂停 ' + o.paused.remain + ' 分钟</span>');
     if (o.schedule.outsideNow) tags.push('<span class="tag coral">现在不在允许时段</span>');
     if (o.extra > 0) tags.push('<span class="tag sun">今天已加时 ' + o.extra + ' 分钟</span>');
+    if (o.pinDefault) tags.push('<span class="tag coral">家长密码还是 1234，去「设置」改掉</span>');
     if (p.restRemain > 0) tags.push('<span class="tag sun">本场已用 ' + p.sessionUsed + ' 分钟</span>');
     if (o.quiz.enabled) tags.push('<span class="tag mint">每 ' + o.quiz.interval + ' 分钟答 ' + o.quiz.count + ' 道</span>');
     if (o.quiz.pending) tags.push('<span class="tag coral">有题没答完</span>');
@@ -427,7 +428,7 @@
         var cells = s.counts.map(function (n, i) {
           var grade = i + 1;
           var na = grade < s.from || grade > s.to;
-          var cls = na ? "na" : (n === 0 ? "zero" : (n < gaps.threshold ? "low" : "ok"));
+          var cls = na ? "na" : (n === 0 ? "zero" : (n < (gaps.target || 150) ? "low" : "ok"));
           return '<td class="' + cls + '">' + (na ? "·" : n) + "</td>";
         }).join("");
         return "<tr><td class='s'>" + esc(SUBJECT_LABEL[s.subject] || s.subject) + "</td>" + cells + "</tr>";
@@ -438,11 +439,12 @@
           '<div class="card-h"><div class="card-t">题库</div><div class="card-n">数学由程序现出，不占题库</div></div>' +
           '<div class="row"><span class="k">总题数</span><span class="v">' + b.total + ' 道</span></div>' +
           '<div class="row"><span class="k">内置 / 你加的</span><span class="v">' + b.builtin + ' / ' + b.custom + '</span></div>' +
-          '<div class="row"><span class="k">缺口</span><span class="v">' + gaps.gapCount + ' 处低于 ' + gaps.threshold + ' 道</span></div>' +
+          '<div class="row"><span class="k">几乎没题</span><span class="v">' + gaps.gapCount + ' 处（不到 ' + gaps.threshold + ' 道）</span></div>' +
+          '<div class="row"><span class="k">不够撑一周</span><span class="v">' + (gaps.thin || 0) + ' 处（不到 ' + (gaps.target || 150) + ' 道）</span></div>' +
         '</div>' +
 
         '<div class="card">' +
-          '<div class="card-h"><div class="card-t">哪一块题少</div><div class="card-n">红=0 道，黄=不足</div></div>' +
+          '<div class="card-h"><div class="card-t">哪一块题少</div><div class="card-n">红=没题，黄=不到 150 道，绿=够用</div></div>' +
           '<div style="overflow-x:auto"><table class="matrix">' + head + rows + '</table></div>' +
         '</div>' +
 
@@ -558,7 +560,8 @@
         '<div class="card-n" style="line-height:1.7;margin-top:8px">' +
           '默认只能用家里同一个 WiFi 打开。想在外面看，在电视和手机上都装 Tailscale（或 ZeroTier），' +
           '登录同一个账号，然后打开这个开关，用下面那个 100.x 开头的地址访问。<br>' +
-          '不需要公网 IP，也不需要把电视端口映射到外网。' +
+          '不需要公网 IP，也不用改路由器。<b>公网地址一律拒绝</b>——就算路由器把端口映射出去了，别人也进不来。<br>' +
+          '这个页面 20 分钟没人动会自动关掉，回头再改就回电视上重新开一次。' +
         '</div>' +
         '<div class="card-n" id="endpoints" style="margin-top:8px"></div>' +
       '</div>' +
