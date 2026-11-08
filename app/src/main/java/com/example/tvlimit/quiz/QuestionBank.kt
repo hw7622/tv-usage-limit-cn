@@ -2,7 +2,6 @@ package com.example.tvlimit.quiz
 
 import android.content.Context
 import androidx.preference.PreferenceManager
-import org.json.JSONObject
 import kotlin.random.Random
 
 /**
@@ -15,50 +14,54 @@ object QuestionBank {
 
     @Volatile
     private var cache: List<QuizQuestion>? = null
+
+    /** 只含 assets 里的内置题，用于网页上分开显示「内置 / 自己加的」。 */
+    @Volatile
+    private var builtinCache: List<QuizQuestion>? = null
     private val loadLock = Any()
+
+    fun builtin(ctx: Context): List<QuizQuestion> {
+        builtinCache?.let { return it }
+        synchronized(loadLock) {
+            builtinCache?.let { return it }
+            val list = try {
+                loadFromAssets(ctx)
+            } catch (e: Exception) {
+                emptyList()
+            }
+            builtinCache = list
+            return list
+        }
+    }
 
     fun all(ctx: Context): List<QuizQuestion> {
         cache?.let { return it }
         synchronized(loadLock) {
             cache?.let { return it }
-            val loaded = try {
-                loadFromAssets(ctx)
-            } catch (e: Exception) {
-                emptyList()
+            val builtin = builtin(ctx)
+            // 家长从手机网页导入的题排在内置题之后、按 id 覆盖，
+            // 这样「改掉一道内置题」也能靠导入完成，不用重新打包 APK。
+            val custom = BankStore.loadCustom(ctx)
+            val merged = if (custom.isEmpty()) builtin else {
+                val map = LinkedHashMap<String, QuizQuestion>(builtin.size + custom.size)
+                builtin.forEach { map[it.id] = it }
+                custom.forEach { map[it.id] = it }
+                map.values.toList()
             }
-            cache = loaded
-            return loaded
+            cache = merged
+            return merged
         }
+    }
+
+    /** 题库文件变了（导入/清空）之后必须调用，否则还抽旧题。 */
+    fun invalidate() {
+        synchronized(loadLock) { cache = null }
     }
 
     private fun loadFromAssets(ctx: Context): List<QuizQuestion> {
         val text = ctx.assets.open("quiz/bank.json").bufferedReader().use { it.readText() }
-        val root = JSONObject(text)
-        val arr = root.optJSONArray("questions") ?: return emptyList()
-        val list = ArrayList<QuizQuestion>(arr.length())
-        for (i in 0 until arr.length()) {
-            val o = arr.optJSONObject(i) ?: continue
-            val optionsArr = o.optJSONArray("options") ?: continue
-            val options = ArrayList<String>(optionsArr.length())
-            for (j in 0 until optionsArr.length()) options.add(optionsArr.optString(j))
-            if (options.size < 2) continue
-            val answer = o.optInt("answer", -1)
-            if (answer !in options.indices) continue
-            list.add(
-                QuizQuestion(
-                    id = o.optString("id", "q-$i"),
-                    subject = o.optString("subject", "chinese"),
-                    grade = o.optInt("grade", 2),
-                    knowledge = o.optString("knowledge", "综合"),
-                    stem = o.optString("stem", ""),
-                    options = options,
-                    answer = answer,
-                    explain = o.optString("explain", "").ifBlank { null },
-                    difficulty = o.optInt("difficulty", 1)
-                )
-            )
-        }
-        return list
+        // 解析与校验跟家长导入共用一套，避免两处规则不一致
+        return BankStore.parse(text, limitErrors = 0).first
     }
 
     /**

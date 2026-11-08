@@ -137,6 +137,9 @@ adb shell "run-as com.example.tvlimit cat databases/tv_limit_database-wal" > db.
 | 一次答题会话的队列规则 | `quiz/QuizSession.kt` |
 | 出题来源 | `quiz/QuestionBank.kt`（题库）、`quiz/MathQuestionGenerator.kt`（数学现算） |
 | 内置题库数据 | `app/src/main/assets/quiz/bank.json` |
+| 家长自己加的题（导入的） | `quiz/BankStore.kt`（`filesDir/custom_bank.json`，同 id 覆盖内置） |
+| 手机配置服务（局域网 HTTP） | `net/ConfigServer.kt`（手写 ServerSocket，无依赖） |
+| 手机配置页面 | `app/src/main/assets/web/index.html`（单页，随 APK 打包，不联网加载） |
 | 家长设置首页 | `ui/AdminActivity.kt` |
 | 答题设置页 | `ui/QuizSettingsActivity.kt` |
 | 孩子看到的剩余时间页 | `ui/MainActivity.kt` |

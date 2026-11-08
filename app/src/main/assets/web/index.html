@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#141210">
+<title>电视时间管理 · 手机配置</title>
+<style>
+  :root{
+    --bg:#141210; --card:#1e1b18; --card2:#26221e; --line:#332d27;
+    --text:#f2ede6; --sub:#b3a89b; --faint:#7d7268;
+    --sun:#ffb454; --green:#5fd08a; --red:#ff6b6b;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font:16px/1.6 -apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;
+    padding:16px 14px 40px;
+  }
+  h1{font-size:19px;margin:0 0 2px}
+  .muted{color:var(--sub);font-size:13px}
+  .faint{color:var(--faint);font-size:12px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin-top:14px}
+  .card h2{font-size:15px;margin:0 0 12px;color:var(--sun);font-weight:600}
+  .row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:11px 0;border-top:1px solid var(--line)}
+  .row:first-of-type{border-top:0;padding-top:0}
+  .row .label{font-size:15px}
+  .row .hint{font-size:12px;color:var(--faint);margin-top:2px}
+  .stat{display:flex;gap:10px;flex-wrap:wrap}
+  .stat div{flex:1;min-width:88px;background:var(--card2);border-radius:12px;padding:10px 12px}
+  .stat b{display:block;font-size:22px;font-variant-numeric:tabular-nums}
+  .bar{height:8px;border-radius:6px;background:var(--card2);overflow:hidden;margin-top:6px}
+  .bar i{display:block;height:100%;background:var(--sun);border-radius:6px}
+  select,input[type=text],input[type=password],textarea{
+    width:100%;background:var(--card2);border:1px solid var(--line);color:var(--text);
+    border-radius:11px;padding:11px 12px;font-size:16px;font-family:inherit;
+  }
+  textarea{min-height:92px;resize:vertical;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:13px}
+  button{
+    border:0;border-radius:12px;padding:13px 16px;font-size:16px;font-weight:600;
+    font-family:inherit;background:var(--sun);color:#241a0b;width:100%;
+  }
+  button.ghost{background:var(--card2);color:var(--text);border:1px solid var(--line)}
+  button.danger{background:transparent;color:var(--red);border:1px solid #4a2b2b}
+  button:disabled{opacity:.5}
+  .btns{display:flex;gap:10px;margin-top:12px}
+  .btns button{flex:1}
+  .chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+  .chip{
+    padding:8px 13px;border-radius:999px;background:var(--card2);border:1px solid var(--line);
+    font-size:14px;color:var(--sub);
+  }
+  .chip.on{background:rgba(255,180,84,.15);border-color:var(--sun);color:var(--sun)}
+  .switch{position:relative;width:52px;height:30px;flex:0 0 auto}
+  .switch input{opacity:0;width:100%;height:100%;margin:0;position:absolute;z-index:2}
+  .switch span{position:absolute;inset:0;background:var(--card2);border:1px solid var(--line);border-radius:999px;transition:.15s}
+  .switch span:after{content:"";position:absolute;width:22px;height:22px;border-radius:50%;background:var(--faint);top:3px;left:3px;transition:.15s}
+  .switch input:checked + span{background:rgba(255,180,84,.2);border-color:var(--sun)}
+  .switch input:checked + span:after{background:var(--sun);transform:translateX(22px)}
+  .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%) translateY(20px);
+    background:#332d27;color:var(--text);padding:11px 18px;border-radius:999px;font-size:14px;
+    opacity:0;transition:.22s;pointer-events:none;max-width:88vw;text-align:center}
+  .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+  .toast.bad{background:#4a2b2b}
+  #login{position:fixed;inset:0;background:var(--bg);display:flex;flex-direction:column;
+    justify-content:center;padding:28px;z-index:20}
+  #login .box{max-width:360px;margin:0 auto;width:100%}
+  #login h1{font-size:22px;margin-bottom:6px}
+  #login input{margin:18px 0 12px;text-align:center;letter-spacing:8px;font-size:22px}
+  .err{color:var(--red);font-size:13px;margin-top:8px;min-height:18px}
+  .list{margin-top:10px}
+  .list div{font-size:13px;color:var(--sub);padding:3px 0;border-bottom:1px dashed var(--line)}
+  .kv{display:flex;justify-content:space-between;font-size:14px;padding:6px 0}
+  .kv span{color:var(--sub)}
+  .hide{display:none!important}
+</style>
+</head>
+<body>
+
+<div id="login">
+  <div class="box">
+    <h1>电视时间管理</h1>
+    <p class="muted">输入家长密码，配置题库和时间规则</p>
+    <input id="pin" type="password" inputmode="numeric" maxlength="8" placeholder="家长密码" autocomplete="off">
+    <button id="loginBtn">进入</button>
+    <div class="err" id="loginErr"></div>
+    <p class="faint" style="margin-top:22px">手机和电视要连同一个 WiFi。密码就是电视上「家长设置」那个。</p>
+  </div>
+</div>
+
+<div id="app" class="hide">
+  <h1>电视时间管理</h1>
+  <p class="muted" id="device">连接中…</p>
+
+  <div class="card">
+    <h2>题库</h2>
+    <div class="stat">
+      <div><span class="faint">合计</span><b id="stTotal">–</b></div>
+      <div><span class="faint">内置</span><b id="stBuiltin">–</b></div>
+      <div><span class="faint">自己加的</span><b id="stCustom" style="color:var(--sun)">–</b></div>
+    </div>
+    <div class="list" id="subjectBars"></div>
+  </div>
+
+  <div class="card">
+    <h2>导入题目</h2>
+    <p class="faint" style="margin:0 0 10px">
+      支持 JSON（与 bank.json 同格式，或直接是题目数组）和 CSV（表头：subject,grade,knowledge,stem,optionA-D,answer,explain）。同 id 会覆盖旧题。
+    </p>
+    <input id="file" type="file" accept=".json,.csv,.txt,application/json,text/csv" style="display:none">
+    <button class="ghost" id="pickBtn">选择文件</button>
+    <div class="row" style="margin-top:12px">
+      <div>
+        <div class="label">整库替换</div>
+        <div class="hint">勾上会先清空自己加过的题</div>
+      </div>
+      <label class="switch"><input type="checkbox" id="replace"><span></span></label>
+    </div>
+    <textarea id="paste" placeholder="也可以直接粘贴 JSON / CSV 内容"></textarea>
+    <div class="btns">
+      <button id="importBtn">导入</button>
+      <button class="ghost" id="clearBtn">清空我的题</button>
+    </div>
+    <div class="err" id="importMsg"></div>
+    <div class="list" id="importErrors"></div>
+    <div class="btns">
+      <button class="ghost" id="exportBtn">导出我的题</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>答题门禁</h2>
+    <div class="row">
+      <div><div class="label">开启答题</div><div class="hint">关掉后只按时间管</div></div>
+      <label class="switch"><input type="checkbox" id="enabled"><span></span></label>
+    </div>
+    <div class="row">
+      <div><div class="label">每隔多久答一组</div></div>
+      <select id="interval" style="width:118px"></select>
+    </div>
+    <div class="row">
+      <div><div class="label">每次几道题</div></div>
+      <select id="count" style="width:118px"></select>
+    </div>
+    <div class="row">
+      <div><div class="label">题目年级</div></div>
+      <select id="grade" style="width:118px"></select>
+    </div>
+    <div style="padding-top:12px">
+      <div class="label">出题科目</div>
+      <div class="chips" id="subjects"></div>
+    </div>
+    <div class="btns">
+      <button id="saveBtn">保存设置</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <h2>今天</h2>
+    <div class="kv"><span>谁在看</span><b id="who">–</b></div>
+    <div class="kv"><span>今日已看</span><b id="today">–</b></div>
+    <div class="kv"><span>今日上限</span><b id="limit">–</b></div>
+    <div class="kv"><span>错题知识点</span><b id="mistakes">–</b></div>
+    <div class="btns">
+      <button class="ghost" id="testBtn">在电视上试一组</button>
+    </div>
+    <div class="btns">
+      <button class="danger" id="clearMistakes">清空错题记录</button>
+    </div>
+  </div>
+
+  <p class="faint" style="margin-top:18px;text-align:center" id="foot"></p>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUBJECT_LABEL = {
+  math:"数学", chinese:"语文", english:"英语", science:"科学", physics:"物理",
+  chemistry:"化学", biology:"生物", history:"历史", geography:"地理", politics:"道德与法治"
+};
+const ALL_SUBJECTS = Object.keys(SUBJECT_LABEL);
+let state = null;
+let picked = new Set();
+
+const $ = id => document.getElementById(id);
+
+function toast(msg, bad){
+  const t = $("toast");
+  t.textContent = msg;
+  t.className = "toast show" + (bad ? " bad" : "");
+  clearTimeout(t._h);
+  t._h = setTimeout(() => t.className = "toast", 2200);
+}
+
+async function api(path, opt){
+  const res = await fetch(path, Object.assign({credentials:"same-origin", headers:{}}, opt || {}));
+  if (res.status === 401){
+    $("login").classList.remove("hide");
+    $("app").classList.add("hide");
+    throw new Error("请先登录");
+  }
+  const ct = res.headers.get("content-type") || "";
+  const data = ct.includes("json") ? await res.json() : await res.text();
+  if (!res.ok) throw new Error((data && data.error) || ("HTTP " + res.status));
+  return data;
+}
+
+async function login(){
+  const pin = $("pin").value.trim();
+  if (!pin) return;
+  $("loginErr").textContent = "";
+  try{
+    await api("/api/login", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({pin})
+    });
+    $("login").classList.add("hide");
+    $("app").classList.remove("hide");
+    await load();
+  }catch(e){
+    $("loginErr").textContent = e.message;
+  }
+}
+
+async function load(){
+  try{
+    state = await api("/api/status");
+  }catch(e){ return; }
+  const d = state.device, b = state.bank, s = state.settings, u = state.usage;
+  $("device").textContent = `${d.model} · ${d.ip}:${d.port} · v${d.version}`;
+  $("foot").textContent = `Android ${d.android} · 数据只在局域网内传输`;
+
+  $("stTotal").textContent = b.total;
+  $("stBuiltin").textContent = b.builtin;
+  $("stCustom").textContent = b.custom;
+
+  // 科目分布：只显示有题的科目，条形长度按最大科目归一
+  const entries = Object.entries(b.bySubject).sort((a,c) => c[1]-a[1]);
+  const max = entries.length ? entries[0][1] : 1;
+  $("subjectBars").innerHTML = entries.map(([k,v]) => `
+    <div>
+      <div style="display:flex;justify-content:space-between;font-size:13px">
+        <span>${SUBJECT_LABEL[k] || k}</span><span class="faint">${v}</span>
+      </div>
+      <div class="bar"><i style="width:${Math.max(3, v*100/max)}%"></i></div>
+    </div>`).join("");
+
+  $("enabled").checked = !!s.enabled;
+  $("interval").value = s.interval;
+  $("count").value = s.count;
+  $("grade").value = s.grade;
+  picked = new Set(s.subjects);
+  renderSubjects();
+
+  $("who").textContent = u.profile;
+  $("today").textContent = u.today + " 分钟";
+  $("limit").textContent = u.dailyLimit > 0 ? u.dailyLimit + " 分钟" : "不限";
+  $("mistakes").textContent = state.mistakes + " 个";
+}
+
+function renderSubjects(){
+  $("subjects").innerHTML = ALL_SUBJECTS.map(k =>
+    `<div class="chip ${picked.has(k) ? "on" : ""}" data-k="${k}">${SUBJECT_LABEL[k]}</div>`
+  ).join("");
+  [...$("subjects").children].forEach(el => el.onclick = () => {
+    const k = el.dataset.k;
+    if (picked.has(k)){
+      if (picked.size === 1){ toast("至少留一科", true); return; }
+      picked.delete(k);
+    } else picked.add(k);
+    renderSubjects();
+  });
+}
+
+function fillSelects(){
+  const intervals = [5,10,15,20,30,45,60];
+  $("interval").innerHTML = intervals.map(m => `<option value="${m}">${m} 分钟</option>`).join("");
+  const counts = [1,2,3,4,5,6,8,10];
+  $("count").innerHTML = counts.map(n => `<option value="${n}">${n} 道</option>`).join("");
+  const grades = [1,2,3,4,5,6,7,8,9];
+  const cn = ["一","二","三","四","五","六","七","八","九"];
+  $("grade").innerHTML = grades.map(g => `<option value="${g}">${cn[g-1]}年级</option>`).join("");
+}
+
+// ===== CSV =====
+function parseCsv(text){
+  const rows = [];
+  let row = [], cell = "", q = false;
+  for (let i=0;i<text.length;i++){
+    const c = text[i];
+    if (q){
+      if (c === '"' && text[i+1] === '"'){ cell += '"'; i++; }
+      else if (c === '"') q = false;
+      else cell += c;
+    } else if (c === '"') q = true;
+    else if (c === ','){ row.push(cell); cell = ""; }
+    else if (c === '\n'){ row.push(cell); rows.push(row); row = []; cell = ""; }
+    else if (c !== '\r') cell += c;
+  }
+  if (cell.length || row.length){ row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(x => x.trim() !== ""));
+}
+
+function csvToQuestions(text){
+  const rows = parseCsv(text);
+  if (rows.length < 2) throw new Error("CSV 至少要有表头和一行题");
+  const head = rows[0].map(h => h.trim());
+  const idx = name => head.findIndex(h => h.toLowerCase() === name.toLowerCase());
+  const required = ["subject","grade","stem","optionA","optionB"];
+  for (const r of required) if (idx(r) < 0) throw new Error("CSV 缺列：" + r);
+  const out = [];
+  for (let i=1;i<rows.length;i++){
+    const r = rows[i];
+    const get = n => { const k = idx(n); return k >= 0 ? (r[k] || "").trim() : ""; };
+    const options = ["optionA","optionB","optionC","optionD"].map(get).filter(x => x !== "");
+    if (!options.length) continue;
+    const ansRaw = get("answer").toUpperCase();
+    let answer = options.length > 0 ? 0 : -1;
+    if (/^[A-D]$/.test(ansRaw)) answer = ansRaw.charCodeAt(0) - 65;
+    else if (ansRaw !== "" && !isNaN(+ansRaw)) answer = (+ansRaw >= 1 && +ansRaw <= options.length) ? +ansRaw - 1 : +ansRaw;
+    else {
+      const hit = options.findIndex(o => o === get("answer"));
+      if (hit >= 0) answer = hit;
+    }
+    out.push({
+      id: get("id"),
+      subject: get("subject"),
+      grade: +get("grade") || 2,
+      knowledge: get("knowledge"),
+      stem: get("stem"),
+      options,
+      answer,
+      explain: get("explain"),
+      difficulty: +get("difficulty") || 1
+    });
+  }
+  return out;
+}
+
+async function doImport(){
+  let text = $("paste").value.trim();
+  const file = $("file").files[0];
+  if (!text && file) text = await file.text();
+  if (!text){ toast("先选文件或粘贴内容", true); return; }
+  // CSV 转成 JSON 再上传，电视端只认一种格式
+  if (!/^[\[{]/.test(text.slice(0, 4).trim())){
+    try{
+      text = JSON.stringify({questions: csvToQuestions(text)});
+    }catch(e){ $("importMsg").textContent = e.message; return; }
+  }
+  $("importMsg").textContent = "导入中…";
+  $("importErrors").innerHTML = "";
+  try{
+    const replace = $("replace").checked ? "?replace=1" : "";
+    const r = await api("/api/bank/import" + replace, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: text
+    });
+    const ret = r.result;
+    $("importMsg").textContent = `新增 ${ret.added} 道 · 覆盖 ${ret.updated} 道 · 拒绝 ${ret.rejected} 道 · 现有自定义 ${ret.customTotal} 道`;
+    $("importErrors").innerHTML = (ret.errors || []).map(e => `<div>${e}</div>`).join("");
+    $("paste").value = "";
+    $("file").value = "";
+    toast("导入完成");
+    await load();
+  }catch(e){
+    $("importMsg").textContent = e.message;
+    toast("导入失败", true);
+  }
+}
+
+async function saveSettings(){
+  try{
+    await api("/api/settings", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body: JSON.stringify({
+        enabled: $("enabled").checked,
+        interval: +$("interval").value,
+        count: +$("count").value,
+        grade: +$("grade").value,
+        subjects: [...picked]
+      })
+    });
+    toast("已保存，电视立即生效");
+    await load();
+  }catch(e){ toast(e.message, true); }
+}
+
+// ===== 事件 =====
+$("loginBtn").onclick = login;
+$("pin").addEventListener("keydown", e => { if (e.key === "Enter") login(); });
+$("pickBtn").onclick = () => $("file").click();
+$("file").onchange = () => {
+  const f = $("file").files[0];
+  if (f) toast("已选：" + f.name);
+};
+$("importBtn").onclick = doImport;
+$("saveBtn").onclick = saveSettings;
+$("clearBtn").onclick = async () => {
+  if (!confirm("清空你自己加的题？内置题库不受影响。")) return;
+  try{
+    const r = await api("/api/bank/clear", {method:"POST"});
+    toast("已清空 " + r.removed + " 道");
+    await load();
+  }catch(e){ toast(e.message, true); }
+};
+$("exportBtn").onclick = () => { location.href = "/api/bank/export"; };
+$("clearMistakes").onclick = async () => {
+  if (!confirm("清空错题记录？")) return;
+  try{
+    await api("/api/mistakes/clear", {method:"POST"});
+    toast("已清空");
+    await load();
+  }catch(e){ toast(e.message, true); }
+};
+$("testBtn").onclick = async () => {
+  try{
+    await api("/api/quiz/test", {method:"POST"});
+    toast("已让电视弹一组题");
+  }catch(e){ toast(e.message, true); }
+};
+
+fillSelects();
+// 已登录过（cookie 还在）就直接进；否则留在登录页
+api("/api/status").then(() => {
+  $("login").classList.add("hide");
+  $("app").classList.remove("hide");
+  load();
+}).catch(() => {});
+</script>
+</body>
+</html>
