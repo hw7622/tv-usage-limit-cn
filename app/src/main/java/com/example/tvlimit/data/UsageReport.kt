@@ -28,10 +28,12 @@ object UsageReport {
 
     data class DayStat(val date: String, val minutes: Int)
 
-    private class EventCache(val at: Long, val days: Int, val counts: Map<String, Int>)
-
-    @Volatile
-    private var eventCache: EventCache? = null
+    /**
+     * 事件计数缓存：**按天数分开存**。
+     * 原来只有一个槽位、命中条件是 `cached.days >= days`，
+     * 于是先看 30 天再切 7 天，7 天报表上还挂着 30 天的次数，家长一眼就能看出不对。
+     */
+    private val eventCache = HashMap<Int, Pair<Long, Map<String, Int>>>()
 
     suspend fun daily(ctx: Context, profileId: Int, days: Int): List<DayStat> {
         val n = days.coerceIn(1, 90)
@@ -105,9 +107,12 @@ object UsageReport {
 
     /** 扫事件日志数次数。只认 ev 字段，用子串匹配比解析 JSON 快一个数量级。 */
     private fun eventCounts(ctx: Context, days: Int): Map<String, Int> {
-        val cached = eventCache
         val now = System.currentTimeMillis()
-        if (cached != null && cached.days >= days && now - cached.at < 120_000L) return cached.counts
+        synchronized(eventCache) {
+            eventCache[days]?.let { (at, counts) ->
+                if (now - at < 120_000L) return counts
+            }
+        }
 
         val names = listOf("quiz_pass", "quiz_wrong", "block", "limit", "quiz_abandon")
         val out = names.associateWith { 0 }.toMutableMap()
@@ -130,7 +135,10 @@ object UsageReport {
                     }
                 }
         }
-        eventCache = EventCache(now, days, out)
+        synchronized(eventCache) {
+            if (eventCache.size > 6) eventCache.clear()
+            eventCache[days] = now to out
+        }
         return out
     }
 

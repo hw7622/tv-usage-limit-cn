@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import com.example.tvlimit.service.RevivalSync
 import com.example.tvlimit.service.ServiceWatchdog
 
 /**
@@ -18,11 +19,22 @@ class BootReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
         val action = intent.action ?: return
         val interesting = action == Intent.ACTION_BOOT_COMPLETED ||
+            action == "android.intent.action.LOCKED_BOOT_COMPLETED" ||
             action == "android.intent.action.QUICKBOOT_POWERON" ||
             action == "android.intent.action.HTC_QUICKBOOT_POWERON" ||
             action == Intent.ACTION_MY_PACKAGE_REPLACED
 
         if (!interesting) return
+
+        // 复活通道的账号/同步任务在 force-stop 后会被清掉，每次开机都补一遍
+        RevivalSync.ensure(context)
+
+        // 直接启动阶段数据还没解密：这时候去开 Room 会直接崩，
+        // 只把定时任务排上，真正的启动留给紧接着的 BOOT_COMPLETED。
+        if (action == "android.intent.action.LOCKED_BOOT_COMPLETED") {
+            ServiceWatchdog.schedule(context)
+            return
+        }
 
         Log.d("BootReceiver", "$action -> start TimeTrackingService")
         // 先把看门狗排上（装新版本后 JobScheduler 里的任务会被清掉）

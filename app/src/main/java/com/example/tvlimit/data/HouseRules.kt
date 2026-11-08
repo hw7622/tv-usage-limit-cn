@@ -138,10 +138,19 @@ object HouseRules {
     fun isOutsideSchedule(ctx: Context, at: ZonedDateTime = ZonedDateTime.now()): Boolean {
         val s = schedule(ctx)
         if (!s.enabled || !s.configured) return false
-        val windows = s.windowsFor(at.dayOfWeek)
-        if (windows.isEmpty()) return false
         val minute = at.hour * 60 + at.minute
-        return windows.none { it.contains(minute) }
+        val today = s.windowsFor(at.dayOfWeek)
+        if (today.any { it.contains(minute) }) return false
+        // 跨夜窗口（21:00-07:00）的凌晨那半段，算的是**前一天**那张表。
+        // 只用今天的表判断的话，「工作日 21:00-07:00」在周六 02:00 会被当成
+        // 周末没到 08:00 而拦掉，孩子周五晚上看一半就被踢出来。
+        val overnight = s.windowsFor(at.minusDays(1).dayOfWeek)
+            .any { it.start > it.end && minute < it.end }
+        if (overnight) return false
+        // 当天一段都没填 = 不限（和上面对「没配置」的态度一致：
+        // 宁可不管，也不能因为漏填把电视全锁死）
+        if (today.isEmpty()) return false
+        return true
     }
 
     /** 「今天是 17:00-19:30」—— 拦截页上要告诉孩子什么时候能看。 */

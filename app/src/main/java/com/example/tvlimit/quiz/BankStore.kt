@@ -148,6 +148,14 @@ object BankStore {
     fun import(ctx: Context, text: String, replace: Boolean = false): ImportResult {
         require(text.toByteArray().size <= MAX_BYTES) { "文件超过 8MB" }
         val (incoming, errors) = parse(text)
+        // 一道都没解析出来时绝对不能往下走：
+        // `{"items":[...]}`、键名写成 `question`、或者整段被 Web 端转义坏了，
+        // 都会得到「合法 JSON 但 0 道题」。原来是照常写盘，配合「覆盖导入」
+        // 等于把家长攒的几千道题一次性清空，接口还回 ok。
+        require(incoming.isNotEmpty()) {
+            "没有解析出任何题目：要 {\"questions\":[...]} 或直接 [...]，" +
+                "每道题都要有 stem / subject / grade / options / answer"
+        }
         val merged = LinkedHashMap<String, QuizQuestion>()
         if (!replace) loadCustom(ctx).forEach { merged[it.id] = it }
         var added = 0
@@ -180,7 +188,15 @@ object BankStore {
             put("source", "手机导入")
             put("importedAt", System.currentTimeMillis())
         })
-        file(ctx).writeText(root.toString())
+        // 先写临时文件再改名：导入一份大题库时正好断电 / 被电视管家杀进程，
+        // 直接覆盖会留下半截 JSON，下次读不出来就等于「题库空了」。
+        val target = file(ctx)
+        val tmp = File(target.parentFile, "$FILE_NAME.tmp")
+        tmp.writeText(root.toString())
+        if (!tmp.renameTo(target)) {
+            target.writeText(root.toString())
+            tmp.delete()
+        }
     }
 
     private fun report(list: List<QuizQuestion>, meta: JSONObject?): JSONObject {

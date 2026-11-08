@@ -29,6 +29,7 @@ Android TV / 电视盒子上的**儿童观看时间管理**：家长设定每日
 - **全屏拦截页**：暂停播放、退回桌面，显示「还 要 休 息 X 分 XX 秒」并逐秒递减
 - **家长入口**：拦截页上的「我是家长」可直接输密码切换档案
 - **遥控器可操作**：所有输入（含密码）都支持方向键 + 确认键，不依赖软键盘
+- **被电视管家杀掉也能自己回来**：通知使用权 + 同步框架两条复活通道（不读任何通知内容），配合省电白名单，`force-stop` 后十几秒自动恢复（2.9.0 起）
 
 <table>
 <tr>
@@ -64,7 +65,7 @@ Android TV / 电视盒子上的**儿童观看时间管理**：家长设定每日
 
 ```bash
 adb connect <TV_IP>:5555     # 先在电视「开发者选项」里打开网络调试
-adb install -r tvlimit-2.7.6-cn.apk
+adb install -r tvlimit-2.9.0-cn.apk
 adb shell am start -n com.example.tvlimit/.ui.MainActivity   # 装完必须启动一次
 ```
 

@@ -42,6 +42,22 @@
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
 
+    <!--
+      复活通道（见 service/Revival.kt）：
+      · 通知使用权只借系统「进程死了会重新 bind 监听器」这个行为，不读任何通知内容；
+      · 同步框架同理，账号和同步任务归系统所有，force-stop 清不掉。
+      这两样是国产电视 force-stop 之后唯一还能把进程拉起来的办法。
+    -->
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS" />
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS" />
+    <uses-permission
+        android:name="android.permission.AUTHENTICATE_ACCOUNTS"
+        android:maxSdkVersion="22" />
+    <uses-permission
+        android:name="android.permission.GET_ACCOUNTS"
+        android:maxSdkVersion="22" />
+
+
     <!-- 手机配置：在电视上开一个局域网 HTTP 服务（只监听内网，不访问互联网） -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -124,12 +140,49 @@
             android:exported="false"
             android:permission="android.permission.BIND_JOB_SERVICE" />
 
+        <!-- 复活通道之一：通知使用权。进程被 force-stop 后系统会重新 bind 它，见 Revival.kt -->
+        <service
+            android:name=".service.Revival.Listener"
+            android:directBootAware="true"
+            android:exported="true"
+            android:label="电视时间管家（保活）"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- 复活通道之二：同步框架（低内存机型上通知监听绑不上，靠这条兜底） -->
+        <service
+            android:name=".service.RevivalSyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/revival_sync" />
+        </service>
+        <service
+            android:name=".service.RevivalAccountService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/revival_account" />
+        </service>
+
         <receiver
             android:name=".receiver.BootReceiver"
+            android:directBootAware="true"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <!-- 直接启动阶段（数据还没解密）也要能把服务叫起来 -->
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
                 <action android:name="android.intent.action.HTC_QUICKBOOT_POWERON" />
                 <!-- 覆盖安装新版本后也要把服务叫回来 -->

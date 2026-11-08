@@ -1,6 +1,6 @@
 # 交接文档（换电脑继续开发看这一份）
 
-最后更新：2026-11-07 · 对应版本 **v2.7.6-cn**（versionCode 44）
+最后更新：2026-11-08 · 对应版本 **v2.9.0-cn**（versionCode 51）
 
 这份文档的目的：**在一台干净电脑上，从零把项目跑起来、装进电视、并且不踩已经踩过的坑。**
 实现细节看代码注释（注释密度很高，关键决策都写在类头），这里只写「怎么用」和「别踩什么」。
@@ -312,6 +312,57 @@ adb shell run-as com.example.tvlimit tail -50 files/logs/events-$(date +%Y%m%d).
 测试副作用说明：验证「清空错题记录」时把当天的错题本清空了（这是按钮本身的功能，不是 bug）；
 答题预览触发了一次答题，会正常计入当天统计。家长密码未被改动。
 
+### v2.9.0 的整体复查与保活（2026-11-08）
+
+**① 三个「答案错了」的数学题（孩子答对被判错）**
+
+| 题型 | 原来 | 现在 |
+|---|---|---|
+| 六年级 比例 | `2:3 = ?:30` 答案写成 2（正确是 20），而 20 还被放进干扰项 | 答案 20，干扰项改成 2 / 3 / 5 |
+| 七年级 有理数乘法 | 题干 `a × (-ab)`，答案却写 `-ab` | 题干改成 `(-a) × b`，答案 `-ab` |
+| 八年级 勾股定理 | 随机取两条直角边，把 `a²+b²` 当斜边 | 只出整数勾股数（3-4-5、5-12-13…），答案是真斜边 |
+
+**② 界面回归（v2.8.2 遗留）**：把布局里的 `<Button>` 全换成 `TextView` 时，四处 Kotlin 还在
+`findViewById<Button>(...)`。泛型在字节码里是真 `checkcast`，取到 TextView 会抛
+`ClassCastException` —— 涉及**拦截页、诊断页、学习报告页**和拦截悬浮窗的两个按钮。
+现在全部改成 `findViewById<TextView>`；学习报告页里代码 new 出来的 `Button` 也换成 `TextView`
+（否则 AppCompat 的 `backgroundTint` 又会盖掉描边）。
+
+**③ 其它修复**
+
+- 题库「覆盖导入」遇到「合法 JSON 但 0 道题」（`{"items":[...]}`、键名拼错）会把家长攒的题**清空**且返回成功 → 现在直接拒绝并说明格式。
+- 题库落盘改 tmp + rename，导入大文件时被杀不会留下半截 JSON。
+- 手机报表：事件计数缓存原来「30 天的缓存也回答 7 天」，先看 30 天再切 7 天数字不对 → 改成按天数分槽。
+- 作息跨零点：`21:00-07:00` 的凌晨那半段原来用**当天**的表判断，周六 02:00 会被当成「周末 8 点才开始」拦掉 → 现在凌晨时段回看前一天的表。
+- 配置接口只认 GET/POST、没校验方法：任意网页用顶层 GET 导航就能带着 cookie 触发
+  `/api/bank/clear`、`/api/resume` 这类写操作（CSRF）→ 写接口现在只收 POST，cookie 改 `SameSite=Strict`。
+- 配置服务连接数封顶 6：线程池 4 线程 + 无界队列，慢客户端能把队列堆起来。
+- 题库预览/first quiz 的主线程解析：服务启动时在 IO 线程预热（3200 道、640KB）。
+
+**④ 保活：从「一条腿」变成「三条腿」**
+
+原来只有 JobScheduler 看门狗，但国产电视 `force-stop` 时会把 JobService、Alarm、静态广播
+一起作废，还把包标成 stopped —— 从此开机广播也不给。参考开源电视桌面
+[Aerial](https://github.com/pengchujin/aerial-tv) 的 `guard/` 实现，补上：
+
+1. **通知使用权**（`service/Revival.kt` 的 `Listener`）：授权记录在系统里，进程死了系统会重新 bind。
+   不读任何通知内容，只把「被 bind」当成一次复活机会。
+2. **同步框架**（`service/RevivalSync.kt`）：账号 + SyncAdapter 归系统所有，`force-stop` 清不掉；
+   系统设置被写入后约 30 秒跑一次同步，顺手拉起进程。给「低内存机型上通知监听绑不上」兜底。
+3. **心跳判活**：`ServiceRecord` 存在不等于 `onCreate` 跑过 —— TCL 的 FreezeManager 会把刚起来的
+   进程冻住，`startForegroundCount=0`。现在服务自己每 30 秒刷 `markAlive()`，复活逻辑看这个心跳。
+
+熄屏时**不会**顶透明页（半夜把电视点亮比限制失效更吓人），只等下一次 bind / 开机广播。
+
+真机实测（TCL MT5879 / 雷鸟系统，2026-11-08 19:59）：`am force-stop com.example.tvlimit`
+之后 **17 秒**服务重新 `isForeground=true`、`startForegroundCount=1`。没有这条通道时只能等开机。
+
+**⑤ 还没验证的**
+
+- 拦截页 / 诊断页 / 学习报告页换成 TextView 后的实机截图（当时电视在看视频，没再打断）。
+- 跨零点作息、CSRF 拦截、导入拒绝这三项只有代码级验证。
+- 通知使用权在其它品牌电视上的入口（小米叫「通知使用权」，海信/创维在「应用 → 特殊权限」）。
+
 ---
 
 ## 10. 发布流程
@@ -323,9 +374,9 @@ adb shell run-as com.example.tvlimit tail -50 files/logs/events-$(date +%Y%m%d).
 # 3) 重命名产物（约定）
 cp app/build/outputs/apk/debug/app-debug.apk tvlimit-<versionName>.apk
 # 4) 打 tag 并推
-git tag v2.7.6-cn && git push origin main --tags
+git tag v2.9.0-cn && git push origin main --tags
 # 5) 传到 Releases（gh CLI 已登录时）
-gh release create v2.7.6-cn tvlimit-2.7.6-cn.apk --title "v2.7.6-cn" --notes "..."
+gh release create v2.9.0-cn tvlimit-2.9.0-cn.apk --title "v2.9.0-cn" --notes "..."
 ```
 
 Releases 里只放 APK，不放 keystore（本来也没有）。

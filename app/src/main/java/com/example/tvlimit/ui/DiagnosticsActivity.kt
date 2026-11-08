@@ -3,12 +3,12 @@ package com.example.tvlimit.ui
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.widget.Button
 import android.widget.ScrollView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.example.tvlimit.R
+import com.example.tvlimit.service.Revival
 import com.example.tvlimit.util.EventLog
 
 /**
@@ -52,9 +52,9 @@ class DiagnosticsActivity : AppCompatActivity() {
         tvLog = findViewById(R.id.tvLog)
         logScroll = findViewById(R.id.logScroll)
 
-        val btnRefresh = findViewById<Button>(R.id.btnRefresh)
-        val btnExport = findViewById<Button>(R.id.btnExport)
-        val btnBack = findViewById<Button>(R.id.btnBack)
+        val btnRefresh = findViewById<TextView>(R.id.btnRefresh)
+        val btnExport = findViewById<TextView>(R.id.btnExport)
+        val btnBack = findViewById<TextView>(R.id.btnBack)
         TvFocus.attach(btnRefresh, btnExport, btnBack)
 
         btnRefresh.setOnClickListener {
@@ -108,11 +108,22 @@ class DiagnosticsActivity : AppCompatActivity() {
         }
 
         val state = prefs.getString("last_tick_state", null)
-        tvStateLine.text = if (state == null) {
+        val keepAlive = buildString {
+            append(if (Revival.isServiceAlive(this@DiagnosticsActivity)) "服务在跑" else "服务没在跑")
+            append(" · 通知保活").append(if (Revival.isListenerEnabled(this@DiagnosticsActivity)) "已开" else "未开")
+            val battery = try {
+                (getSystemService(POWER_SERVICE) as android.os.PowerManager)
+                    .isIgnoringBatteryOptimizations(packageName)
+            } catch (e: Exception) {
+                false
+            }
+            append(" · 省电白名单").append(if (battery) "已加" else "未加")
+        }
+        tvStateLine.text = (if (state == null) {
             "监控服务还没有开始计时（电视待机时是正常的）"
         } else {
             "s=本场 d=今日 r=到点 p=暂停 top=前台 scope=是否计时 rest=整机遮罩 → $state"
-        }
+        }) + "\n保活：" + keepAlive
 
         val lines = EventLog.tail(200)
         tvLog.text = if (lines.isEmpty()) {

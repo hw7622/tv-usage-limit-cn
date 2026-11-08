@@ -98,11 +98,24 @@ object ConfigServer {
 
     private val fails = ConcurrentHashMap<String, Attempts>()
 
+    /**
+     * 只读接口白名单：其余的 api 接口一律要求 POST。
+     * 新增接口时如果忘了加在这里，最坏结果是「GET 被拒」，不会变成「GET 能改数据」。
+     */
+    private val READ_ONLY_PATHS = setOf(
+        "/api/overview", "/api/report", "/api/profiles",
+        "/api/schedule", "/api/settings", "/api/config",
+        "/api/bank/gaps", "/api/bank/export", "/api/mistakes"
+    )
+
     /** 最后一次收到请求的时间，用来判断「没人用就关掉」。 */
     @Volatile
     private var lastActiveAt = 0L
 
     private val pool = Executors.newFixedThreadPool(4)
+
+    /** 同时处理的连接上限（见 acceptLoop）。 */
+    private val slots = java.util.concurrent.Semaphore(6)
 
     @Volatile
     var port: Int = 0
@@ -321,8 +334,25 @@ object ConfigServer {
                 if (ss.isClosed) break else continue
             }
             try {
-                pool.execute { handle(ctx, socket) }
+                // 连接数封顶：线程池只有 4 个线程，队列又是无界的，慢客户端/半开连接
+                // 一多就会把队列堆到内存里，同时占着文件描述符。家里就几台设备，
+                // 超过 6 个并发直接关掉，比事后 OOM 好收拾。
+                if (!slots.tryAcquire()) {
+                    try {
+                        socket.close()
+                    } catch (ignored: Exception) {
+                    }
+                    continue
+                }
+                pool.execute {
+                    try {
+                        handle(ctx, socket)
+                    } finally {
+                        slots.release()
+                    }
+                }
             } catch (e: Exception) {
+                slots.release()
                 try {
                     socket.close()
                 } catch (ignored: Exception) {
@@ -458,6 +488,15 @@ object ConfigServer {
 
         if (!isAuthed(headers)) {
             json(out, 401, error("请先输入家长密码"))
+            return
+        }
+
+        // 改数据的接口一律只收 POST。
+        // 不校验方法的话，`<img src="http://电视:8080/api/bank/clear">` 这种
+        // 顶层 GET 导航就能带着 cookie 把题库清空、把「暂停」解除 ——
+        // 家长只是拿手机随手点开了一个网页而已。
+        if (path !in READ_ONLY_PATHS && method != "POST") {
+            json(out, 405, error("这个接口只接受 POST"))
             return
         }
 
@@ -597,7 +636,7 @@ object ConfigServer {
         respond(
             out, 200, "application/json; charset=utf-8",
             JSONObject().put("ok", true).put("pinDefault", stored == "1234").toString().toByteArray(),
-            "Set-Cookie: $COOKIE=$token; Path=/; Max-Age=86400; HttpOnly; SameSite=Lax\r\n"
+            "Set-Cookie: $COOKIE=$token; Path=/; Max-Age=86400; HttpOnly; SameSite=Strict\r\n"
         )
     }
 

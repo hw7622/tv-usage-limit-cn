@@ -26,7 +26,6 @@ import android.view.KeyEvent
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
-import android.widget.Button
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.ImageView
@@ -45,6 +44,7 @@ import com.example.tvlimit.data.LimitControl
 import com.example.tvlimit.data.Profile
 import com.example.tvlimit.data.UsageLog
 import com.example.tvlimit.receiver.AdminReceiver
+import com.example.tvlimit.quiz.QuestionBank
 import com.example.tvlimit.quiz.QuizSettings
 import com.example.tvlimit.ui.CountdownRingView
 import com.example.tvlimit.ui.ParentGateActivity
@@ -138,6 +138,26 @@ class TimeTrackingService : Service() {
          * 0 表示正在看。休息够 restDuration 就把本场额度清零，这是需求 2。
          */
         private const val PREF_IDLE_SINCE_PREFIX = "idle_since_"
+
+        /**
+         * 服务心跳：onCreate 和每轮自愈时刷新。
+         *
+         * 为什么不用 `ActivityManager.getRunningServices` 判断「服务在不在」：
+         * TCL 的 FreezeManager 会在进程起来约 6 秒后把它冻住，这时 dumpsys 里
+         * **ServiceRecord 已经有了**（startRequested=true），但 onCreate 一行都没跑、
+         * startForegroundCount 还是 0 —— 只排队没干活。看这个心跳才分得清
+         * 「排队」和「真的在计时」。
+         */
+        @Volatile
+        private var aliveAt = 0L
+
+        /** 90 秒内有过心跳 = 服务真的在跑（自愈循环 30 秒刷一次）。 */
+        fun isAlive(): Boolean =
+            aliveAt > 0 && System.currentTimeMillis() - aliveAt < 90_000L
+
+        fun markAlive() {
+            aliveAt = System.currentTimeMillis()
+        }
     }
 
     /**
@@ -348,6 +368,7 @@ class TimeTrackingService : Service() {
         } catch (e: Exception) {
             Log.e("TvLimit", "startForeground failed: ${e.message}", e)
         }
+        markAlive()
 
         Log.d("TvLimit", "Service onCreate")
         // 老版本升级：把旧的默认间隔 20 分搬成 10 分、给题量补默认值。
@@ -405,7 +426,18 @@ class TimeTrackingService : Service() {
         // 挂上看门狗：服务被杀后 15 分钟内会被自动拉起来
         ServiceWatchdog.schedule(this)
 
+        // 同步框架那条复活通道的账号要建出来（force-stop 会把它清掉，每次启动补一遍）
+        serviceScope.launch(Dispatchers.IO) { RevivalSync.ensure(this@TimeTrackingService) }
+
         initQuizGate()
+
+        // 预热题库。assets 里 3200+ 道题、640KB JSON，第一次解析要几百毫秒；
+        // 万一第一次解析正好发生在「该弹题了」那一刻，就会在电视上先卡一下再弹窗。
+        // 这里趁服务启动（孩子还没开始看）先解一遍，弹题时直接命中缓存。
+        serviceScope.launch(Dispatchers.IO) {
+            runCatching { QuestionBank.all(this@TimeTrackingService) }
+                .onFailure { Log.w("TvLimit", "题库预热失败：${it.message}") }
+        }
 
         // 断电重弹：上次题没答完就关机 / 被强杀，开机后不能就这么算了。
         // 文章里孩子第一次绕过就是「直接断电重启」，这里必须补上。
@@ -442,6 +474,7 @@ class TimeTrackingService : Service() {
             var staleForeground = 0
             while (isActive) {
                 delay(30_000L)
+                markAlive()
                 try {
                     // ① 前台标记卡死：ProcessLifecycleOwner 只在 ON_STOP 派发，
                     //    而「从我们的页面直接跳到另一个应用」只走到 onPause，
@@ -1040,7 +1073,7 @@ class TimeTrackingService : Service() {
                 if (!isOverlayShowing || isAppInForeground) return@launch
                 Log.d("TvLimit", "Screen on: reclaiming overlay focus")
                 forceOverlayWindowFocus()
-                TvFocus.focus(overlayView?.findViewById<Button>(R.id.btnSwitchProfile))
+                TvFocus.focus(overlayView?.findViewById<TextView>(R.id.btnSwitchProfile))
             }
         }
         startTracking()
@@ -1728,8 +1761,8 @@ class TimeTrackingService : Service() {
         view.findViewById<TextView>(R.id.tvAppBlockedDetails)?.text = blockDetailText(appName, reason)
         updateAppBlockedRest(view)
 
-        val btnHome = view.findViewById<Button>(R.id.btnAppBlockedHome)
-        val btnParent = view.findViewById<Button>(R.id.btnAppBlockedParent)
+        val btnHome = view.findViewById<TextView>(R.id.btnAppBlockedHome)
+        val btnParent = view.findViewById<TextView>(R.id.btnAppBlockedParent)
 
         btnHome.setOnClickListener {
             removeAppBlockedOverlay()
@@ -2030,7 +2063,7 @@ class TimeTrackingService : Service() {
                 // 大数字每秒跟着走，别停在开页时那一刻
                 updateAppBlockedRest(v)
 
-                val btn = v.findViewById<Button>(R.id.btnAppBlockedParent)
+                val btn = v.findViewById<TextView>(R.id.btnAppBlockedParent)
                 if (btn != null && !isAppInForeground) {
                     if (v.hasWindowFocus() != true) {
                         // 焦点被桌面抢走时把这层窗口提回顶部
@@ -2217,7 +2250,7 @@ class TimeTrackingService : Service() {
                         KeyEvent.KEYCODE_DPAD_DOWN,
                         KeyEvent.KEYCODE_DPAD_LEFT,
                         KeyEvent.KEYCODE_DPAD_RIGHT -> {
-                            TvFocus.focus(overlayView?.findViewById<Button>(R.id.btnSwitchProfile))
+                            TvFocus.focus(overlayView?.findViewById<TextView>(R.id.btnSwitchProfile))
                             true
                         }
                         // 兜底二：焦点在根布局时 OK 键没人接，直接当成点按钮。
@@ -2225,7 +2258,7 @@ class TimeTrackingService : Service() {
                         KeyEvent.KEYCODE_DPAD_CENTER,
                         KeyEvent.KEYCODE_ENTER,
                         KeyEvent.KEYCODE_NUMPAD_ENTER -> {
-                            overlayView?.findViewById<Button>(R.id.btnSwitchProfile)?.performClick()
+                            overlayView?.findViewById<TextView>(R.id.btnSwitchProfile)?.performClick()
                             true
                         }
                         else -> false
@@ -2238,7 +2271,7 @@ class TimeTrackingService : Service() {
                 // 结果就是家长进不去密码页、也关不掉遮罩，整台电视干等。
                 // 焦点必须落在按钮上：见 ensureButtonFocus()。
 
-                val btnSwitch = overlayView!!.findViewById<Button>(R.id.btnSwitchProfile)
+                val btnSwitch = overlayView!!.findViewById<TextView>(R.id.btnSwitchProfile)
                 btnSwitch.setOnClickListener {
                     // 这里只做两件事：撤掉遮罩、打开密码页。
                     // 绝不能像以前那样停计时 + 写「本场结束时间」——孩子点一下再按返回，
@@ -2298,7 +2331,7 @@ class TimeTrackingService : Service() {
      */
     private fun ensureButtonFocus() {
         val v = overlayView ?: return
-        val btn = v.findViewById<Button>(R.id.btnSwitchProfile) ?: return
+        val btn = v.findViewById<TextView>(R.id.btnSwitchProfile) ?: return
         btn.isFocusable = true
         btn.post {
             if (overlayView?.isAttachedToWindow == true && !btn.isFocused) {
@@ -2362,7 +2395,7 @@ class TimeTrackingService : Service() {
                 // 1) 整个窗口丢了输入焦点（关屏再开机最常见）——把焦点抢回来；
                 // 2) 窗口有焦点但焦点不在按钮上——按回按钮。
                 // 只在不是本应用在前台时做，免得跟密码页抢。
-                val btn = overlayView?.findViewById<Button>(R.id.btnSwitchProfile)
+                val btn = overlayView?.findViewById<TextView>(R.id.btnSwitchProfile)
                 if (btn != null && !isAppInForeground) {
                     if (overlayView?.hasWindowFocus() != true) {
                         Log.w("TvLimit", "Overlay has no window focus, reclaiming")

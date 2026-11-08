@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  同步框架的适配器：只借「系统设置被写入后会跑一次同步」这件事，
+  在进程被 force-stop 之后把监控服务拉回来（见 RevivalSync.kt）。
+  它不同步任何数据。
+-->
+<sync-adapter xmlns:android="http://schemas.android.com/apk/res/android"
+    android:contentAuthority="settings"
+    android:accountType="com.example.tvlimit"
+    android:userVisible="false"
+    android:supportsUploading="true"
+    android:allowParallelSyncs="false"
+    android:isAlwaysSyncable="true" />

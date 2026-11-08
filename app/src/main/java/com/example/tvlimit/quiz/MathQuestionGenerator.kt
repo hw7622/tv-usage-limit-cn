@@ -239,12 +239,13 @@ object MathQuestionGenerator {
             }
             else -> {
                 val a = r.nextInt(2, 9); val b = r.nextInt(2, 9)
-                val c = a * 10
-                val correct = a
+                // 后项乘以 10，前项也得乘以 10，比值才不变。
+                // 之前把 a 当成答案，结果「选对的」被判错、「选错的」被判对。
+                val correct = a * 10
                 numeric(
                     "p6-ratio-$a-$b", "比例",
                     "$a : $b = ? : ${b * 10}", correct,
-                    listOf(c, b, a + b), 3,
+                    listOf(a, b, a + b), 3,
                     explain = "比的前项和后项同时乘 10，比值不变。"
                 )
             }
@@ -273,11 +274,13 @@ object MathQuestionGenerator {
             }
             else -> {
                 val a = r.nextInt(2, 9); val b = r.nextInt(2, 9)
-                val c = -a * b
+                // 题干是 (-a) × b，答案就是 -ab。
+                // 原来是「a × (-ab)」却把 -ab 当答案，题干和答案对不上。
+                val correct = -a * b
                 numeric(
-                    "j7-mul-$a-$b", "有理数乘法", "$a × ($c) = ?", -a * b * 1,
-                    listOf(a * b, -a * b - a, a * b + b), 3,
-                    explain = "异号相乘得负。"
+                    "j7-mul-$a-$b", "有理数乘法", "(-$a) × $b = ?", correct,
+                    listOf(a * b, correct - a, a * b + b), 3,
+                    explain = "异号相乘得负，绝对值相乘。"
                 )
             }
         }
@@ -307,13 +310,20 @@ object MathQuestionGenerator {
                 )
             }
             else -> {
-                val a = r.nextInt(3, 10); val b = r.nextInt(4, 13)
-                val c = a * a + b * b
+                // 只出整数勾股数，答案才是整数。
+                // 原来随机取两条直角边、把 a²+b² 当斜边，3 和 4 的「斜边」变成了 25。
+                val triples = listOf(
+                    Triple(3, 4, 5), Triple(6, 8, 10), Triple(5, 12, 13),
+                    Triple(8, 15, 17), Triple(9, 12, 15), Triple(7, 24, 25)
+                )
+                val t = triples[r.nextInt(triples.size)]
+                val k = if (r.nextBoolean()) 1 else 2
+                val a = t.first * k; val b = t.second * k; val c = t.third * k
                 numeric(
                     "j8-pyth-$a-$b", "勾股定理",
                     "直角三角形两条直角边为 $a 和 $b，斜边是多少？",
                     c, listOf(a + b, c + 1, a * b), 3,
-                    explain = "斜边² = 直角边² + 直角边²。"
+                    explain = "斜边² = 直角边² + 直角边²，$a² + $b² = ${c * c}。"
                 )
             }
         }

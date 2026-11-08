@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
-import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.TextView
@@ -222,9 +221,13 @@ class StudyReportActivity : AppCompatActivity() {
         }
 
         // ===== 返回 =====
-        val btn = Button(this).apply {
+        // 用 TextView 而不是 Button：AppCompat 的 backgroundTint 会在部分电视 ROM 上
+        // 把 selector 描边整圈盖掉，就是「按钮边框显示不全」的来源。
+        val btn = TextView(this).apply {
             text = "返回"
+            gravity = Gravity.CENTER
             setTextColor(color(R.color.bg_deep))
+            setTextSize(TypedValue.COMPLEX_UNIT_SP, 17f)
             setBackgroundResource(R.drawable.selector_btn_primary)
             setOnClickListener { finish() }
             isFocusable = true

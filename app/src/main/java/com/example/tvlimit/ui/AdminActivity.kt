@@ -18,6 +18,8 @@ import com.example.tvlimit.data.AppDatabase
 import com.example.tvlimit.data.LimitControl
 import com.example.tvlimit.data.Profile
 import com.example.tvlimit.quiz.QuizSettings
+import com.example.tvlimit.service.Revival
+import com.example.tvlimit.service.RevivalSync
 import com.example.tvlimit.service.ServiceWatchdog
 import com.example.tvlimit.util.EventLog
 import kotlinx.coroutines.CoroutineScope
@@ -171,14 +173,15 @@ class AdminActivity : AppCompatActivity() {
 
     private fun updateKeepAliveCard() {
         if (!::tvKeepAliveState.isInitialized) return
-        val ok = isBatteryExempt()
-        tvKeepAliveState.text = if (ok) {
-            "开机自动恢复"
-        } else {
-            "点这里设置"
+        val battery = isBatteryExempt()
+        val listener = Revival.isListenerEnabled(this)
+        tvKeepAliveState.text = when {
+            battery && listener -> "双重保活已开启"
+            battery -> "点这里开启强力保活"
+            else -> "点这里设置"
         }
         tvKeepAliveState.setTextColor(
-            ContextCompat.getColor(this, if (ok) R.color.mint else R.color.coral)
+            ContextCompat.getColor(this, if (battery && listener) R.color.mint else R.color.coral)
         )
     }
 
@@ -186,29 +189,46 @@ class AdminActivity : AppCompatActivity() {
         // 顺手把看门狗重新排一遍，装的旧版本可能还没排上
         ServiceWatchdog.schedule(this)
         ServiceWatchdog.startService(this)
+        RevivalSync.ensure(this)
 
-        if (isBatteryExempt()) {
-            toast("已经设置好了。若还是失效，到 设置 → 应用 → 电视时间管家 打开「自启动」")
+        if (!isBatteryExempt()) {
+            val opened = try {
+                startActivity(
+                    Intent(
+                        Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
+                        Uri.parse("package:$packageName")
+                    )
+                )
+                true
+            } catch (e: Exception) {
+                false
+            }
+            if (!opened) {
+                try {
+                    startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+                } catch (e: Exception) {
+                    toast("请到 设置 → 应用 → 电视时间管家 里允许后台运行")
+                }
+            }
             return
         }
-        val opened = try {
-            startActivity(
-                Intent(
-                    Settings.ACTION_REQUEST_IGNORE_BATTERY_OPTIMIZATIONS,
-                    Uri.parse("package:$packageName")
-                )
-            )
-            true
-        } catch (e: Exception) {
-            false
-        }
-        if (!opened) {
-            try {
-                startActivity(Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS))
+
+        // 第二步：通知使用权。这是「被电视管家 force-stop 之后还能自己起来」的关键，
+        // 小米的待机清理、TCL 的后台冻结都会直接停掉我们的进程和所有定时任务，
+        // 只有系统自己重新 bind 通知监听器能把我们叫回来（不读任何通知内容）。
+        if (!Revival.isListenerEnabled(this)) {
+            toast("在列表里找到「电视时间管家」，打开开关")
+            val ok = try {
+                startActivity(Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS))
+                true
             } catch (e: Exception) {
-                toast("请到 设置 → 应用 → 电视时间管家 里允许后台运行")
+                false
             }
+            if (!ok) toast("请到 设置 → 应用 → 特殊权限 → 通知使用权 里打开")
+            return
         }
+
+        toast("已经设置好了。若还是失效，到 设置 → 应用 → 电视时间管家 打开「自启动」")
     }
 
     override fun onDestroy() {

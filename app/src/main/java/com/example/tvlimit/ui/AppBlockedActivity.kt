@@ -2,7 +2,6 @@ package com.example.tvlimit.ui
 
 import android.content.Intent
 import android.os.Bundle
-import android.widget.Button
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
@@ -33,8 +32,8 @@ class AppBlockedActivity : ComponentActivity() {
             }
         }
 
-        val btnGoBack = findViewById<Button>(R.id.btnGoBack)
-        val btnSwitch = findViewById<Button>(R.id.btnSwitchProfile)
+        val btnGoBack = findViewById<TextView>(R.id.btnGoBack)
+        val btnSwitch = findViewById<TextView>(R.id.btnSwitchProfile)
         TvFocus.attach(btnGoBack, btnSwitch)
 
         btnGoBack.setOnClickListener { goHome() }
