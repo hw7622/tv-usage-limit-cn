@@ -65,7 +65,7 @@ Android TV / 电视盒子上的**儿童观看时间管理**：家长设定每日
 
 ```bash
 adb connect <TV_IP>:5555     # 先在电视「开发者选项」里打开网络调试
-adb install -r tvlimit-2.9.0-cn.apk
+adb install -r tvlimit-2.9.2-cn.apk
 adb shell am start -n com.example.tvlimit/.ui.MainActivity   # 装完必须启动一次
 ```
 

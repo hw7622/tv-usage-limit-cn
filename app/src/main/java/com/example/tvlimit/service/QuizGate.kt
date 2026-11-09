@@ -82,11 +82,21 @@ class QuizGate(
         attach()
     }
 
-    fun dismiss() {
+    /**
+     * 收起答题页。
+     *
+     * @param keepSession true = 把这组题的状态留下来（孩子按返回、服务被杀都走这里）；
+     *        false = 连题组一起丢掉（家长解锁 / 切档案 / 关掉门禁）。
+     *
+     * 这个参数不能省：`clearQuizGate()` 先 `saveSession(null)` 再 `dismiss()`，
+     * 而 `dismiss()` 里的 `persistSession()` 会拿内存里的题组把刚清掉的记录又写回去，
+     * 于是家长明明放行了，下次却还能恢复出「上次答到一半的那组题」。
+     */
+    fun dismiss(keepSession: Boolean = true) {
         stopHeartbeat()
-        // 走之前把这组题的状态留下来：孩子在答题页按返回、家长解锁、服务被杀，
+        // 走之前把这组题的状态留下来：孩子在答题页按返回、服务被杀，
         // 下次进来都从「还剩几道」接着答，不会退回最初的题量。
-        persistSession()
+        if (keepSession) persistSession()
         val v = root ?: return
         root = null
         try {

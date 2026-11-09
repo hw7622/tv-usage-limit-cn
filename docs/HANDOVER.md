@@ -1,6 +1,6 @@
 # 交接文档（换电脑继续开发看这一份）
 
-最后更新：2026-11-08 · 对应版本 **v2.9.0-cn**（versionCode 51）
+最后更新：2026-11-09 · 对应版本 **v2.9.2-cn**（versionCode 53）
 
 这份文档的目的：**在一台干净电脑上，从零把项目跑起来、装进电视、并且不踩已经踩过的坑。**
 实现细节看代码注释（注释密度很高，关键决策都写在类头），这里只写「怎么用」和「别踩什么」。
@@ -374,9 +374,9 @@ adb shell run-as com.example.tvlimit tail -50 files/logs/events-$(date +%Y%m%d).
 # 3) 重命名产物（约定）
 cp app/build/outputs/apk/debug/app-debug.apk tvlimit-<versionName>.apk
 # 4) 打 tag 并推
-git tag v2.9.0-cn && git push origin main --tags
+git tag v2.9.2-cn && git push origin main --tags
 # 5) 传到 Releases（gh CLI 已登录时）
-gh release create v2.9.0-cn tvlimit-2.9.0-cn.apk --title "v2.9.0-cn" --notes "..."
+gh release create v2.9.2-cn tvlimit-2.9.2-cn.apk --title "v2.9.2-cn" --notes "..."
 ```
 
 Releases 里只放 APK，不放 keystore（本来也没有）。

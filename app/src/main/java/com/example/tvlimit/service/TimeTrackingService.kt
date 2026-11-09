@@ -348,9 +348,11 @@ class TimeTrackingService : Service() {
                     handleRecheck()
                 }
                 ACTION_QUIZ_TEST -> {
-                    // 家长在设置页主动要求试一道：允许在自己界面上弹，方便马上看效果
+                    // 家长在设置页主动要求试一道：允许在自己界面上弹，方便马上看效果。
+                    // preview 必须显式写 true：下面看孩子欠的那组题时，家长很可能正开着一个视频，
+                    // 靠 `force && isAppInForeground` 推断会把「试一道」也变成真门禁，把电视切回桌面。
                     EventLog.event("quiz_test", "enabled" to QuizSettings.enabled(this@TimeTrackingService))
-                    showQuiz(lastTopPackage, force = true)
+                    showQuiz(lastTopPackage, force = true, preview = true)
                 }
             }
         }
@@ -448,7 +450,12 @@ class TimeTrackingService : Service() {
                 quizGate?.isShowing != true
             ) {
                 EventLog.event("quiz_reboot", "pkg" to QuizSettings.pendingPkg(this@TimeTrackingService))
-                showQuiz(QuizSettings.pendingPkg(this@TimeTrackingService), force = true)
+                // 开机补弹是真门禁，不是预览：要恢复没答完的题组、设 pending、暂停播放。
+                showQuiz(
+                    QuizSettings.pendingPkg(this@TimeTrackingService),
+                    force = true,
+                    preview = false
+                )
             }
         }
 
@@ -1903,8 +1910,16 @@ class TimeTrackingService : Service() {
      *
      * 顺序照抄已验证的拦截路径：先挂悬浮窗，再 goHome 释放硬件视频层。
      * 反过来的话，悬浮窗下面那层视频还在播，声音也还在。
+     *
+     * @param force 绕过「额度已用完 / 临时关闭」等拦截条件。家长试一道、开机补弹都要绕过。
+     * @param preview 显式指定是不是「家长预览」。null = 按老规则推断（force 且自己在前台）。
+     *
+     * 为什么必须能显式指定：开机补弹走的是 `force=true`，而服务刚起来时前台往往就是我们
+     * 自己的界面，老规则 `force && isAppInForeground` 会把开机补弹误判成预览 ——
+     * 于是不恢复没答完的题组、不设 pending、也不暂停播放，孩子在开机自动播放的视频上
+     * 按一下返回就绕过去了。
      */
-    private fun showQuiz(pkg: String?, force: Boolean = false) {
+    private fun showQuiz(pkg: String?, force: Boolean = false, preview: Boolean? = null) {
         val gate = quizGate ?: return
         if (gate.isShowing) return
         val p = currentProfile ?: return
@@ -1926,19 +1941,19 @@ class TimeTrackingService : Service() {
         // 「现在试一道」是在家长自己的界面上点的，属于预览：
         // 这时不暂停播放、不 goHome、也不留 pending，
         // 答完直接回设置页，家长不用再点一次图标进来。
-        val preview = force && isAppInForeground
-        quizPreview = preview
+        val isPreview = preview ?: (force && isAppInForeground)
+        quizPreview = isPreview
 
-        if (!preview) QuizSettings.setPending(this, true, pkg)
+        if (!isPreview) QuizSettings.setPending(this, true, pkg)
         // 预览永远开新题，不能把「孩子还欠着的那一组」覆盖掉
-        gate.show(pkg, resume = !preview)
-        if (!preview) {
+        gate.show(pkg, resume = !isPreview)
+        if (!isPreview) {
             pausePlaybackIfPlaying()
             goHome()
         }
         EventLog.event(
             "quiz_show", "pkg" to pkg, "s" to currentSessionUsage,
-            "d" to accumulatedDailyUsage, "force" to force, "preview" to preview
+            "d" to accumulatedDailyUsage, "force" to force, "preview" to isPreview
         )
     }
 
@@ -1953,8 +1968,14 @@ class TimeTrackingService : Service() {
      * 在桌面坐着、切换到不受限应用、家长临时关闭、已经到点休息 —— 都不弹。
      */
     private fun maybeQuizGate() {
-        if (!QuizSettings.enabled(this)) return
         val gate = quizGate ?: return
+        // 家长在手机网页或电视设置里把答题关掉时，屏幕上那组题要跟着撤掉。
+        // 以前只清了 prefs，悬浮窗还留着：家长以为关了，孩子却还被挡着；
+        // 而且 pending 已清，孩子就算答完也走不到 onPassed 的正常路径。
+        if (!QuizSettings.enabled(this)) {
+            if (gate.isShowing) clearQuizGate("disabled")
+            return
+        }
         if (gate.isShowing) return
         val p = currentProfile ?: return
         if (!p.isRestricted) return
@@ -1993,9 +2014,11 @@ class TimeTrackingService : Service() {
     private fun clearQuizGate(why: String) {
         val wasPending = QuizSettings.isPending(this)
         QuizSettings.setPending(this, false, null)
-        QuizSettings.saveSession(this, null)
         QuizSettings.resetSeg(this)
-        quizGate?.let { if (it.isShowing) it.dismiss() }
+        // 一定要告诉 dismiss 别保存：否则它会把内存里那组题重新写回 prefs，
+        // 家长刚放行、下次又恢复出旧题组。
+        quizGate?.let { if (it.isShowing) it.dismiss(keepSession = false) }
+        QuizSettings.saveSession(this, null)
         if (wasPending) EventLog.event("quiz_clear", "why" to why)
     }
 
