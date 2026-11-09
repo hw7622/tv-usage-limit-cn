@@ -35,6 +35,13 @@ object QuizSettings {
     private const val PREF_PENDING = "quiz_pending"
     /** 被暂停的应用（答完要回去）。 */
     private const val PREF_PENDING_PKG = "quiz_pending_pkg"
+    /**
+     * 没答完的那一组题（QuizSession 的 JSON 快照）。
+     *
+     * 光有 [PREF_PENDING] 这个布尔只能说明「还欠一组题」，欠几道、欠哪几道全丢了，
+     * 孩子按一下返回再进来就被重置成最初的题量 —— 追加惩罚形同虚设。
+     */
+    private const val PREF_RESUME = "quiz_resume_session"
 
     private fun sp(ctx: Context) =
         PreferenceManager.getDefaultSharedPreferences(ctx.applicationContext)
@@ -137,11 +144,20 @@ object QuizSettings {
             .apply()
     }
 
+    /** 没答完的那组题；null 表示没有（或者已经答完）。 */
+    fun savedSession(ctx: Context): String? = sp(ctx).getString(PREF_RESUME, null)
+
+    /** 传 null 就是清掉。空题组也按「没有」处理，别留一条无意义的 JSON。 */
+    fun saveSession(ctx: Context, raw: String?) {
+        sp(ctx).edit().putString(PREF_RESUME, raw?.takeIf { it.isNotBlank() }).apply()
+    }
+
     fun resetRuntime(ctx: Context) {
         sp(ctx).edit()
             .putLong(PREF_SEG_MS, 0L)
             .putBoolean(PREF_PENDING, false)
             .putString(PREF_PENDING_PKG, null)
+            .putString(PREF_RESUME, null)
             .apply()
     }
 }

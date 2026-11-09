@@ -1,6 +1,8 @@
 package com.example.tvlimit.quiz
 
 import android.content.Context
+import org.json.JSONArray
+import org.json.JSONObject
 
 /**
  * 一次答题会话：一道原题 + 按错题次数追加的题。
@@ -21,6 +23,18 @@ class QuizSession private constructor(
     fun current(): QuizQuestion? = queue.firstOrNull()
 
     fun remaining(): Int = queue.size
+
+    /**
+     * 把「还没答完的这一组题」原样存成字符串。
+     *
+     * 为什么必须存下来：这个会话只活在这个对象里，孩子按返回退出（或进程被杀、电视断电）
+     * 就整组消失，下次重进又是最初那 3 道 —— 等于「答错追加」这条规则按一下返回就能抵消。
+     * 存的是题目快照而不是 id，题库改过之后也能照原题接着答。
+     */
+    fun toJson(): String = JSONObject().apply {
+        put("wrong", wrongOnCurrent)
+        put("queue", JSONArray().also { arr -> queue.forEach { arr.put(it.toJson()) } })
+    }.toString()
 
     fun submit(ctx: Context, chosenIndex: Int): Outcome {
         val q = queue.firstOrNull() ?: return Outcome.Finished
@@ -90,5 +104,59 @@ class QuizSession private constructor(
             }
             return QuizSession(queue)
         }
+
+        /**
+         * 恢复上次没答完的那一组。数据坏了就返回 null，让调用方重新开一组；
+         * 绝不能因为一条坏 JSON 把孩子永久锁在答题页。
+         */
+        fun restore(raw: String?): QuizSession? {
+            if (raw.isNullOrBlank()) return null
+            return try {
+                val o = JSONObject(raw)
+                val arr = o.optJSONArray("queue") ?: return null
+                val queue = ArrayList<QuizQuestion>(arr.length())
+                for (i in 0 until arr.length()) {
+                    val q = arr.optJSONObject(i)?.toQuestion() ?: continue
+                    queue.add(q)
+                }
+                if (queue.isEmpty()) null else QuizSession(queue, o.optInt("wrong", 0))
+            } catch (e: Exception) {
+                null
+            }
+        }
     }
+}
+
+private fun QuizQuestion.toJson(): JSONObject = JSONObject().apply {
+    put("id", id)
+    put("subject", subject)
+    put("grade", grade)
+    put("knowledge", knowledge)
+    put("stem", stem)
+    put("options", JSONArray(options))
+    put("answer", answer)
+    put("explain", explain ?: JSONObject.NULL)
+    put("difficulty", difficulty)
+}
+
+private fun JSONObject.toQuestion(): QuizQuestion? {
+    val stem = optString("stem", "")
+    if (stem.isEmpty()) return null
+    val optsArr = optJSONArray("options") ?: return null
+    val options = ArrayList<String>(optsArr.length())
+    for (i in 0 until optsArr.length()) options.add(optsArr.optString(i, ""))
+    if (options.size < 2) return null
+    val answer = optInt("answer", -1)
+    if (answer !in options.indices) return null
+    return QuizQuestion(
+        id = optString("id", ""),
+        subject = optString("subject", "math"),
+        grade = optInt("grade", 2),
+        knowledge = optString("knowledge", ""),
+        stem = stem,
+        options = options,
+        answer = answer,
+        explain = if (isNull("explain")) null else optString("explain", ""),
+        difficulty = optInt("difficulty", 1)
+    )
 }

@@ -18,6 +18,7 @@ import androidx.core.content.ContextCompat
 import com.example.tvlimit.R
 import com.example.tvlimit.quiz.QuizQuestion
 import com.example.tvlimit.quiz.QuizSession
+import com.example.tvlimit.quiz.QuizSettings
 
 /**
  * 答题门禁的界面层：一个全屏悬浮窗 + 一组题。
@@ -51,6 +52,8 @@ class QuizGate(
     private var session: QuizSession? = null
     private var pausedPkg: String? = null
     private var inputLocked = false
+    /** 这组题要不要落盘。家长「试一道」的预览不落盘，免得冲掉孩子欠着的那一组。 */
+    private var persist = true
     private val handler = Handler(Looper.getMainLooper())
 
     val isShowing: Boolean get() = root != null
@@ -61,15 +64,29 @@ class QuizGate(
 
     // ===== 对外 =====
 
-    fun show(pkg: String?) {
+    /**
+     * 弹题。
+     *
+     * @param resume true = 接着上次没答完的那组（孩子按返回退出、重进电视都算同一组）；
+     *        false = 强制新开一组，用于家长「现在试一道」的预览。
+     */
+    fun show(pkg: String?, resume: Boolean = true) {
         if (root != null) return
         pausedPkg = pkg
-        session = QuizSession.start(service)
+        persist = resume
+        val restored = if (resume) QuizSession.restore(QuizSettings.savedSession(service)) else null
+        session = restored ?: QuizSession.start(service)
+        if (restored != null) {
+            callback.onLog("quiz_resume", "remain" to restored.remaining())
+        }
         attach()
     }
 
     fun dismiss() {
         stopHeartbeat()
+        // 走之前把这组题的状态留下来：孩子在答题页按返回、家长解锁、服务被杀，
+        // 下次进来都从「还剩几道」接着答，不会退回最初的题量。
+        persistSession()
         val v = root ?: return
         root = null
         try {
@@ -80,6 +97,16 @@ class QuizGate(
         session = null
         pausedPkg = null
         inputLocked = false
+    }
+
+    /** 把当前题组写盘；已经答完（没有剩余）就清掉，别留一条空记录。 */
+    private fun persistSession() {
+        if (!persist) return
+        val s = session ?: return
+        QuizSettings.saveSession(
+            service,
+            if (s.remaining() <= 0) null else s.toJson()
+        )
     }
 
     // ===== 内部 =====
@@ -264,6 +291,8 @@ class QuizGate(
         if (index !in q.options.indices) return
 
         val outcome = s.submit(service, index)
+        // 每答一题就落盘：这一题答错追加的题，必须比「按返回」更早地写进去。
+        persistSession()
         when (outcome) {
             is QuizSession.Outcome.Finished -> {
                 flashCorrect(index)

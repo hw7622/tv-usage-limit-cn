@@ -1867,6 +1867,7 @@ class TimeTrackingService : Service() {
 
             override fun onPassed(pkg: String?) {
                 QuizSettings.setPending(this@TimeTrackingService, false, null)
+                QuizSettings.saveSession(this@TimeTrackingService, null)
                 QuizSettings.resetSeg(this@TimeTrackingService)
                 EventLog.event("quiz_reset", "why" to "passed", "pkg" to pkg)
                 if (quizPreview) {
@@ -1929,7 +1930,8 @@ class TimeTrackingService : Service() {
         quizPreview = preview
 
         if (!preview) QuizSettings.setPending(this, true, pkg)
-        gate.show(pkg)
+        // 预览永远开新题，不能把「孩子还欠着的那一组」覆盖掉
+        gate.show(pkg, resume = !preview)
         if (!preview) {
             pausePlaybackIfPlaying()
             goHome()
@@ -1991,6 +1993,7 @@ class TimeTrackingService : Service() {
     private fun clearQuizGate(why: String) {
         val wasPending = QuizSettings.isPending(this)
         QuizSettings.setPending(this, false, null)
+        QuizSettings.saveSession(this, null)
         QuizSettings.resetSeg(this)
         quizGate?.let { if (it.isShowing) it.dismiss() }
         if (wasPending) EventLog.event("quiz_clear", "why" to why)
